@@ -1,0 +1,27 @@
+{
+  "name": "@laryngoos/desktop",
+  "version": "1.0.0",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "tsc --noEmit",
+    "electron:start": "electron ."
+  },
+  "dependencies": {
+    "@laryngoos/core": "workspace:*",
+    "@laryngoos/db": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^25.3.0",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.5",
+    "electron-builder": "^24.6.3"
+  }
+}

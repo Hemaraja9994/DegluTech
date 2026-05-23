@@ -8,10 +8,10 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "clean": "turbo run clean"
+    "build": "corepack pnpm -r --if-present --sort run build",
+    "dev": "corepack pnpm -r --parallel --if-present run dev",
+    "lint": "corepack pnpm -r --if-present run lint",
+    "clean": "corepack pnpm -r --if-present run clean"
   },
   "devDependencies": {
     "turbo": "^1.10.15",
