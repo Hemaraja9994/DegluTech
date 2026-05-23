@@ -1,243 +1,138 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { RecommendationDashboard } from './src/components/RecommendationDashboard';
-import { AdvancedOncologicalHistory } from '../../packages/core/src/types/oncologyTypes';
-import { OPMEAssessment, SpeechSwallowingAssessment } from '../../packages/core/src/types/interfaces';
-
-const PATIENT_HASH = '5e883e81b37e1273b4b455b5d198ee6a3782b6e1e21b7c3cf374fa04e22e845c';
-
-const INITIAL_ONCOLOGY: AdvancedOncologicalHistory = {
-  patientHash: PATIENT_HASH,
-  diagnosisDate: '2026-01-15',
-  staging: {
-    site: 'lip_oral_cavity',
-    t: 'T2',
-    n: 'N1',
-    m: 'M0',
-    derivedStage: 'Stage III',
-  },
-  surgery: {
-    hasHadSurgery: true,
-    surgeryDate: '2026-02-10',
-    margins: 'clear',
-    closestMarginMm: 8,
-    neckDissection: {
-      type: 'selective',
-      side: 'ipsilateral',
-      levelsRemoved: ['I', 'II', 'III'],
-    },
-    reconstruction: {
-      isReconstructed: true,
-      flapType: 'free',
-      donorSite: 'radial_forearm',
-      microvascularStatus: 'patent',
-    },
-  },
-  radiotherapy: {
-    hasHadRT: true,
-    totalDoseGy: 60,
-    fractionsCount: 30,
-    deliveryMethod: 'VMAT',
-    targetFields: ['Primary Bed', 'Ipsilateral Neck'],
-    toxicities: {
-      trismusOnset: true,
-      trismusOnsetWeeksPostRT: 4,
-      radiationInducedFibrosisGrade: 2,
-      xerostomiaSeverity: 'moderate',
-    },
-  },
-  chemotherapy: {
-    hasHadCT: true,
-    agents: ['Cisplatin'],
-    cycleCount: 3,
-    timing: 'concurrent',
-    activeToxicities: {
-      ototoxicity: true,
-      peripheralNeuropathy: false,
-      nephrotoxicity: false,
-      hematologicSuppression: true,
-    },
-  },
-  updatedAt: new Date().toISOString(),
-};
-
-const INITIAL_OPME: OPMEAssessment = {
-  patientHash: PATIENT_HASH,
-  matrix: {
-    labial: { retraction: 'normal', protrusion: 'normal', pucker: 'normal', resistance: 'normal' },
-    lingual: { protrusion: 'normal', lateralization: 'normal', elevation: 'normal', retraction: 'normal', resistance: 'normal' },
-    mandibular: { depression: 'normal', elevation: 'normal', lateralization: 'normal' },
-    velopharyngeal: { elevation: 'normal', symmetry: 'normal' },
-  },
-  cranialNerves: {
-    cnV_trigeminal: { sensoryFace: 'intact', motorJawDeviation: 'none', jawStrength: 'normal' },
-    cnVII_facial: { asymmetryAtRest: false, smileSymmetry: 'symmetric', lipClosureStrength: 'normal' },
-    cnIX_X_glossopharyngeal_vagus: { palatalElevation: 'symmetric', gagReflex: 'present', vocalQuality: 'normal' },
-    cnXI_accessory: { shoulderShrugStrength: 'normal', headTurnStrength: 'normal' },
-    cnXII_hypoglossal: { tongueAtrophy: false, fasciculations: false, deviationOnProtrusion: 'none' },
-  },
-  tissueQualities: {
-    mucosalStatusPostRT: {
-      rtogEortcScore: 2,
-    },
-    rangeOfMotion: {
-      restrictedLabial: false,
-      restrictedLingual: true,
-      restrictedMandibular: false,
-    },
-    symmetry: {
-      facialAtRest: 'symmetric',
-      tongueProtruded: 'symmetric',
-    },
-    manualStrengthTesting: {
-      tongueResistanceScore: 2,
-      lipResistanceScore: 3,
-    },
-  },
-  specializedMetrics: {
-    maxJawOpeningInterincisalDistanceMm: 30,
-  },
-  recordedAt: new Date().toISOString(),
-};
-
-const INITIAL_SWALLOW: SpeechSwallowingAssessment = {
-  patientHash: PATIENT_HASH,
-  perceptualSpeech: {
-    speechIntelligibilityPercent: 75,
-    syllablesPerMinute: 115,
-    dysarthriaSubtype: 'mixed_post_surgical',
-  },
-  dysphagiaClinical: {
-    masaScore: {
-      alertness: 10,
-      cooperation: 10,
-      auditoryComprehension: 10,
-      lipSeal: 10,
-      lingualAction: 8,
-      jawMovement: 8,
-      velopharyngealCompetence: 10,
-      coughReflex: 10,
-      voluntaryCough: 8,
-      gagReflex: 10,
-      swallowTrigger: 8,
-      laryngealElevation: 8,
-      respirationRate: 10,
-      respirationSwallowCoord: 10,
-      dysphagiaSeverityScore: 168,
-      aspirationRiskScore: 172,
-    },
-    eat10: {
-      responses: [3, 2, 4, 3, 2, 1, 3, 2, 2, 3],
-      totalScore: 25,
-    },
-  },
-  clinicalMarkers: {
-    oralPreparatoryTimeSeconds: 4.5,
-    oralTransitTimeSeconds: 2.8,
-    delayedPharyngealSwallowInitiation: true,
-    laryngealElevation: 'reduced',
-    postSwallowIndicators: {
-      wetVoiceQuality: true,
-      reflexiveCoughEfficiency: 'weak',
-      multipleSwallowsPerBolus: true,
-      penetrationAspirationRiskSigns: ['Coughing on thin liquids', 'Wet voice post-swallow'],
-    },
-  },
-  recordedAt: new Date().toISOString(),
-};
+import {
+  HNC_CLINICAL_SECTIONS,
+  HNC_EXERCISE_LIBRARY,
+  HNC_PATIENT_SNAPSHOT,
+  type HncSectionId,
+} from '../../packages/core/src/hncClinicalModel';
 
 export default function App() {
-  const [viewMode, setViewMode] = useState<'patient_exercises' | 'clinician_portal'>('patient_exercises');
-  const [completedExercises, setCompletedExercises] = useState<Record<string, boolean>>({
-    ex_masako: true,
-    ex_shaker: false,
-    ex_speech: false,
-  });
+  const [view, setView] = useState<'home' | 'sections' | 'exercises'>('home');
+  const [activeSectionId, setActiveSectionId] = useState<HncSectionId>('command');
+  const [done, setDone] = useState<Record<string, boolean>>({ masako: true });
+
+  const activeSection = HNC_CLINICAL_SECTIONS.find((section) => section.id === activeSectionId) ?? HNC_CLINICAL_SECTIONS[0];
 
   const toggleExercise = (id: string) => {
-    setCompletedExercises((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    setDone((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
-      <View style={styles.navBar}>
-        <TouchableOpacity
-          onPress={() => setViewMode('patient_exercises')}
-          style={[styles.navBtn, viewMode === 'patient_exercises' && styles.navBtnActive]}
-        >
-          <Text style={styles.navText}>🏠 Daily Schedule</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setViewMode('clinician_portal')}
-          style={[styles.navBtn, viewMode === 'clinician_portal' && styles.navBtnActive]}
-        >
-          <Text style={styles.navText}>⚕️ Clinician CDSS</Text>
-        </TouchableOpacity>
+      <StatusBar style="dark" />
+      <View style={styles.header}>
+        <Text style={styles.brand}>DegluTech</Text>
+        <Text style={styles.subtitle}>HNC SLP Rehabilitation</Text>
       </View>
 
-      {viewMode === 'patient_exercises' ? (
-        <ScrollView style={styles.scrollArea}>
-          <Text style={styles.sectionHeader}>Today's Target Therapy Protocols</Text>
-
-          {/* Exercise 1 */}
+      <View style={styles.segmented}>
+        {[
+          ['home', 'Home'],
+          ['sections', 'Clinical'],
+          ['exercises', 'Exercises'],
+        ].map(([id, label]) => (
           <TouchableOpacity
-            onPress={() => toggleExercise('ex_masako')}
-            style={[styles.exerciseCard, completedExercises.ex_masako && styles.exerciseCardDone]}
+            key={id}
+            onPress={() => setView(id as 'home' | 'sections' | 'exercises')}
+            style={[styles.segment, view === id && styles.segmentActive]}
           >
-            <View style={styles.cardTop}>
-              <Text style={styles.exerciseName}>Masako Maneuver (Tongue Hold)</Text>
-              <Text style={styles.doneIndicator}>
-                {completedExercises.ex_masako ? '✅ Done' : '⏳ Pending'}
-              </Text>
-            </View>
-            <Text style={styles.exerciseDetails}>
-              Hold tongue between teeth and swallow saliva. Reps: 3 sets of 10.
-            </Text>
+            <Text style={[styles.segmentText, view === id && styles.segmentTextActive]}>{label}</Text>
           </TouchableOpacity>
+        ))}
+      </View>
 
-          {/* Exercise 2 */}
-          <TouchableOpacity
-            onPress={() => toggleExercise('ex_shaker')}
-            style={[styles.exerciseCard, completedExercises.ex_shaker && styles.exerciseCardDone]}
-          >
-            <View style={styles.cardTop}>
-              <Text style={styles.exerciseName}>Shaker Head Lift</Text>
-              <Text style={styles.doneIndicator}>
-                {completedExercises.ex_shaker ? '✅ Done' : '⏳ Pending'}
-              </Text>
+      {view === 'home' && (
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.patientCard}>
+            <Text style={styles.kicker}>Active case</Text>
+            <Text style={styles.title}>{HNC_PATIENT_SNAPSHOT.diagnosis}</Text>
+            <Text style={styles.bodyText}>{HNC_PATIENT_SNAPSHOT.stage}</Text>
+            <View style={styles.riskPill}>
+              <Text style={styles.riskText}>{HNC_PATIENT_SNAPSHOT.riskLevel.toUpperCase()} RISK</Text>
             </View>
-            <Text style={styles.exerciseDetails}>
-              Raise head off flat bed to view toes. Reps: 3 holds x 60s.
-            </Text>
-          </TouchableOpacity>
+          </View>
 
-          {/* Exercise 3 */}
-          <TouchableOpacity
-            onPress={() => toggleExercise('ex_speech')}
-            style={[styles.exerciseCard, completedExercises.ex_speech && styles.exerciseCardDone]}
-          >
-            <View style={styles.cardTop}>
-              <Text style={styles.exerciseName}>Glossectomy Speech Drills</Text>
-              <Text style={styles.doneIndicator}>
-                {completedExercises.ex_speech ? '✅ Done' : '⏳ Pending'}
-              </Text>
+          <Text style={styles.sectionTitle}>Today priorities</Text>
+          {HNC_PATIENT_SNAPSHOT.primaryGoals.map((goal) => (
+            <View key={goal} style={styles.rowCard}>
+              <View style={styles.dot} />
+              <Text style={styles.rowText}>{goal}</Text>
             </View>
-            <Text style={styles.exerciseDetails}>
-              Exaggerate posterior velar consonant closures: /ka/, /ga/, /nga/.
-            </Text>
-          </TouchableOpacity>
+          ))}
+
+          <Text style={styles.sectionTitle}>Alerts</Text>
+          {HNC_PATIENT_SNAPSHOT.alerts.map((alert) => (
+            <View key={alert} style={styles.alertCard}>
+              <Text style={styles.alertText}>{alert}</Text>
+            </View>
+          ))}
         </ScrollView>
-      ) : (
-        <RecommendationDashboard
-          oncologyHistory={INITIAL_ONCOLOGY}
-          opme={INITIAL_OPME}
-          swallowSpeech={INITIAL_SWALLOW}
-        />
+      )}
+
+      {view === 'sections' && (
+        <View style={styles.twoPane}>
+          <ScrollView style={styles.sectionRail} contentContainerStyle={styles.sectionRailContent}>
+            {HNC_CLINICAL_SECTIONS.map((section) => (
+              <TouchableOpacity
+                key={section.id}
+                onPress={() => setActiveSectionId(section.id)}
+                style={[styles.sectionButton, activeSectionId === section.id && styles.sectionButtonActive]}
+              >
+                <Text style={[styles.sectionButtonText, activeSectionId === section.id && styles.sectionButtonTextActive]}>
+                  {section.shortLabel}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <ScrollView style={styles.sectionDetail} contentContainerStyle={styles.content}>
+            <Text style={styles.kicker}>Module {activeSection.order}</Text>
+            <Text style={styles.title}>{activeSection.label}</Text>
+            <Text style={styles.bodyText}>{activeSection.purpose}</Text>
+            {activeSection.blocks.map((block) => (
+              <View key={block.title} style={styles.blockCard}>
+                <Text style={styles.blockTitle}>{block.title}</Text>
+                <Text style={styles.bodyText}>{block.description}</Text>
+                {block.fields.slice(0, 4).map((field) => (
+                  <View key={field.id} style={styles.fieldRow}>
+                    <Text style={styles.fieldText}>{field.label}</Text>
+                    <Text style={styles.fieldKind}>{field.kind}</Text>
+                  </View>
+                ))}
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {view === 'exercises' && (
+        <ScrollView contentContainerStyle={styles.content}>
+          <Text style={styles.sectionTitle}>Illustrated exercise program</Text>
+          {HNC_EXERCISE_LIBRARY.map((exercise) => (
+            <TouchableOpacity
+              key={exercise.id}
+              onPress={() => toggleExercise(exercise.id)}
+              style={[styles.exerciseCard, done[exercise.id] && styles.exerciseCardDone]}
+            >
+              <View style={styles.exerciseTop}>
+                <Text style={styles.exerciseName}>{exercise.name}</Text>
+                <Text style={styles.statusText}>{done[exercise.id] ? 'Done' : 'Pending'}</Text>
+              </View>
+              <Text style={styles.bodyText}>{exercise.patientLanguage}</Text>
+              <Text style={styles.doseText}>{exercise.dosage}</Text>
+              <View style={styles.stepStrip}>
+                {exercise.steps.map((step) => (
+                  <View key={step.label} style={styles.stepBox}>
+                    <Text style={styles.stepLabel}>{step.label}</Text>
+                    <Text style={styles.stepCue}>{step.cue}</Text>
+                  </View>
+                ))}
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       )}
     </SafeAreaView>
   );
@@ -246,70 +141,258 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#020617',
-    paddingTop: 40,
+    backgroundColor: '#f8fafc',
   },
-  navBar: {
-    flexDirection: 'row',
-    backgroundColor: '#0f172a',
-    padding: 8,
+  header: {
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 10,
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
+    borderBottomColor: '#dbe4ef',
   },
-  navBtn: {
+  brand: {
+    color: '#0f172a',
+    fontSize: 22,
+    fontWeight: '900',
+  },
+  subtitle: {
+    color: '#64748b',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  segmented: {
+    flexDirection: 'row',
+    padding: 8,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#dbe4ef',
+  },
+  segment: {
     flex: 1,
-    paddingVertical: 12,
     alignItems: 'center',
-    borderRadius: 6,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
-  navBtnActive: {
-    backgroundColor: '#0d9488',
+  segmentActive: {
+    backgroundColor: '#2563eb',
   },
-  navText: {
+  segmentText: {
+    color: '#475569',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  segmentTextActive: {
     color: '#ffffff',
-    fontWeight: 'bold',
-    fontSize: 14,
   },
-  scrollArea: {
+  content: {
     padding: 16,
+    paddingBottom: 40,
   },
-  sectionHeader: {
-    fontSize: 16,
-    color: '#38bdf8',
-    fontWeight: 'bold',
+  patientCard: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#dbe4ef',
+    borderRadius: 8,
+    padding: 16,
     marginBottom: 16,
   },
+  kicker: {
+    color: '#64748b',
+    fontSize: 11,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  title: {
+    color: '#0f172a',
+    fontSize: 20,
+    fontWeight: '900',
+    lineHeight: 25,
+  },
+  bodyText: {
+    color: '#475569',
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 7,
+  },
+  riskPill: {
+    marginTop: 12,
+    alignSelf: 'flex-start',
+    backgroundColor: '#fee2e2',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  riskText: {
+    color: '#b91c1c',
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  sectionTitle: {
+    color: '#0f172a',
+    fontSize: 16,
+    fontWeight: '900',
+    marginBottom: 10,
+    marginTop: 6,
+  },
+  rowCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#dbe4ef',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 9,
+  },
+  dot: {
+    width: 9,
+    height: 9,
+    borderRadius: 999,
+    backgroundColor: '#0d9488',
+    marginRight: 10,
+  },
+  rowText: {
+    flex: 1,
+    color: '#334155',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  alertCard: {
+    backgroundColor: '#fff7ed',
+    borderWidth: 1,
+    borderColor: '#fed7aa',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 9,
+  },
+  alertText: {
+    color: '#9a3412',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  twoPane: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  sectionRail: {
+    width: 112,
+    backgroundColor: '#ffffff',
+    borderRightWidth: 1,
+    borderRightColor: '#dbe4ef',
+  },
+  sectionRailContent: {
+    padding: 8,
+  },
+  sectionButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    marginBottom: 6,
+  },
+  sectionButtonActive: {
+    backgroundColor: '#eff6ff',
+  },
+  sectionButtonText: {
+    color: '#64748b',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  sectionButtonTextActive: {
+    color: '#1d4ed8',
+  },
+  sectionDetail: {
+    flex: 1,
+  },
+  blockCard: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#dbe4ef',
+    borderRadius: 8,
+    padding: 14,
+    marginTop: 12,
+  },
+  blockTitle: {
+    color: '#0f172a',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  fieldRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    marginTop: 8,
+  },
+  fieldText: {
+    flex: 1,
+    color: '#334155',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  fieldKind: {
+    color: '#0d9488',
+    fontSize: 11,
+    fontWeight: '900',
+  },
   exerciseCard: {
-    backgroundColor: '#1e293b',
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#dbe4ef',
     borderRadius: 8,
     padding: 14,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#334155',
   },
   exerciseCardDone: {
     borderColor: '#0d9488',
-    backgroundColor: '#064e3b',
+    backgroundColor: '#ecfdf5',
   },
-  cardTop: {
+  exerciseTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    gap: 10,
   },
   exerciseName: {
-    color: '#f8fafc',
-    fontSize: 15,
-    fontWeight: 'bold',
     flex: 1,
+    color: '#0f172a',
+    fontSize: 15,
+    fontWeight: '900',
   },
-  doneIndicator: {
-    color: '#38bdf8',
+  statusText: {
+    color: '#0d9488',
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: '900',
   },
-  exerciseDetails: {
-    color: '#cbd5e1',
-    fontSize: 13,
-    lineHeight: 18,
+  doseText: {
+    color: '#1d4ed8',
+    fontSize: 12,
+    fontWeight: '900',
+    marginTop: 8,
+  },
+  stepStrip: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+  },
+  stepBox: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+    backgroundColor: '#eff6ff',
+    borderRadius: 8,
+    padding: 8,
+  },
+  stepLabel: {
+    color: '#1d4ed8',
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  stepCue: {
+    color: '#334155',
+    fontSize: 11,
+    fontWeight: '800',
+    marginTop: 4,
   },
 });

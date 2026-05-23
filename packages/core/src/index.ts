@@ -10,3 +10,6 @@ export * from './hooks/useAudioPipeline';
 
 // Export DSP Acoustic Engine
 export * from './dsp/AcousticEngine';
+
+// Export HNC software model
+export * from './hncClinicalModel';
