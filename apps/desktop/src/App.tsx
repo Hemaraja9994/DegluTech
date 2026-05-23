@@ -11,6 +11,7 @@ import {
   FileText,
   Home,
   LayoutDashboard,
+  Languages,
   Mic,
   MonitorUp,
   Save,
@@ -30,10 +31,24 @@ import {
   type ExerciseProtocol,
   type HncSectionId,
 } from '../../../packages/core/src/hncClinicalModel';
+import {
+  exerciseTranslations,
+  type ExerciseLanguageCode,
+  type LocalizedExerciseStep,
+} from './translationData';
 
 type FieldState = Record<string, string | string[]>;
 
-const masakoImageUrl = new URL('./assets/masako-maneuver.png', import.meta.url).href;
+const exerciseIllustrationUrls: Record<string, string> = {
+  masako: new URL('./assets/masako-maneuver.png', import.meta.url).href,
+  'effortful-swallow': new URL('./assets/effortful-swallow.png', import.meta.url).href,
+  mendelsohn: new URL('./assets/mendelsohn-maneuver.png', import.meta.url).href,
+  supraglottic: new URL('./assets/supraglottic-swallow.png', import.meta.url).href,
+  'jaw-stretch': new URL('./assets/jaw-stretch.png', import.meta.url).href,
+  'lingual-resistance': new URL('./assets/lingual-resistance.png', import.meta.url).href,
+  'velar-drills': new URL('./assets/velar-drills.png', import.meta.url).href,
+  'neck-shoulder-rom': new URL('./assets/neck-shoulder-rom.png', import.meta.url).href,
+};
 
 const sectionIcons: Record<HncSectionId, LucideIcon> = {
   command: LayoutDashboard,
@@ -138,6 +153,7 @@ export const App: React.FC = () => {
   const [activeSectionId, setActiveSectionId] = useState<HncSectionId>('command');
   const [fieldState, setFieldState] = useState<FieldState>(initialFieldState);
   const [selectedExerciseId, setSelectedExerciseId] = useState('masako');
+  const [patientLanguage, setPatientLanguage] = useState<ExerciseLanguageCode>('en');
   const [savedAt, setSavedAt] = useState<string>('Not saved this session');
 
   const activeSection = HNC_CLINICAL_SECTIONS.find((section) => section.id === activeSectionId) ?? HNC_CLINICAL_SECTIONS[0];
@@ -245,6 +261,8 @@ export const App: React.FC = () => {
             selectedExercise={selectedExercise}
             selectedExerciseId={selectedExerciseId}
             setSelectedExerciseId={setSelectedExerciseId}
+            patientLanguage={patientLanguage}
+            setPatientLanguage={setPatientLanguage}
           />
         )}
 
@@ -518,11 +536,19 @@ function ExercisePrescription({
   selectedExercise,
   selectedExerciseId,
   setSelectedExerciseId,
+  patientLanguage,
+  setPatientLanguage,
 }: {
   selectedExercise: ExerciseProtocol;
   selectedExerciseId: string;
   setSelectedExerciseId: (id: string) => void;
+  patientLanguage: ExerciseLanguageCode;
+  setPatientLanguage: (language: ExerciseLanguageCode) => void;
 }) {
+  const illustrationUrl = exerciseIllustrationUrls[selectedExercise.id];
+  const localizedBundle = exerciseTranslations[patientLanguage];
+  const localizedExercise = localizedBundle.exercises[selectedExercise.id] ?? exerciseTranslations.en.exercises[selectedExercise.id];
+
   return (
     <div style={styles.workspaceGrid}>
       <section style={styles.sectionIntro}>
@@ -532,6 +558,8 @@ function ExercisePrescription({
         </div>
         <div style={styles.moduleBadge}>patient-ready</div>
       </section>
+
+      <LanguageSelector selectedLanguage={patientLanguage} onSelect={setPatientLanguage} />
 
       <div style={styles.exerciseLayout}>
         <section style={styles.exerciseMenu}>
@@ -551,35 +579,42 @@ function ExercisePrescription({
         <section style={styles.panel}>
           <div style={styles.exerciseHeaderBlock}>
             <div>
-              <p style={styles.overline}>{selectedExercise.category} protocol</p>
-              <h3 style={styles.panelTitle}>{selectedExercise.name}</h3>
-              <p style={styles.exerciseText}>{selectedExercise.patientLanguage}</p>
+              <p style={styles.overline}>{selectedExercise.category} {localizedBundle.protocolLabel}</p>
+              <h3 style={styles.panelTitle}>{localizedExercise.title}</h3>
+              <p style={styles.exerciseText}>{localizedExercise.description}</p>
+              <p style={styles.languageNote}>
+                {localizedBundle.handoutLanguageLabel}: {localizedBundle.nativeName} ({localizedBundle.name})
+              </p>
             </div>
             <div style={styles.dosageBox}>
-              <span style={styles.dosageLabel}>Dosage</span>
-              <strong>{selectedExercise.dosage}</strong>
+              <span style={styles.dosageLabel}>{localizedBundle.dosageTitle}</span>
+              <strong>{localizedExercise.dosage}</strong>
             </div>
           </div>
 
-          {selectedExercise.id === 'masako' && (
+          {illustrationUrl && (
             <div style={styles.generatedImageFrame}>
-              <img src={masakoImageUrl} alt="Masako Maneuver illustrated steps" style={styles.generatedImage} />
+              <img src={illustrationUrl} alt={`${selectedExercise.name} illustrated exercise steps`} style={styles.generatedImage} />
             </div>
           )}
 
-          <ExercisePanels exercise={selectedExercise} />
+          <ExercisePanels
+            exercise={selectedExercise}
+            steps={localizedExercise.steps}
+            stepLabel={localizedBundle.stepLabel}
+          />
 
           <div style={styles.prescriptionGrid}>
             <div style={styles.prescriptionBand}>
-              <h4 style={styles.smallTitle}>Indication</h4>
-              <p style={styles.smallText}>{selectedExercise.indication}</p>
+              <h4 style={styles.smallTitle}>{localizedBundle.indicationTitle}</h4>
+              <p style={styles.smallText}>{localizedExercise.indication}</p>
             </div>
             <div style={styles.prescriptionBand}>
-              <h4 style={styles.smallTitle}>Safety</h4>
-              <p style={styles.smallText}>{selectedExercise.safety}</p>
+              <h4 style={styles.smallTitle}>{localizedBundle.safetyTitle}</h4>
+              <p style={styles.smallText}>{localizedExercise.safety}</p>
             </div>
             <div style={styles.prescriptionBand}>
-              <h4 style={styles.smallTitle}>Targets</h4>
+              <h4 style={styles.smallTitle}>{localizedBundle.targetsTitle}</h4>
               <div style={styles.outputGrid}>
                 {selectedExercise.targetImpairments.map((target) => (
                   <span key={target} style={styles.outputChip}>{target}</span>
@@ -593,12 +628,68 @@ function ExercisePrescription({
   );
 }
 
-function ExercisePanels({ exercise }: { exercise: ExerciseProtocol }) {
+function LanguageSelector({
+  selectedLanguage,
+  onSelect,
+}: {
+  selectedLanguage: ExerciseLanguageCode;
+  onSelect: (language: ExerciseLanguageCode) => void;
+}) {
+  const selectedBundle = exerciseTranslations[selectedLanguage];
+
+  return (
+    <section
+      className="my-1 flex flex-col gap-3 rounded-lg border-2 border-amber-400 bg-amber-50 p-4 shadow-sm"
+      aria-labelledby="language-selector-title"
+    >
+      <div
+        id="language-selector-title"
+        className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-900"
+      >
+        <Languages size={16} aria-hidden="true" />
+        <span>{selectedBundle.selectorTitle}</span>
+      </div>
+
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Patient handout language">
+        {Object.entries(exerciseTranslations).map(([languageCode, language]) => {
+          const code = languageCode as ExerciseLanguageCode;
+          const isSelected = selectedLanguage === code;
+
+          return (
+            <button
+              key={code}
+              type="button"
+              aria-pressed={isSelected}
+              onClick={() => onSelect(code)}
+              className={`min-h-11 rounded-md px-3.5 py-2 text-sm font-semibold shadow-sm transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 focus-visible:ring-offset-2 ${
+                isSelected
+                  ? 'bg-blue-700 text-white'
+                  : 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50'
+              }`}
+            >
+              {language.nativeName} ({language.name})
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function ExercisePanels({
+  exercise,
+  steps,
+  stepLabel,
+}: {
+  exercise: ExerciseProtocol;
+  steps: [LocalizedExerciseStep, LocalizedExerciseStep, LocalizedExerciseStep];
+  stepLabel: string;
+}) {
   return (
     <div style={styles.infographicGrid}>
-      {exercise.steps.map((step, index) => (
-        <div key={step.label} style={styles.infographicPanel}>
-          <div style={styles.stepLabel}>{step.label}</div>
+      {steps.map((step, index) => (
+        <div key={`${exercise.id}-${index}`} style={styles.infographicPanel}>
+          <div style={styles.stepLabel}>{stepLabel} {index + 1}</div>
           <div style={styles.patientFigure}>
             <div style={styles.headCircle}>
               {exercise.id === 'masako' && index === 1 && <span style={styles.tongueMark} />}
@@ -662,7 +753,11 @@ function PatientPortalPreview({
 
         <section style={styles.panel}>
           <h3 style={styles.panelTitle}>Featured illustrated exercise</h3>
-          <ExercisePanels exercise={selectedExercise} />
+          <ExercisePanels
+            exercise={selectedExercise}
+            steps={exerciseTranslations.en.exercises[selectedExercise.id].steps}
+            stepLabel={exerciseTranslations.en.stepLabel}
+          />
         </section>
       </div>
     </div>
@@ -1250,6 +1345,12 @@ const styles: Record<string, React.CSSProperties> = {
     margin: '7px 0 0',
     color: '#475569',
     lineHeight: 1.5,
+  },
+  languageNote: {
+    margin: '8px 0 0',
+    color: '#1d4ed8',
+    fontSize: '12px',
+    fontWeight: 800,
   },
   dosageBox: {
     background: '#f0fdfa',
