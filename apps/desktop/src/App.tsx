@@ -3,7 +3,6 @@ import {
   Activity,
   Apple,
   BarChart3,
-  BookOpen,
   Brain,
   ChevronLeft,
   ChevronRight,
@@ -27,7 +26,6 @@ import {
 import {
   HNC_CLINICAL_SECTIONS,
   HNC_EXERCISE_LIBRARY,
-  HNC_ICF_ITEMS,
   HNC_PATIENT_SNAPSHOT,
   type ClinicalField,
   type ClinicalSection,
@@ -39,6 +37,8 @@ import {
   type ExerciseLanguageCode,
   type LocalizedExerciseStep,
 } from './translationData';
+import { ReportErrorBoundary, ReportWorkspace } from './components/ReportWorkspace';
+import { ClinicianDashboard } from './components/ClinicianDashboard';
 
 type FieldState = Record<string, string | string[]>;
 
@@ -336,7 +336,7 @@ export const App: React.FC = () => {
         />
 
         {activeSection.id === 'command' && (
-          <CommandCenter
+          <ClinicianDashboard
             completion={completion}
             fieldState={fieldState}
             savedAt={savedAt}
@@ -377,7 +377,14 @@ export const App: React.FC = () => {
         )}
 
         {activeSection.id === 'report' && (
-          <ReportWorkspace fieldState={fieldState} completion={completion} />
+          <ReportErrorBoundary>
+            <ReportWorkspace
+              fieldState={fieldState}
+              setFieldState={setFieldState}
+              completion={completion}
+              onJump={navigateToSection}
+            />
+          </ReportErrorBoundary>
         )}
 
         <SectionPager
@@ -525,193 +532,6 @@ function SectionPager({
         </span>
         <ChevronRight size={18} />
       </button>
-    </section>
-  );
-}
-
-function CommandCenter({
-  completion,
-  fieldState,
-  savedAt,
-  onJump,
-}: {
-  completion: number;
-  fieldState: FieldState;
-  savedAt: string;
-  onJump: (section: HncSectionId) => void;
-}) {
-  const metrics = [
-    { label: 'Aspiration', value: fieldState.aspirationRisk || '0', accent: '#dc2626' },
-    { label: 'Nutrition', value: fieldState.nutritionRisk || '0', accent: '#ea580c' },
-    { label: 'Jaw opening', value: `${fieldState.jawOpening || 0} mm`, accent: '#d97706' },
-    { label: 'EAT-10', value: fieldState.eat10 || '0', accent: '#0f766e' },
-  ];
-
-  return (
-    <div style={styles.workspaceGrid}>
-      <section style={styles.heroPanel}>
-        <div style={styles.heroCopy}>
-          <p style={styles.overline}>Active case</p>
-          <h3 style={styles.heroTitle}>{HNC_PATIENT_SNAPSHOT.diagnosis}</h3>
-          <p style={styles.heroText}>{HNC_PATIENT_SNAPSHOT.stage} / {HNC_PATIENT_SNAPSHOT.treatmentPhase}</p>
-          <div style={styles.goalList}>
-            {HNC_PATIENT_SNAPSHOT.primaryGoals.map((goal) => (
-              <span key={goal} style={styles.goalChip}>{goal}</span>
-            ))}
-          </div>
-        </div>
-        <div style={styles.statusPanel}>
-          <div style={styles.largeNumber}>{completion}%</div>
-          <div style={styles.statusLabel}>clinical model complete</div>
-          <div style={styles.savedLine}>Saved: {savedAt}</div>
-        </div>
-      </section>
-
-      <div style={styles.metricGrid}>
-        {metrics.map((metric) => (
-          <section key={metric.label} style={styles.metricCard}>
-            <span style={{ ...styles.metricDot, backgroundColor: metric.accent }} />
-            <div style={styles.metricLabel}>{metric.label}</div>
-            <div style={styles.metricValue}>{metric.value}</div>
-          </section>
-        ))}
-      </div>
-
-      <section style={styles.panel}>
-        <div style={styles.panelHeader}>
-          <h3 style={styles.panelTitle}>Clinical alerts</h3>
-          <ShieldAlert size={18} color="#dc2626" />
-        </div>
-        <div style={styles.alertList}>
-          {HNC_PATIENT_SNAPSHOT.alerts.map((alert) => (
-            <div key={alert} style={styles.alertRow}>
-              <span style={styles.alertMark} />
-              <span>{alert}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section style={styles.panel}>
-        <div style={styles.panelHeader}>
-          <h3 style={styles.panelTitle}>Workflow queue</h3>
-          <ClipboardCheck size={18} color="#2563eb" />
-        </div>
-        <div style={styles.queueList}>
-          {[
-            ['opme', 'Confirm jaw opening and CN XII findings'],
-            ['swallow', 'Update swallow safety and diet recommendation'],
-            ['exercise', 'Prescribe illustrated home program'],
-            ['report', 'Finalize SLP report and handoff'],
-          ].map(([id, label]) => (
-            <button key={id} type="button" style={styles.queueItem} onClick={() => onJump(id as HncSectionId)}>
-              <span>{label}</span>
-              <BookOpen size={16} />
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <PlatformOperationsHub onJump={onJump} />
-    </div>
-  );
-}
-
-function PlatformOperationsHub({ onJump }: { onJump: (section: HncSectionId) => void }) {
-  const platformModules: Array<{
-    title: string;
-    description: string;
-    status: string;
-    action: string;
-    section: HncSectionId;
-    icon: LucideIcon;
-  }> = [
-    {
-      title: 'Schedule and Reminders',
-      description: 'Next SLP review, recurring therapy cadence, no-show prevention, and caregiver reminder planning.',
-      status: 'Session in 2 weeks',
-      action: 'Open referral details',
-      section: 'demographics',
-      icon: ClipboardCheck,
-    },
-    {
-      title: 'Teletherapy Session Room',
-      description: 'Designed for future video visits, screen sharing, exercise coaching, and secure in-session chat.',
-      status: 'Workflow scaffold',
-      action: 'Review patient portal',
-      section: 'patient',
-      icon: MonitorUp,
-    },
-    {
-      title: 'Clinical Notes and Outcomes',
-      description: 'SLP diagnosis, EAT-10, FOIS, MASA/PAS, ICF mapping, and progress documentation in one chart.',
-      status: 'Outcome-ready',
-      action: 'Open report',
-      section: 'report',
-      icon: FileText,
-    },
-    {
-      title: 'Exercise Resource Library',
-      description: 'Clinician-controlled illustrated resources, multilingual instructions, SOP dose, and patient phone queue.',
-      status: 'Patient controlled by SLP',
-      action: 'Prescribe exercises',
-      section: 'exercise',
-      icon: Dumbbell,
-    },
-    {
-      title: 'Client Portal Model',
-      description: 'Patient-facing phone surface for homework, symptoms, language access, and caregiver-safe education.',
-      status: 'Mobile-first',
-      action: 'Preview phone',
-      section: 'patient',
-      icon: Home,
-    },
-    {
-      title: 'Security and Storage',
-      description: 'Local draft persistence is active. Cloud patient storage should move to authenticated, audited edge storage.',
-      status: 'Prototype local storage',
-      action: 'Open summary',
-      section: 'report',
-      icon: ShieldAlert,
-    },
-  ];
-
-  return (
-    <section style={styles.platformHub}>
-      <div style={styles.panelHeader}>
-        <div>
-          <p style={styles.overline}>DegluTech platform model</p>
-          <h3 style={styles.panelTitle}>All-in-one HNC rehabilitation operating dashboard</h3>
-        </div>
-        <div style={styles.moduleBadge}>Thera-style workflow</div>
-      </div>
-
-      <div style={styles.platformGrid}>
-        {platformModules.map((module) => {
-          const Icon = module.icon;
-
-          return (
-            <button
-              key={module.title}
-              type="button"
-              onClick={() => onJump(module.section)}
-              style={styles.platformCard}
-            >
-              <span style={styles.platformIcon}>
-                <Icon size={18} />
-              </span>
-              <span style={styles.platformCopy}>
-                <strong>{module.title}</strong>
-                <span>{module.description}</span>
-              </span>
-              <span style={styles.platformFooter}>
-                <span>{module.status}</span>
-                <strong>{module.action}</strong>
-              </span>
-            </button>
-          );
-        })}
-      </div>
     </section>
   );
 }
@@ -1323,73 +1143,6 @@ function PatientPortalPreview({
           />
         </section>
       </div>
-    </div>
-  );
-}
-
-function ReportWorkspace({ fieldState, completion }: { fieldState: FieldState; completion: number }) {
-  const icfScores = ['b5105', 'b310', 'b320', 's320', 'd550', 'd560', 'd330', 'e310'].map((id) => ({
-    id,
-    value: Number(fieldState[id] || 0),
-  }));
-
-  return (
-    <div style={styles.workspaceGrid}>
-      <section style={styles.sectionIntro}>
-        <div>
-          <p style={styles.overline}>Summary and handoff</p>
-          <h3 style={styles.introTitle}>{fieldState.slpDiagnosis}</h3>
-        </div>
-        <div style={styles.moduleBadge}>{completion}% complete</div>
-      </section>
-
-      <div style={styles.reportGrid}>
-        <section style={styles.panel}>
-          <h3 style={styles.panelTitle}>Clinical report</h3>
-          <ReportLine label="Severity" value={fieldState.severity} />
-          <ReportLine label="Recommendations" value={fieldState.recommendations} />
-          <ReportLine label="Follow-up" value={fieldState.followUp} />
-          <ReportLine label="Diet and route" value={HNC_PATIENT_SNAPSHOT.currentRoute} />
-        </section>
-
-        <section style={styles.panel}>
-          <h3 style={styles.panelTitle}>ICF-HNC profile</h3>
-          <div style={styles.icfBars}>
-            {icfScores.map((score) => (
-              <div key={score.id} style={styles.icfRow}>
-                <span style={styles.icfCode}>{score.id}</span>
-                <div style={styles.icfTrack}>
-                  <div style={{ ...styles.icfFill, width: `${Math.min(score.value, 4) * 25}%` }} />
-                </div>
-                <span style={styles.icfValue}>{score.value}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      <section style={styles.panel}>
-        <h3 style={styles.panelTitle}>Mapped ICF codes</h3>
-        <div style={styles.icfGrid}>
-          {HNC_ICF_ITEMS.map((item) => (
-            <div key={item.code} style={styles.icfItem}>
-              <span style={styles.icfCode}>{item.code}</span>
-              <strong>{item.name}</strong>
-              <p>{item.hncRelevance}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function ReportLine({ label, value }: { label: string; value: string | string[] | undefined }) {
-  const display = Array.isArray(value) ? value.join(', ') : value || 'Not recorded';
-  return (
-    <div style={styles.reportLine}>
-      <span>{label}</span>
-      <strong>{display}</strong>
     </div>
   );
 }

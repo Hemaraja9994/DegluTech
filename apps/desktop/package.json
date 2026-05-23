@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "tsc --noEmit",
+    "deploy": "wrangler pages deploy dist --project-name=deglutech --branch=main",
     "electron:start": "electron ."
   },
   "dependencies": {

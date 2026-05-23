@@ -139,9 +139,9 @@ export const HNC_CLINICAL_SECTIONS: ClinicalSection[] = [
   {
     id: 'command',
     order: 1,
-    label: 'Clinical Command Center',
-    shortLabel: 'Command',
-    purpose: 'One-screen snapshot for triage, active risk, care pathway, and daily clinical priorities.',
+    label: 'Clinician Dashboard',
+    shortLabel: 'Dashboard',
+    purpose: 'Caseload overview, KPIs, and drill-down analytics for the active head-and-neck cancer patient.',
     accent: '#2563eb',
     status: 'ready',
     blocks: [
