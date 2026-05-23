@@ -1,10 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   Apple,
   BarChart3,
   BookOpen,
   Brain,
+  ChevronLeft,
+  ChevronRight,
   ClipboardCheck,
   Download,
   Dumbbell,
@@ -12,6 +14,7 @@ import {
   Home,
   LayoutDashboard,
   Languages,
+  Map,
   Mic,
   MonitorUp,
   Save,
@@ -39,6 +42,9 @@ import {
 
 type FieldState = Record<string, string | string[]>;
 
+const WORKSPACE_STORAGE_KEY = 'deglutech-hnc-clinical-workspace-v1';
+const DEFAULT_PRESCRIBED_EXERCISE_IDS = ['masako', 'effortful-swallow', 'jaw-stretch', 'velar-drills'];
+
 const exerciseIllustrationUrls: Record<string, string> = {
   masako: new URL('./assets/masako-maneuver.png', import.meta.url).href,
   'effortful-swallow': new URL('./assets/effortful-swallow.png', import.meta.url).href,
@@ -49,6 +55,9 @@ const exerciseIllustrationUrls: Record<string, string> = {
   'velar-drills': new URL('./assets/velar-drills.png', import.meta.url).href,
   'neck-shoulder-rom': new URL('./assets/neck-shoulder-rom.png', import.meta.url).href,
 };
+
+const isExerciseLanguageCode = (value: string): value is ExerciseLanguageCode =>
+  Object.prototype.hasOwnProperty.call(exerciseTranslations, value);
 
 const sectionIcons: Record<HncSectionId, LucideIcon> = {
   command: LayoutDashboard,
@@ -154,9 +163,15 @@ export const App: React.FC = () => {
   const [fieldState, setFieldState] = useState<FieldState>(initialFieldState);
   const [selectedExerciseId, setSelectedExerciseId] = useState('masako');
   const [patientLanguage, setPatientLanguage] = useState<ExerciseLanguageCode>('en');
+  const [prescribedExerciseIds, setPrescribedExerciseIds] = useState<string[]>(DEFAULT_PRESCRIBED_EXERCISE_IDS);
   const [savedAt, setSavedAt] = useState<string>('Not saved this session');
+  const [storageReady, setStorageReady] = useState(false);
+  const [storedAt, setStoredAt] = useState('Waiting for local draft restore');
 
   const activeSection = HNC_CLINICAL_SECTIONS.find((section) => section.id === activeSectionId) ?? HNC_CLINICAL_SECTIONS[0];
+  const activeSectionIndex = Math.max(0, HNC_CLINICAL_SECTIONS.findIndex((section) => section.id === activeSection.id));
+  const previousSection = activeSectionIndex > 0 ? HNC_CLINICAL_SECTIONS[activeSectionIndex - 1] : undefined;
+  const nextSection = activeSectionIndex < HNC_CLINICAL_SECTIONS.length - 1 ? HNC_CLINICAL_SECTIONS[activeSectionIndex + 1] : undefined;
   const selectedExercise = HNC_EXERCISE_LIBRARY.find((exercise) => exercise.id === selectedExerciseId) ?? HNC_EXERCISE_LIBRARY[0];
 
   const completion = useMemo(() => {
@@ -170,8 +185,81 @@ export const App: React.FC = () => {
     return Math.round((completed / allFieldIds.length) * 100);
   }, [fieldState]);
 
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(WORKSPACE_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as {
+          fieldState?: FieldState;
+          selectedExerciseId?: string;
+          patientLanguage?: string;
+          prescribedExerciseIds?: string[];
+          savedAt?: string;
+          storedAt?: string;
+        };
+        const knownExerciseIds = new Set(HNC_EXERCISE_LIBRARY.map((exercise) => exercise.id));
+        const restoredPrescription = Array.isArray(parsed.prescribedExerciseIds)
+          ? parsed.prescribedExerciseIds.filter((id) => knownExerciseIds.has(id))
+          : [];
+
+        if (parsed.fieldState) setFieldState({ ...initialFieldState, ...parsed.fieldState });
+        if (parsed.selectedExerciseId && knownExerciseIds.has(parsed.selectedExerciseId)) setSelectedExerciseId(parsed.selectedExerciseId);
+        if (parsed.patientLanguage && isExerciseLanguageCode(parsed.patientLanguage)) setPatientLanguage(parsed.patientLanguage);
+        if (restoredPrescription.length > 0) setPrescribedExerciseIds(restoredPrescription);
+        if (parsed.savedAt) setSavedAt(parsed.savedAt);
+        setStoredAt(parsed.storedAt ? `Restored ${new Date(parsed.storedAt).toLocaleString()}` : 'Restored local draft');
+      } else {
+        setStoredAt('New local draft');
+      }
+    } catch {
+      setStoredAt('Local draft unavailable');
+    } finally {
+      setStorageReady(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!storageReady) return;
+
+    const storedAtIso = new Date().toISOString();
+    try {
+      window.localStorage.setItem(
+        WORKSPACE_STORAGE_KEY,
+        JSON.stringify({
+          fieldState,
+          selectedExerciseId,
+          patientLanguage,
+          prescribedExerciseIds,
+          savedAt,
+          storedAt: storedAtIso,
+        })
+      );
+      setStoredAt(`Stored locally ${new Date(storedAtIso).toLocaleTimeString()}`);
+    } catch {
+      setStoredAt('Local storage write failed');
+    }
+  }, [fieldState, patientLanguage, prescribedExerciseIds, savedAt, selectedExerciseId, storageReady]);
+
   const saveSession = () => {
     setSavedAt(new Date().toLocaleTimeString());
+  };
+
+  const navigateToSection = (sectionId: HncSectionId) => {
+    setActiveSectionId(sectionId);
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
+  };
+
+  const togglePrescribedExercise = (exerciseId: string) => {
+    setPrescribedExerciseIds((current) => {
+      if (current.includes(exerciseId)) {
+        if (current.length === 1) return current;
+        const next = current.filter((id) => id !== exerciseId);
+        if (selectedExerciseId === exerciseId) setSelectedExerciseId(next[0]);
+        return next;
+      }
+
+      return [...current, exerciseId];
+    });
   };
 
   return (
@@ -201,7 +289,7 @@ export const App: React.FC = () => {
               <button
                 key={section.id}
                 type="button"
-                onClick={() => setActiveSectionId(section.id)}
+                onClick={() => navigateToSection(section.id)}
                 style={{
                   ...styles.navButton,
                   ...(isActive ? styles.navButtonActive : {}),
@@ -239,12 +327,20 @@ export const App: React.FC = () => {
           </div>
         </header>
 
+        <SectionNavigator
+          activeSection={activeSection}
+          activeSectionIndex={activeSectionIndex}
+          previousSection={previousSection}
+          nextSection={nextSection}
+          onJump={navigateToSection}
+        />
+
         {activeSection.id === 'command' && (
           <CommandCenter
             completion={completion}
             fieldState={fieldState}
             savedAt={savedAt}
-            onJump={setActiveSectionId}
+            onJump={navigateToSection}
           />
         )}
 
@@ -263,6 +359,10 @@ export const App: React.FC = () => {
             setSelectedExerciseId={setSelectedExerciseId}
             patientLanguage={patientLanguage}
             setPatientLanguage={setPatientLanguage}
+            prescribedExerciseIds={prescribedExerciseIds}
+            onTogglePrescribedExercise={togglePrescribedExercise}
+            storageReady={storageReady}
+            storedAt={storedAt}
           />
         )}
 
@@ -270,17 +370,164 @@ export const App: React.FC = () => {
           <PatientPortalPreview
             fieldState={fieldState}
             selectedExercise={selectedExercise}
-            setActiveSectionId={setActiveSectionId}
+            prescribedExerciseIds={prescribedExerciseIds}
+            patientLanguage={patientLanguage}
+            setActiveSectionId={navigateToSection}
           />
         )}
 
         {activeSection.id === 'report' && (
           <ReportWorkspace fieldState={fieldState} completion={completion} />
         )}
+
+        <SectionPager
+          previousSection={previousSection}
+          nextSection={nextSection}
+          onJump={navigateToSection}
+        />
       </main>
     </div>
   );
 };
+
+function SectionNavigator({
+  activeSection,
+  activeSectionIndex,
+  previousSection,
+  nextSection,
+  onJump,
+}: {
+  activeSection: ClinicalSection;
+  activeSectionIndex: number;
+  previousSection?: ClinicalSection;
+  nextSection?: ClinicalSection;
+  onJump: (section: HncSectionId) => void;
+}) {
+  const ActiveIcon = sectionIcons[activeSection.id];
+
+  return (
+    <section style={styles.workflowNav} aria-label="Clinical section navigation">
+      <div style={styles.workflowNavHeader}>
+        <div style={styles.workflowCurrent}>
+          <div style={{ ...styles.workflowCurrentIcon, background: activeSection.accent }}>
+            <ActiveIcon size={19} />
+          </div>
+          <div>
+            <p style={styles.overline}>
+              Section {activeSectionIndex + 1} of {HNC_CLINICAL_SECTIONS.length}
+            </p>
+            <h3 style={styles.workflowCurrentTitle}>{activeSection.shortLabel}</h3>
+            <p style={styles.workflowCurrentText}>{activeSection.purpose}</p>
+          </div>
+        </div>
+
+        <div style={styles.workflowControls}>
+          <button
+            type="button"
+            onClick={() => previousSection && onJump(previousSection.id)}
+            disabled={!previousSection}
+            style={previousSection ? styles.workflowButton : styles.workflowButtonDisabled}
+          >
+            <ChevronLeft size={17} />
+            <span style={styles.workflowButtonText}>
+              <span>Previous</span>
+              <strong>{previousSection?.shortLabel ?? 'Start'}</strong>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => nextSection && onJump(nextSection.id)}
+            disabled={!nextSection}
+            style={nextSection ? styles.workflowButtonPrimary : styles.workflowButtonDisabled}
+          >
+            <span style={styles.workflowButtonText}>
+              <span>Next</span>
+              <strong>{nextSection?.shortLabel ?? 'Complete'}</strong>
+            </span>
+            <ChevronRight size={17} />
+          </button>
+        </div>
+      </div>
+
+      <div style={styles.workflowRailHeader}>
+        <Map size={15} />
+        <span>Clinical workflow map</span>
+      </div>
+      <div style={styles.workflowRail}>
+        {HNC_CLINICAL_SECTIONS.map((section) => {
+          const isActive = section.id === activeSection.id;
+          const isComplete = section.order < activeSection.order;
+
+          return (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => onJump(section.id)}
+              aria-current={isActive ? 'step' : undefined}
+              style={{
+                ...styles.workflowStep,
+                ...(isActive ? styles.workflowStepActive : {}),
+                borderColor: isActive ? section.accent : '#dbe4ef',
+                background: isActive ? `${section.accent}12` : '#ffffff',
+              }}
+            >
+              <span
+                style={{
+                  ...styles.workflowStepNumber,
+                  background: isActive ? section.accent : isComplete ? '#0f766e' : '#e2e8f0',
+                  color: isActive || isComplete ? '#ffffff' : '#475569',
+                }}
+              >
+                {section.order}
+              </span>
+              <span style={styles.workflowStepLabel}>{section.shortLabel}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function SectionPager({
+  previousSection,
+  nextSection,
+  onJump,
+}: {
+  previousSection?: ClinicalSection;
+  nextSection?: ClinicalSection;
+  onJump: (section: HncSectionId) => void;
+}) {
+  return (
+    <section style={styles.sectionPager} aria-label="Move between clinical sections">
+      <button
+        type="button"
+        disabled={!previousSection}
+        onClick={() => previousSection && onJump(previousSection.id)}
+        style={previousSection ? styles.pagerButton : styles.pagerButtonDisabled}
+      >
+        <ChevronLeft size={18} />
+        <span style={styles.workflowButtonText}>
+          <span>Back</span>
+          <strong>{previousSection?.label ?? 'First section'}</strong>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        disabled={!nextSection}
+        onClick={() => nextSection && onJump(nextSection.id)}
+        style={nextSection ? styles.pagerButtonPrimary : styles.pagerButtonDisabled}
+      >
+        <span style={styles.workflowButtonText}>
+          <span>Continue</span>
+          <strong>{nextSection?.label ?? 'Workflow complete'}</strong>
+        </span>
+        <ChevronRight size={18} />
+      </button>
+    </section>
+  );
+}
 
 function CommandCenter({
   completion,
@@ -364,7 +611,108 @@ function CommandCenter({
           ))}
         </div>
       </section>
+
+      <PlatformOperationsHub onJump={onJump} />
     </div>
+  );
+}
+
+function PlatformOperationsHub({ onJump }: { onJump: (section: HncSectionId) => void }) {
+  const platformModules: Array<{
+    title: string;
+    description: string;
+    status: string;
+    action: string;
+    section: HncSectionId;
+    icon: LucideIcon;
+  }> = [
+    {
+      title: 'Schedule and Reminders',
+      description: 'Next SLP review, recurring therapy cadence, no-show prevention, and caregiver reminder planning.',
+      status: 'Session in 2 weeks',
+      action: 'Open referral details',
+      section: 'demographics',
+      icon: ClipboardCheck,
+    },
+    {
+      title: 'Teletherapy Session Room',
+      description: 'Designed for future video visits, screen sharing, exercise coaching, and secure in-session chat.',
+      status: 'Workflow scaffold',
+      action: 'Review patient portal',
+      section: 'patient',
+      icon: MonitorUp,
+    },
+    {
+      title: 'Clinical Notes and Outcomes',
+      description: 'SLP diagnosis, EAT-10, FOIS, MASA/PAS, ICF mapping, and progress documentation in one chart.',
+      status: 'Outcome-ready',
+      action: 'Open report',
+      section: 'report',
+      icon: FileText,
+    },
+    {
+      title: 'Exercise Resource Library',
+      description: 'Clinician-controlled illustrated resources, multilingual instructions, SOP dose, and patient phone queue.',
+      status: 'Patient controlled by SLP',
+      action: 'Prescribe exercises',
+      section: 'exercise',
+      icon: Dumbbell,
+    },
+    {
+      title: 'Client Portal Model',
+      description: 'Patient-facing phone surface for homework, symptoms, language access, and caregiver-safe education.',
+      status: 'Mobile-first',
+      action: 'Preview phone',
+      section: 'patient',
+      icon: Home,
+    },
+    {
+      title: 'Security and Storage',
+      description: 'Local draft persistence is active. Cloud patient storage should move to authenticated, audited edge storage.',
+      status: 'Prototype local storage',
+      action: 'Open summary',
+      section: 'report',
+      icon: ShieldAlert,
+    },
+  ];
+
+  return (
+    <section style={styles.platformHub}>
+      <div style={styles.panelHeader}>
+        <div>
+          <p style={styles.overline}>DegluTech platform model</p>
+          <h3 style={styles.panelTitle}>All-in-one HNC rehabilitation operating dashboard</h3>
+        </div>
+        <div style={styles.moduleBadge}>Thera-style workflow</div>
+      </div>
+
+      <div style={styles.platformGrid}>
+        {platformModules.map((module) => {
+          const Icon = module.icon;
+
+          return (
+            <button
+              key={module.title}
+              type="button"
+              onClick={() => onJump(module.section)}
+              style={styles.platformCard}
+            >
+              <span style={styles.platformIcon}>
+                <Icon size={18} />
+              </span>
+              <span style={styles.platformCopy}>
+                <strong>{module.title}</strong>
+                <span>{module.description}</span>
+              </span>
+              <span style={styles.platformFooter}>
+                <span>{module.status}</span>
+                <strong>{module.action}</strong>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -538,16 +886,25 @@ function ExercisePrescription({
   setSelectedExerciseId,
   patientLanguage,
   setPatientLanguage,
+  prescribedExerciseIds,
+  onTogglePrescribedExercise,
+  storageReady,
+  storedAt,
 }: {
   selectedExercise: ExerciseProtocol;
   selectedExerciseId: string;
   setSelectedExerciseId: (id: string) => void;
   patientLanguage: ExerciseLanguageCode;
   setPatientLanguage: (language: ExerciseLanguageCode) => void;
+  prescribedExerciseIds: string[];
+  onTogglePrescribedExercise: (id: string) => void;
+  storageReady: boolean;
+  storedAt: string;
 }) {
   const illustrationUrl = exerciseIllustrationUrls[selectedExercise.id];
   const localizedBundle = exerciseTranslations[patientLanguage];
   const localizedExercise = localizedBundle.exercises[selectedExercise.id] ?? exerciseTranslations.en.exercises[selectedExercise.id];
+  const prescribedExercises = HNC_EXERCISE_LIBRARY.filter((exercise) => prescribedExerciseIds.includes(exercise.id));
 
   return (
     <div style={styles.workspaceGrid}>
@@ -561,19 +918,36 @@ function ExercisePrescription({
 
       <LanguageSelector selectedLanguage={patientLanguage} onSelect={setPatientLanguage} />
 
+      <ClinicianPlanControl
+        prescribedExerciseIds={prescribedExerciseIds}
+        prescribedExercises={prescribedExercises}
+        selectedExerciseId={selectedExerciseId}
+        onSelectExercise={setSelectedExerciseId}
+        onToggleExercise={onTogglePrescribedExercise}
+        storageReady={storageReady}
+        storedAt={storedAt}
+      />
+
       <div style={styles.exerciseLayout}>
         <section style={styles.exerciseMenu}>
-          {HNC_EXERCISE_LIBRARY.map((exercise) => (
-            <button
-              key={exercise.id}
-              type="button"
-              onClick={() => setSelectedExerciseId(exercise.id)}
-              style={selectedExerciseId === exercise.id ? styles.exerciseMenuItemActive : styles.exerciseMenuItem}
-            >
-              <span style={styles.exerciseName}>{exercise.name}</span>
-              <span style={styles.exerciseMeta}>{exercise.phase} / {exercise.category}</span>
-            </button>
-          ))}
+          {HNC_EXERCISE_LIBRARY.map((exercise) => {
+            const isPatientVisible = prescribedExerciseIds.includes(exercise.id);
+
+            return (
+              <button
+                key={exercise.id}
+                type="button"
+                onClick={() => setSelectedExerciseId(exercise.id)}
+                style={selectedExerciseId === exercise.id ? styles.exerciseMenuItemActive : styles.exerciseMenuItem}
+              >
+                <span style={styles.exerciseName}>{exercise.name}</span>
+                <span style={styles.exerciseMeta}>{exercise.phase} / {exercise.category}</span>
+                <span style={isPatientVisible ? styles.patientVisiblePill : styles.clinicianOnlyPill}>
+                  {isPatientVisible ? 'Patient phone' : 'Clinician library'}
+                </span>
+              </button>
+            );
+          })}
         </section>
 
         <section style={styles.panel}>
@@ -597,6 +971,8 @@ function ExercisePrescription({
               <img src={illustrationUrl} alt={`${selectedExercise.name} illustrated exercise steps`} style={styles.generatedImage} />
             </div>
           )}
+
+          <RegimenSopCard exercise={selectedExercise} />
 
           <ExercisePanels
             exercise={selectedExercise}
@@ -625,6 +1001,57 @@ function ExercisePrescription({
         </section>
       </div>
     </div>
+  );
+}
+
+function RegimenSopCard({ exercise }: { exercise: ExerciseProtocol }) {
+  const regimenRows = [
+    ['Frequency', exercise.regimen.frequency],
+    ['Sets and reps', exercise.regimen.setsAndReps],
+    ['Hold time', exercise.regimen.holdTime],
+    ['Rest period', exercise.regimen.restPeriod],
+    ['Session length', exercise.regimen.sessionDuration],
+    ['Program duration', exercise.regimen.programDuration],
+    ['Clinical review', exercise.regimen.reviewCadence],
+    ['Supervision', exercise.regimen.supervision],
+  ];
+
+  return (
+    <section style={styles.regimenPanel}>
+      <div style={styles.regimenHeader}>
+        <div>
+          <p style={styles.overline}>Standard operating protocol</p>
+          <h4 style={styles.regimenTitle}>Therapy duration, frequency, progression, and stop rules</h4>
+        </div>
+        <div style={styles.adherenceBadge}>{exercise.regimen.adherenceTarget}</div>
+      </div>
+
+      <div style={styles.regimenGrid}>
+        {regimenRows.map(([label, value]) => (
+          <div key={label} style={styles.regimenItem}>
+            <span>{label}</span>
+            <strong>{value}</strong>
+          </div>
+        ))}
+      </div>
+
+      <div style={styles.regimenTwoColumn}>
+        <div style={styles.regimenCallout}>
+          <span>Progression rule</span>
+          <strong>{exercise.regimen.progressionRule}</strong>
+        </div>
+        <div style={styles.stopRuleBox}>
+          <span>Stop and contact clinician if</span>
+          <div style={styles.stopRuleList}>
+            {exercise.regimen.stopRules.map((rule) => (
+              <strong key={rule}>{rule}</strong>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <p style={styles.protocolBasis}>{exercise.regimen.protocolBasis}</p>
+    </section>
   );
 }
 
@@ -676,6 +1103,87 @@ function LanguageSelector({
   );
 }
 
+function ClinicianPlanControl({
+  prescribedExerciseIds,
+  prescribedExercises,
+  selectedExerciseId,
+  onSelectExercise,
+  onToggleExercise,
+  storageReady,
+  storedAt,
+}: {
+  prescribedExerciseIds: string[];
+  prescribedExercises: ExerciseProtocol[];
+  selectedExerciseId: string;
+  onSelectExercise: (id: string) => void;
+  onToggleExercise: (id: string) => void;
+  storageReady: boolean;
+  storedAt: string;
+}) {
+  return (
+    <section style={styles.clinicianPlanPanel}>
+      <div style={styles.clinicianPlanHeader}>
+        <div>
+          <p style={styles.overline}>Clinician controlled prescription</p>
+          <h3 style={styles.clinicianPlanTitle}>Choose what appears in the patient phone exercise module.</h3>
+          <p style={styles.workflowCurrentText}>
+            Only selected exercises are visible to the patient. Keep the clinical library available here for review, but publish a small, safe daily queue.
+          </p>
+        </div>
+        <div style={styles.storageStatusCard}>
+          <span style={styles.storageLabel}>Data storage</span>
+          <strong>{storageReady ? 'Local draft active' : 'Restoring draft'}</strong>
+          <p style={styles.storageText}>{storedAt}</p>
+          <p style={styles.storageText}>This prototype stores the working plan on this device. No cloud patient database is enabled yet.</p>
+        </div>
+      </div>
+
+      <div style={styles.prescribedSummary}>
+        <div style={styles.prescribedCount}>
+          <strong>{prescribedExercises.length}</strong>
+          <span>patient-visible exercises</span>
+        </div>
+        <div style={styles.prescribedQueue}>
+          {prescribedExercises.map((exercise) => (
+            <button
+              key={exercise.id}
+              type="button"
+              onClick={() => onSelectExercise(exercise.id)}
+              style={selectedExerciseId === exercise.id ? styles.queueChipActive : styles.queueChip}
+            >
+              {exercise.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={styles.exerciseToggleGrid}>
+        {HNC_EXERCISE_LIBRARY.map((exercise) => {
+          const isChecked = prescribedExerciseIds.includes(exercise.id);
+
+          return (
+            <label key={exercise.id} style={isChecked ? styles.exerciseToggleActive : styles.exerciseToggle}>
+              <input
+                type="checkbox"
+                checked={isChecked}
+                onChange={() => onToggleExercise(exercise.id)}
+                style={styles.exerciseToggleInput}
+              />
+              <span style={styles.exerciseToggleText}>
+                <strong>{exercise.name}</strong>
+                <span>{exercise.category} / {exercise.phase}</span>
+              </span>
+              <span style={isChecked ? styles.patientVisiblePill : styles.clinicianOnlyPill}>
+                {isChecked ? 'Phone on' : 'Hidden'}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function ExercisePanels({
   exercise,
   steps,
@@ -711,14 +1219,20 @@ function ExercisePanels({
 function PatientPortalPreview({
   fieldState,
   selectedExercise,
+  prescribedExerciseIds,
+  patientLanguage,
   setActiveSectionId,
 }: {
   fieldState: FieldState;
   selectedExercise: ExerciseProtocol;
+  prescribedExerciseIds: string[];
+  patientLanguage: ExerciseLanguageCode;
   setActiveSectionId: (id: HncSectionId) => void;
 }) {
-  const today = Array.isArray(fieldState.today) ? fieldState.today : [];
   const symptoms = Array.isArray(fieldState.symptoms) ? fieldState.symptoms : [];
+  const localizedBundle = exerciseTranslations[patientLanguage];
+  const prescribedExercises = HNC_EXERCISE_LIBRARY.filter((exercise) => prescribedExerciseIds.includes(exercise.id));
+  const selectedLocalizedExercise = localizedBundle.exercises[selectedExercise.id] ?? exerciseTranslations.en.exercises[selectedExercise.id];
 
   return (
     <div style={styles.workspaceGrid}>
@@ -736,14 +1250,29 @@ function PatientPortalPreview({
       <div style={styles.patientPortalGrid}>
         <section style={styles.patientPhone}>
           <div style={styles.phoneTop} />
-          <h3 style={styles.phoneTitle}>Today</h3>
-          <p style={styles.phoneSub}>{HNC_PATIENT_SNAPSHOT.currentRoute}</p>
-          {today.map((item) => (
-            <div key={item} style={styles.homeTask}>
+          <h3 style={styles.phoneTitle}>Today&apos;s exercises</h3>
+          <p style={styles.phoneSub}>{localizedBundle.nativeName} / {HNC_PATIENT_SNAPSHOT.currentRoute}</p>
+          {prescribedExercises.map((exercise) => {
+            const localizedExercise = localizedBundle.exercises[exercise.id] ?? exerciseTranslations.en.exercises[exercise.id];
+
+            return (
+              <div key={exercise.id} style={styles.homeTask}>
+                <span style={styles.homeCheck} />
+                <span>
+                  <strong>{localizedExercise.title}</strong>
+                  <small style={styles.phoneTaskDose}>{localizedExercise.dosage}</small>
+                  <small style={styles.phoneTaskDose}>{exercise.regimen.frequency}</small>
+                  <small style={styles.phoneTaskDose}>Session time: {exercise.regimen.sessionDuration}</small>
+                </span>
+              </div>
+            );
+          })}
+          {prescribedExercises.length === 0 && (
+            <div style={styles.homeTask}>
               <span style={styles.homeCheck} />
-              <span>{item}</span>
+              <span>No phone exercises have been released by the clinician.</span>
             </div>
-          ))}
+          )}
           <div style={styles.symptomStrip}>
             {symptoms.map((item) => (
               <span key={item}>{item}</span>
@@ -752,11 +1281,45 @@ function PatientPortalPreview({
         </section>
 
         <section style={styles.panel}>
-          <h3 style={styles.panelTitle}>Featured illustrated exercise</h3>
+          <div style={styles.panelHeader}>
+            <div>
+              <p style={styles.overline}>Patient phone module</p>
+              <h3 style={styles.panelTitle}>Clinician-controlled exercise view</h3>
+            </div>
+            <div style={styles.moduleBadge}>patient-facing</div>
+          </div>
+          <p style={styles.exerciseText}>{selectedLocalizedExercise.description}</p>
+          <div style={styles.phoneRegimenGrid}>
+            <div style={styles.phoneRegimenGridItem}>
+              <span>Frequency</span>
+              <strong>{selectedExercise.regimen.frequency}</strong>
+            </div>
+            <div style={styles.phoneRegimenGridItem}>
+              <span>How much</span>
+              <strong>{selectedExercise.regimen.setsAndReps}</strong>
+            </div>
+            <div style={styles.phoneRegimenGridItem}>
+              <span>Session time</span>
+              <strong>{selectedExercise.regimen.sessionDuration}</strong>
+            </div>
+            <div style={styles.phoneRegimenGridItem}>
+              <span>Review</span>
+              <strong>{selectedExercise.regimen.reviewCadence}</strong>
+            </div>
+          </div>
+          {exerciseIllustrationUrls[selectedExercise.id] && (
+            <div style={styles.generatedImageFrame}>
+              <img
+                src={exerciseIllustrationUrls[selectedExercise.id]}
+                alt={`${selectedExercise.name} patient phone illustration`}
+                style={styles.generatedImage}
+              />
+            </div>
+          )}
           <ExercisePanels
             exercise={selectedExercise}
-            steps={exerciseTranslations.en.exercises[selectedExercise.id].steps}
-            stepLabel={exerciseTranslations.en.stepLabel}
+            steps={selectedLocalizedExercise.steps}
+            stepLabel={localizedBundle.stepLabel}
           />
         </section>
       </div>
@@ -968,6 +1531,193 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '10px',
   },
+  workflowNav: {
+    background: '#ffffff',
+    border: '1px solid #dbe4ef',
+    borderRadius: '8px',
+    padding: '14px',
+    marginBottom: '18px',
+    display: 'grid',
+    gap: '12px',
+  },
+  workflowNavHeader: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) auto',
+    gap: '16px',
+    alignItems: 'center',
+  },
+  workflowCurrent: {
+    display: 'grid',
+    gridTemplateColumns: '44px minmax(0, 1fr)',
+    gap: '12px',
+    alignItems: 'center',
+  },
+  workflowCurrentIcon: {
+    width: '44px',
+    height: '44px',
+    borderRadius: '8px',
+    color: '#ffffff',
+    display: 'grid',
+    placeItems: 'center',
+  },
+  workflowCurrentTitle: {
+    margin: 0,
+    fontSize: '18px',
+    lineHeight: 1.2,
+  },
+  workflowCurrentText: {
+    margin: '5px 0 0',
+    color: '#64748b',
+    fontSize: '13px',
+    lineHeight: 1.45,
+    maxWidth: '760px',
+  },
+  workflowControls: {
+    display: 'flex',
+    gap: '8px',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
+  workflowButton: {
+    minHeight: '44px',
+    border: '1px solid #cbd5e1',
+    borderRadius: '8px',
+    background: '#ffffff',
+    color: '#172033',
+    padding: '8px 10px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    cursor: 'pointer',
+    textAlign: 'left',
+  },
+  workflowButtonPrimary: {
+    minHeight: '44px',
+    border: '1px solid #1d4ed8',
+    borderRadius: '8px',
+    background: '#2563eb',
+    color: '#ffffff',
+    padding: '8px 10px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    cursor: 'pointer',
+    textAlign: 'left',
+  },
+  workflowButtonDisabled: {
+    minHeight: '44px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    background: '#f8fafc',
+    color: '#94a3b8',
+    padding: '8px 10px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    cursor: 'not-allowed',
+    textAlign: 'left',
+  },
+  workflowButtonText: {
+    display: 'grid',
+    gap: '2px',
+    fontSize: '11px',
+    fontWeight: 800,
+    lineHeight: 1.15,
+  },
+  workflowRailHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '7px',
+    color: '#475569',
+    fontSize: '12px',
+    fontWeight: 900,
+    textTransform: 'uppercase',
+  },
+  workflowRail: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(13, minmax(86px, 1fr))',
+    gap: '7px',
+    overflowX: 'auto',
+    paddingBottom: '2px',
+  },
+  workflowStep: {
+    minHeight: '64px',
+    border: '1px solid #dbe4ef',
+    borderRadius: '8px',
+    padding: '8px',
+    display: 'grid',
+    justifyItems: 'start',
+    alignContent: 'center',
+    gap: '6px',
+    color: '#334155',
+    cursor: 'pointer',
+    textAlign: 'left',
+  },
+  workflowStepActive: {
+    boxShadow: 'inset 0 0 0 1px rgba(15, 23, 42, 0.04)',
+    color: '#0f172a',
+    fontWeight: 900,
+  },
+  workflowStepNumber: {
+    width: '24px',
+    height: '24px',
+    borderRadius: '999px',
+    display: 'grid',
+    placeItems: 'center',
+    fontSize: '11px',
+    fontWeight: 900,
+  },
+  workflowStepLabel: {
+    fontSize: '11px',
+    lineHeight: 1.2,
+    fontWeight: 800,
+  },
+  sectionPager: {
+    marginTop: '18px',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: '12px',
+  },
+  pagerButton: {
+    minHeight: '58px',
+    border: '1px solid #cbd5e1',
+    borderRadius: '8px',
+    background: '#ffffff',
+    color: '#172033',
+    padding: '10px 12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    cursor: 'pointer',
+    textAlign: 'left',
+  },
+  pagerButtonPrimary: {
+    minHeight: '58px',
+    border: '1px solid #0f766e',
+    borderRadius: '8px',
+    background: '#0f766e',
+    color: '#ffffff',
+    padding: '10px 12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '10px',
+    cursor: 'pointer',
+    textAlign: 'left',
+  },
+  pagerButtonDisabled: {
+    minHeight: '58px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    background: '#f8fafc',
+    color: '#94a3b8',
+    padding: '10px 12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    cursor: 'not-allowed',
+    textAlign: 'left',
+  },
   progressWrap: {
     display: 'grid',
     gap: '5px',
@@ -1143,6 +1893,58 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#172033',
     fontWeight: 700,
   },
+  platformHub: {
+    background: '#ffffff',
+    border: '1px solid #dbe4ef',
+    borderRadius: '8px',
+    padding: '16px',
+    display: 'grid',
+    gap: '12px',
+  },
+  platformGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    gap: '10px',
+  },
+  platformCard: {
+    border: '1px solid #dbe4ef',
+    background: '#ffffff',
+    borderRadius: '8px',
+    padding: '12px',
+    minHeight: '154px',
+    display: 'grid',
+    gridTemplateRows: 'auto 1fr auto',
+    gap: '10px',
+    cursor: 'pointer',
+    textAlign: 'left',
+    color: '#172033',
+  },
+  platformIcon: {
+    width: '34px',
+    height: '34px',
+    borderRadius: '8px',
+    background: '#eff6ff',
+    color: '#2563eb',
+    display: 'grid',
+    placeItems: 'center',
+  },
+  platformCopy: {
+    display: 'grid',
+    gap: '6px',
+    color: '#475569',
+    fontSize: '13px',
+    lineHeight: 1.35,
+  },
+  platformFooter: {
+    borderTop: '1px solid #e2e8f0',
+    paddingTop: '9px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '10px',
+    color: '#64748b',
+    fontSize: '11px',
+    fontWeight: 800,
+  },
   sectionIntro: {
     background: '#ffffff',
     border: '1px solid #dbe4ef',
@@ -1290,6 +2092,145 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '12px',
     fontWeight: 700,
   },
+  clinicianPlanPanel: {
+    background: '#ffffff',
+    border: '1px solid #dbe4ef',
+    borderRadius: '8px',
+    padding: '16px',
+    display: 'grid',
+    gap: '14px',
+  },
+  clinicianPlanHeader: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) 280px',
+    gap: '16px',
+    alignItems: 'start',
+  },
+  clinicianPlanTitle: {
+    margin: 0,
+    color: '#0f172a',
+    fontSize: '19px',
+    lineHeight: 1.25,
+  },
+  storageStatusCard: {
+    border: '1px solid #bfdbfe',
+    background: '#eff6ff',
+    borderRadius: '8px',
+    padding: '12px',
+    display: 'grid',
+    gap: '5px',
+  },
+  storageLabel: {
+    color: '#1d4ed8',
+    fontSize: '11px',
+    fontWeight: 900,
+    textTransform: 'uppercase',
+  },
+  storageText: {
+    margin: 0,
+    color: '#334155',
+    fontSize: '12px',
+    lineHeight: 1.35,
+  },
+  prescribedSummary: {
+    border: '1px solid #ccfbf1',
+    background: '#f0fdfa',
+    borderRadius: '8px',
+    padding: '12px',
+    display: 'grid',
+    gridTemplateColumns: '150px minmax(0, 1fr)',
+    gap: '12px',
+    alignItems: 'center',
+  },
+  prescribedCount: {
+    display: 'grid',
+    gap: '2px',
+    color: '#134e4a',
+  },
+  prescribedQueue: {
+    display: 'flex',
+    gap: '7px',
+    flexWrap: 'wrap',
+  },
+  queueChip: {
+    border: '1px solid #99f6e4',
+    background: '#ffffff',
+    color: '#115e59',
+    borderRadius: '999px',
+    padding: '7px 10px',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: 800,
+  },
+  queueChipActive: {
+    border: '1px solid #0f766e',
+    background: '#0f766e',
+    color: '#ffffff',
+    borderRadius: '999px',
+    padding: '7px 10px',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: 900,
+  },
+  exerciseToggleGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: '8px',
+  },
+  exerciseToggle: {
+    minHeight: '58px',
+    border: '1px solid #dbe4ef',
+    background: '#ffffff',
+    borderRadius: '8px',
+    padding: '10px',
+    display: 'grid',
+    gridTemplateColumns: '18px minmax(0, 1fr) auto',
+    gap: '9px',
+    alignItems: 'center',
+    cursor: 'pointer',
+  },
+  exerciseToggleActive: {
+    minHeight: '58px',
+    border: '1px solid #0d9488',
+    background: '#ecfeff',
+    borderRadius: '8px',
+    padding: '10px',
+    display: 'grid',
+    gridTemplateColumns: '18px minmax(0, 1fr) auto',
+    gap: '9px',
+    alignItems: 'center',
+    cursor: 'pointer',
+  },
+  exerciseToggleInput: {
+    width: '16px',
+    height: '16px',
+  },
+  exerciseToggleText: {
+    display: 'grid',
+    gap: '3px',
+    fontSize: '12px',
+    color: '#475569',
+  },
+  patientVisiblePill: {
+    border: '1px solid #99f6e4',
+    background: '#ccfbf1',
+    color: '#115e59',
+    borderRadius: '999px',
+    padding: '4px 8px',
+    fontSize: '11px',
+    fontWeight: 900,
+    width: 'fit-content',
+  },
+  clinicianOnlyPill: {
+    border: '1px solid #e2e8f0',
+    background: '#f8fafc',
+    color: '#64748b',
+    borderRadius: '999px',
+    padding: '4px 8px',
+    fontSize: '11px',
+    fontWeight: 800,
+    width: 'fit-content',
+  },
   exerciseLayout: {
     display: 'grid',
     gridTemplateColumns: '300px minmax(0, 1fr)',
@@ -1351,6 +2292,84 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#1d4ed8',
     fontSize: '12px',
     fontWeight: 800,
+  },
+  regimenPanel: {
+    border: '1px solid #bfdbfe',
+    background: '#f8fbff',
+    borderRadius: '8px',
+    padding: '14px',
+    marginBottom: '16px',
+    display: 'grid',
+    gap: '12px',
+  },
+  regimenHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'start',
+    gap: '12px',
+  },
+  regimenTitle: {
+    margin: 0,
+    color: '#0f172a',
+    fontSize: '16px',
+    lineHeight: 1.25,
+  },
+  adherenceBadge: {
+    border: '1px solid #99f6e4',
+    background: '#ecfeff',
+    color: '#115e59',
+    borderRadius: '999px',
+    padding: '7px 10px',
+    fontSize: '12px',
+    fontWeight: 900,
+    whiteSpace: 'nowrap',
+  },
+  regimenGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    gap: '8px',
+  },
+  regimenItem: {
+    border: '1px solid #dbe4ef',
+    background: '#ffffff',
+    borderRadius: '8px',
+    padding: '10px',
+    display: 'grid',
+    gap: '5px',
+  },
+  regimenTwoColumn: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+    gap: '8px',
+  },
+  regimenCallout: {
+    border: '1px solid #fed7aa',
+    background: '#fff7ed',
+    color: '#7c2d12',
+    borderRadius: '8px',
+    padding: '10px',
+    display: 'grid',
+    gap: '5px',
+  },
+  stopRuleBox: {
+    border: '1px solid #fecdd3',
+    background: '#fff1f2',
+    color: '#881337',
+    borderRadius: '8px',
+    padding: '10px',
+    display: 'grid',
+    gap: '8px',
+  },
+  stopRuleList: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '6px',
+  },
+  protocolBasis: {
+    margin: 0,
+    color: '#475569',
+    fontSize: '12px',
+    lineHeight: 1.45,
   },
   dosageBox: {
     background: '#f0fdfa',
@@ -1543,13 +2562,12 @@ const styles: Record<string, React.CSSProperties> = {
     margin: '4px 0 16px',
   },
   homeTask: {
-    minHeight: '46px',
     border: '1px solid #dbe4ef',
     borderRadius: '8px',
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: '10px',
-    padding: '0 12px',
+    padding: '11px 12px',
     marginBottom: '10px',
     fontWeight: 800,
   },
@@ -1559,6 +2577,30 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '4px',
     border: '2px solid #0d9488',
     background: '#ccfbf1',
+    flex: '0 0 auto',
+    marginTop: '2px',
+  },
+  phoneTaskDose: {
+    display: 'block',
+    color: '#64748b',
+    fontSize: '11px',
+    fontWeight: 700,
+    lineHeight: 1.35,
+    marginTop: '4px',
+  },
+  phoneRegimenGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: '8px',
+    margin: '12px 0 16px',
+  },
+  phoneRegimenGridItem: {
+    border: '1px solid #dbe4ef',
+    background: '#f8fafc',
+    borderRadius: '8px',
+    padding: '10px',
+    display: 'grid',
+    gap: '4px',
   },
   symptomStrip: {
     display: 'flex',

@@ -122,6 +122,24 @@ export default function App() {
               </View>
               <Text style={styles.bodyText}>{exercise.patientLanguage}</Text>
               <Text style={styles.doseText}>{exercise.dosage}</Text>
+              <View style={styles.regimenGrid}>
+                <View style={styles.regimenBox}>
+                  <Text style={styles.regimenLabel}>Frequency</Text>
+                  <Text style={styles.regimenValue}>{exercise.regimen.frequency}</Text>
+                </View>
+                <View style={styles.regimenBox}>
+                  <Text style={styles.regimenLabel}>Session</Text>
+                  <Text style={styles.regimenValue}>{exercise.regimen.sessionDuration}</Text>
+                </View>
+                <View style={styles.regimenBox}>
+                  <Text style={styles.regimenLabel}>How much</Text>
+                  <Text style={styles.regimenValue}>{exercise.regimen.setsAndReps}</Text>
+                </View>
+                <View style={styles.regimenBox}>
+                  <Text style={styles.regimenLabel}>Stop if</Text>
+                  <Text style={styles.regimenValue}>{exercise.regimen.stopRules.slice(0, 2).join(', ')}</Text>
+                </View>
+              </View>
               <View style={styles.stepStrip}>
                 {exercise.steps.map((step) => (
                   <View key={step.label} style={styles.stepBox}>
@@ -370,6 +388,33 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '900',
     marginTop: 8,
+  },
+  regimenGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 10,
+  },
+  regimenBox: {
+    width: '48%',
+    borderWidth: 1,
+    borderColor: '#dbe4ef',
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    padding: 9,
+  },
+  regimenLabel: {
+    color: '#64748b',
+    fontSize: 10,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  regimenValue: {
+    color: '#0f172a',
+    fontSize: 11,
+    fontWeight: '800',
+    marginTop: 4,
+    lineHeight: 15,
   },
   stepStrip: {
     flexDirection: 'row',

@@ -64,6 +64,21 @@ export interface ExerciseStep {
   cue: string;
 }
 
+export interface ExerciseRegimen {
+  frequency: string;
+  setsAndReps: string;
+  holdTime: string;
+  restPeriod: string;
+  sessionDuration: string;
+  programDuration: string;
+  reviewCadence: string;
+  supervision: string;
+  progressionRule: string;
+  adherenceTarget: string;
+  stopRules: string[];
+  protocolBasis: string;
+}
+
 export interface ExerciseProtocol {
   id: string;
   name: string;
@@ -79,6 +94,7 @@ export interface ExerciseProtocol {
   indication: string;
   safety: string;
   dosage: string;
+  regimen: ExerciseRegimen;
   patientLanguage: string;
   targetImpairments: string[];
   steps: ExerciseStep[];
@@ -525,6 +541,20 @@ export const HNC_EXERCISE_LIBRARY: ExerciseProtocol[] = [
     indication: 'Reduced tongue base retraction or pharyngeal drive, when clinically appropriate.',
     safety: 'Use saliva only unless cleared by the clinician. Stop if pain, choking, or distress occurs.',
     dosage: '5-10 repetitions, 1-3 sets daily as prescribed.',
+    regimen: {
+      frequency: 'Daily home practice, 1-3 short sessions.',
+      setsAndReps: '5-10 dry swallows per set; prescribe 1-3 sets based on fatigue.',
+      holdTime: 'Gentle tongue hold only during each swallow.',
+      restPeriod: 'Rest 20-30 seconds between swallows if fatigue or coughing appears.',
+      sessionDuration: '3-6 minutes.',
+      programDuration: '2-week block, then reassess swallow safety and technique.',
+      reviewCadence: 'SLP review every 1-2 weeks or earlier if symptoms worsen.',
+      supervision: 'Initial SLP demonstration; home use only after correct technique is observed.',
+      progressionRule: 'Increase repetitions only when the patient completes the set without pain, distress, or persistent cough.',
+      adherenceTarget: 'Aim for at least 80% of prescribed weekly repetitions.',
+      stopRules: ['Sharp pain', 'Choking or breathing distress', 'Persistent coughing', 'Bleeding or new oral wound pain'],
+      protocolBasis: 'SLP-directed exercise dosing aligned with adult dysphagia principles: specify frequency, intensity, duration, timing, and patient safety monitoring.',
+    },
     patientLanguage: 'Hold the tongue gently between the teeth and swallow saliva while keeping it forward.',
     targetImpairments: ['Tongue base retraction', 'Pharyngeal constriction', 'Swallow strength'],
     steps: [
@@ -541,6 +571,20 @@ export const HNC_EXERCISE_LIBRARY: ExerciseProtocol[] = [
     indication: 'Reduced pharyngeal clearance, residue, or need for stronger swallow pressure.',
     safety: 'Use prescribed bolus only. Stop if coughing persists or breathing changes.',
     dosage: '10 repetitions, 2-3 sets daily or during meals if prescribed.',
+    regimen: {
+      frequency: 'Daily, 2-3 sessions; may be paired with meals only if prescribed.',
+      setsAndReps: '10 strong swallows per set; 2-3 sets.',
+      holdTime: 'One strong squeeze during each swallow.',
+      restPeriod: 'Rest 20-30 seconds between repetitions; longer if fatigued.',
+      sessionDuration: '5-8 minutes.',
+      programDuration: '2-week strengthening block, then reassess residue and diet tolerance.',
+      reviewCadence: 'Review weekly during active treatment or every 2 weeks in maintenance.',
+      supervision: 'SLP confirms target effort and safe bolus level before home practice.',
+      progressionRule: 'Progress by adding a set before increasing bolus challenge; do not progress during coughing or wet voice.',
+      adherenceTarget: 'Complete at least 80% of weekly prescribed swallows.',
+      stopRules: ['Persistent coughing', 'Wet or gurgly voice that does not clear', 'Breathing change', 'Chest discomfort'],
+      protocolBasis: 'Task-specific swallow strengthening with clinician-selected intensity, diet level, and safety monitoring.',
+    },
     patientLanguage: 'Swallow hard, like squeezing all the throat muscles together.',
     targetImpairments: ['Residue reduction', 'Base of tongue pressure', 'Pharyngeal clearance'],
     steps: [
@@ -557,6 +601,20 @@ export const HNC_EXERCISE_LIBRARY: ExerciseProtocol[] = [
     indication: 'Reduced laryngeal elevation or shortened UES opening when patient can follow timing cues.',
     safety: 'Practice dry first. Avoid if breath holding causes discomfort.',
     dosage: '3 sets of 5 repetitions as prescribed.',
+    regimen: {
+      frequency: 'Daily, 1-2 focused sessions.',
+      setsAndReps: '5 repetitions per set; up to 3 sets.',
+      holdTime: 'Hold the lifted voice box for 2-3 seconds.',
+      restPeriod: 'Rest 30-45 seconds between repetitions.',
+      sessionDuration: '5-10 minutes.',
+      programDuration: '2-week technique block; continue only if the hold is accurate and safe.',
+      reviewCadence: 'SLP review within 1 week when first prescribed, then every 1-2 weeks.',
+      supervision: 'Requires clinician teaching because timing and laryngeal hold must be accurate.',
+      progressionRule: 'Increase hold quality before increasing repetitions; stop if breath holding causes strain.',
+      adherenceTarget: 'Track completed accurate holds, not just attempts.',
+      stopRules: ['Dizziness', 'Breath-holding distress', 'Pain with swallow', 'Persistent cough'],
+      protocolBasis: 'Skill-based swallow maneuver dosing with emphasis on timing accuracy, rest, and clinician feedback.',
+    },
     patientLanguage: 'Swallow, feel the voice box lift, hold it up for 2-3 seconds, then release.',
     targetImpairments: ['Hyolaryngeal elevation', 'UES opening', 'Swallow timing'],
     steps: [
@@ -573,6 +631,20 @@ export const HNC_EXERCISE_LIBRARY: ExerciseProtocol[] = [
     indication: 'Reduced airway closure or aspiration risk when cleared by clinician.',
     safety: 'Not for patients with cardiac instability unless medically cleared.',
     dosage: 'Use during prescribed boluses only.',
+    regimen: {
+      frequency: 'Use only for clinician-approved bolus trials or meal items.',
+      setsAndReps: 'Prescribe per bolus: breath hold, swallow, cough, reswallow if directed.',
+      holdTime: 'Comfortable breath hold through the swallow only.',
+      restPeriod: 'Pause and breathe normally between boluses.',
+      sessionDuration: 'Meal strategy or short supervised practice, not a fatigue drill.',
+      programDuration: 'Until instrumental or clinical reassessment changes airway strategy.',
+      reviewCadence: 'Review at every diet or liquid-level change.',
+      supervision: 'Requires SLP clearance; medical clearance is needed for cardiac instability.',
+      progressionRule: 'Progress only after airway safety is stable and cough clearance is effective.',
+      adherenceTarget: 'Use correctly for every prescribed bolus, not as extra repetitions.',
+      stopRules: ['Shortness of breath', 'Chest discomfort', 'Repeated aspiration signs', 'Confusion or inability to sequence steps'],
+      protocolBasis: 'Compensatory airway-protection protocol requiring patient selection, sequencing ability, and medical safety screening.',
+    },
     patientLanguage: 'Take a breath, hold it, swallow, cough, then breathe again.',
     targetImpairments: ['Airway closure', 'Cough clearance', 'Thin liquid safety'],
     steps: [
@@ -589,6 +661,20 @@ export const HNC_EXERCISE_LIBRARY: ExerciseProtocol[] = [
     indication: 'Trismus risk, reduced interincisal opening, or masseter/pterygoid tightness.',
     safety: 'Gentle stretch only. Stop with sharp pain, bleeding, or jaw locking.',
     dosage: '5 holds of 30 seconds, 3-5 times daily as prescribed.',
+    regimen: {
+      frequency: 'Daily, 3-5 brief sessions.',
+      setsAndReps: '5 holds per session.',
+      holdTime: '30-second comfortable stretch.',
+      restPeriod: 'Rest 30 seconds between holds.',
+      sessionDuration: '5-7 minutes.',
+      programDuration: '4-week range-of-motion block, then reassess jaw opening in mm.',
+      reviewCadence: 'Measure jaw opening weekly during active trismus management.',
+      supervision: 'Clinician sets safe stretch limit, especially after surgery or radiation fibrosis.',
+      progressionRule: 'Progress only within comfortable range and documented mouth opening tolerance.',
+      adherenceTarget: 'Complete at least 80% of scheduled holds and record pain response.',
+      stopRules: ['Sharp pain', 'Bleeding', 'Jaw locking', 'New wound pull or surgical site pain'],
+      protocolBasis: 'Range-of-motion dosing with measured jaw opening, comfort limits, and stop criteria.',
+    },
     patientLanguage: 'Open the mouth to a comfortable stretch and hold without forcing.',
     targetImpairments: ['Trismus', 'Jaw opening', 'Radiation fibrosis'],
     steps: [
@@ -605,6 +691,20 @@ export const HNC_EXERCISE_LIBRARY: ExerciseProtocol[] = [
     indication: 'Tongue weakness, deviation, reduced bolus control, or post-glossectomy compensation.',
     safety: 'Avoid excessive force on surgical areas. Use clinician-approved resistance only.',
     dosage: '3 sets of 10 pushes each side.',
+    regimen: {
+      frequency: 'Daily, 1-2 strengthening sessions.',
+      setsAndReps: '10 presses each side per set; 3 sets.',
+      holdTime: 'Hold each press 2-3 seconds.',
+      restPeriod: 'Rest 20-30 seconds between sides or sets.',
+      sessionDuration: '6-10 minutes.',
+      programDuration: '2-4 week strengthening block, then reassess tongue control and fatigue.',
+      reviewCadence: 'Review every 1-2 weeks or after surgical-site changes.',
+      supervision: 'Initial clinician instruction is required to avoid excess pressure on reconstructed tissue.',
+      progressionRule: 'Increase resistance only after accurate, pain-free lateral press on both sides.',
+      adherenceTarget: 'Track completed presses by side to avoid asymmetry.',
+      stopRules: ['Surgical-site pain', 'Bleeding', 'Ulcer irritation', 'Marked fatigue or cramping'],
+      protocolBasis: 'Progressive lingual strengthening with side-specific volume, rest, and tissue-protection limits.',
+    },
     patientLanguage: 'Press the tongue into the cheek while the finger gently resists from outside.',
     targetImpairments: ['Tongue strength', 'Bolus control', 'Lateralization'],
     steps: [
@@ -621,6 +721,20 @@ export const HNC_EXERCISE_LIBRARY: ExerciseProtocol[] = [
     indication: 'Reduced posterior tongue contact after glossectomy or flap reconstruction.',
     safety: 'Stop if throat pain increases or fatigue becomes excessive.',
     dosage: '3 sets of 20 sound pairs, twice daily.',
+    regimen: {
+      frequency: 'Twice daily articulation practice.',
+      setsAndReps: '20 sound pairs per set; 3 sets.',
+      holdTime: 'Slow, clear release for each /ka/, /ga/, or /nga/ target.',
+      restPeriod: 'Rest 45-60 seconds between sets.',
+      sessionDuration: '8-12 minutes.',
+      programDuration: '2-week motor speech practice block, then reassess intelligibility and fatigue.',
+      reviewCadence: 'Review weekly while changing sound, syllable, or word complexity.',
+      supervision: 'Clinician selects sound targets and confirms posterior tongue contact strategy.',
+      progressionRule: 'Progress from sounds to syllables to words only when clarity remains stable.',
+      adherenceTarget: 'Prioritize accurate repetitions over speed.',
+      stopRules: ['Throat pain increase', 'Voice strain', 'Excessive fatigue', 'Oral discomfort'],
+      protocolBasis: 'Motor speech practice organized by frequency, accurate repetitions, rest, and staged progression.',
+    },
     patientLanguage: 'Practice clear /ka/, /ga/, and /nga/ sounds slowly with strong back tongue contact.',
     targetImpairments: ['Velar consonants', 'Speech precision', 'Tongue-palate contact'],
     steps: [
@@ -637,6 +751,20 @@ export const HNC_EXERCISE_LIBRARY: ExerciseProtocol[] = [
     indication: 'Neck dissection, scar tightness, shoulder weakness, or postural guarding.',
     safety: 'Avoid pulling on drains, fresh wounds, or painful scar tissue.',
     dosage: '5 slow repetitions each direction, 2-3 times daily.',
+    regimen: {
+      frequency: 'Daily, 2-3 mobility sessions.',
+      setsAndReps: '5 slow repetitions in each prescribed direction.',
+      holdTime: 'Move slowly; hold end range only if comfortable and prescribed.',
+      restPeriod: 'Rest as needed between directions.',
+      sessionDuration: '5-8 minutes.',
+      programDuration: '4-week mobility block, then reassess neck/shoulder range and pain.',
+      reviewCadence: 'Review weekly after surgery or when scar tightness changes.',
+      supervision: 'Clinician confirms wound status, drain precautions, and safe shoulder range.',
+      progressionRule: 'Increase range gradually without pulling on fresh tissue or provoking pain.',
+      adherenceTarget: 'Track completion by direction and pain score.',
+      stopRules: ['Drain or wound pulling', 'Sharp scar pain', 'Dizziness', 'New swelling or neurological symptoms'],
+      protocolBasis: 'Post-operative mobility protocol with tissue precautions, measured tolerance, and gradual progression.',
+    },
     patientLanguage: 'Move the neck and shoulders slowly through a comfortable range.',
     targetImpairments: ['Scar mobility', 'Shoulder range', 'Posture'],
     steps: [
