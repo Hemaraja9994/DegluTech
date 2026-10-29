@@ -1,3 +1,5 @@
+import { EXTENDED_BLOCKS } from './clinicalExtensions.ts';
+
 export type HncSectionId =
   | 'command'
   | 'demographics'
@@ -31,6 +33,9 @@ export interface ClinicalField {
   required?: boolean;
   options?: string[];
   helper?: string;
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
 export interface ClinicalBlock {
@@ -135,7 +140,7 @@ export const HNC_PATIENT_SNAPSHOT: HncPatientSnapshot = {
   ],
 };
 
-export const HNC_CLINICAL_SECTIONS: ClinicalSection[] = [
+const BASE_CLINICAL_SECTIONS: ClinicalSection[] = [
   {
     id: 'command',
     order: 1,
@@ -511,6 +516,8 @@ export const HNC_CLINICAL_SECTIONS: ClinicalSection[] = [
     outputs: ['SLP report', 'Patient handout', 'Team handoff', 'Outcome dashboard'],
   },
 ];
+
+export const HNC_CLINICAL_SECTIONS: ClinicalSection[] = BASE_CLINICAL_SECTIONS.map(section => ({ ...section, blocks: [...section.blocks, ...(EXTENDED_BLOCKS[section.id] ?? [])] }));
 
 export const HNC_ICF_ITEMS: IcfHncItem[] = [
   { code: 'b250', domain: 'bodyFunction', name: 'Taste function', hncRelevance: 'Dysgeusia after radiation or chemotherapy affects intake.' },

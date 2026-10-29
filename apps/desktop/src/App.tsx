@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   Apple,
@@ -39,7 +39,15 @@ import {
 import { ReportErrorBoundary, ReportWorkspace } from './components/ReportWorkspace';
 import { ClinicianDashboard } from './components/ClinicianDashboard';
 import { DegluTechLogo } from './components/DegluTechLogo';
-import { ExerciseMotion } from './components/ExerciseMotion';
+import { ClinicalMeasures } from './components/ClinicalMeasures';
+import { WorkspaceNotice } from './components/WorkspaceNotice';
+import { ExerciseCatalogue } from './components/ExerciseCatalogue';
+import { PrescriptionRelease, PatientSessionLog, isReleased, readDoses } from './components/PrescriptionRelease';
+const ExerciseMotion = lazy(() => import('./components/ExerciseMotion').then(module => ({ default: module.ExerciseMotion })));
+function OptionalMotion({ exerciseId }: { exerciseId: 'jaw-stretch' | 'neck-shoulder-rom' }) {
+  const [open, setOpen] = useState(false);
+  return <details className="suite-motion" onToggle={event => setOpen(event.currentTarget.open)}><summary>Illustrative 3D prototype: not an anatomical demonstration</summary>{open && <Suspense fallback={<p role="status">Loading illustrative viewer...</p>}><ExerciseMotion exerciseId={exerciseId} /></Suspense>}</details>;
+}
 import { FloatingBadge, SectionHeader } from './components/ui/ClinicalPrimitives';
 import { T } from './theme';
 
@@ -168,6 +176,12 @@ export const App: React.FC = () => {
   const [storageReady, setStorageReady] = useState(false);
   const [storedAt, setStoredAt] = useState('Waiting for local draft restore');
 
+  useEffect(() => {
+    if (storageReady && fieldState.releaseLanguage !== patientLanguage) {
+      setFieldState(previous => ({ ...previous, releaseLanguage: patientLanguage }));
+    }
+  }, [storageReady, patientLanguage, fieldState.releaseLanguage]);
+
   const activeSection = HNC_CLINICAL_SECTIONS.find((section) => section.id === activeSectionId) ?? HNC_CLINICAL_SECTIONS[0];
   const activeSectionIndex = Math.max(0, HNC_CLINICAL_SECTIONS.findIndex((section) => section.id === activeSection.id));
   const previousSection = activeSectionIndex > 0 ? HNC_CLINICAL_SECTIONS[activeSectionIndex - 1] : undefined;
@@ -202,7 +216,7 @@ export const App: React.FC = () => {
           ? parsed.prescribedExerciseIds.filter((id) => knownExerciseIds.has(id))
           : [];
 
-        if (parsed.fieldState) setFieldState({ ...initialFieldState, ...parsed.fieldState });
+        if (parsed.fieldState && typeof parsed.fieldState === 'object' && !Array.isArray(parsed.fieldState)) setFieldState(Object.fromEntries(Object.entries(parsed.fieldState).filter(([, value]) => typeof value === 'string' || (Array.isArray(value) && value.every(item => typeof item === 'string')))));
         if (parsed.selectedExerciseId && knownExerciseIds.has(parsed.selectedExerciseId)) setSelectedExerciseId(parsed.selectedExerciseId);
         if (parsed.patientLanguage && isExerciseLanguageCode(parsed.patientLanguage)) setPatientLanguage(parsed.patientLanguage);
         if (Array.isArray(parsed.prescribedExerciseIds)) setPrescribedExerciseIds(restoredPrescription);
@@ -339,6 +353,11 @@ export const App: React.FC = () => {
           </div>
         </header>
 
+        <WorkspaceNotice backup={{ fieldState, prescribedExerciseIds, selectedExerciseId, patientLanguage }} onClear={() => {
+          window.localStorage.removeItem(WORKSPACE_STORAGE_KEY);
+          setFieldState({}); setPrescribedExerciseIds([]); setSelectedExerciseId('masako'); setPatientLanguage('en'); setSavedAt('Not saved this session');
+        }} />
+
         {activeSection.id !== 'command' && (
           <SectionNavigator
             activeSection={activeSection}
@@ -387,7 +406,7 @@ export const App: React.FC = () => {
         )}
 
         {activeSection.id === 'exercise' && (
-          <ExercisePrescription
+          <><PrescriptionRelease state={fieldState} ids={prescribedExerciseIds} update={patch => setFieldState(prev => ({ ...prev, ...patch }))} /><ExerciseCatalogue /><ExercisePrescription
             selectedExercise={selectedExercise}
             selectedExerciseId={selectedExerciseId}
             setSelectedExerciseId={setSelectedExerciseId}
@@ -397,12 +416,13 @@ export const App: React.FC = () => {
             onTogglePrescribedExercise={togglePrescribedExercise}
             storageReady={storageReady}
             storedAt={storedAt}
-          />
+          /></>
         )}
 
         {activeSection.id === 'patient' && (
           <PatientPortalPreview
             fieldState={fieldState}
+            update={patch => setFieldState(prev => ({ ...prev, ...patch }))}
             selectedExercise={selectedExercise}
             setSelectedExerciseId={setSelectedExerciseId}
             prescribedExerciseIds={prescribedExerciseIds}
@@ -594,6 +614,7 @@ function SectionWorkspace({
       />
 
       <div className="deglutech-block-grid" style={styles.blockGrid}>
+        <ClinicalMeasures section={section.id} values={fieldState} />
         {section.blocks.map((block) => (
           <section key={block.title} style={styles.panel}>
             <div style={styles.blockHeaderLine}>
@@ -730,7 +751,7 @@ function FieldControl({
     eat10: { min: 0, max: 40 }, pas: { min: 1, max: 8 },
     intelligibility: { min: 0, max: 100 },
   };
-  const range = bounds[field.id];
+  const range = field.min !== undefined && field.max !== undefined ? { min: field.min, max: field.max } : bounds[field.id];
   const numberValue = typeof value === 'string' && value !== '' ? Number(value) : undefined;
   const invalid = range && numberValue !== undefined && (numberValue < range.min || numberValue > range.max);
   return (
@@ -743,7 +764,7 @@ function FieldControl({
         style={styles.input}
         min={range?.min}
         max={range?.max}
-        step={field.kind === 'metric' ? 'any' : undefined}
+        step={field.step ?? (field.kind === 'metric' ? 'any' : undefined)}
         aria-invalid={invalid || undefined}
       />
       {invalid && <span role="alert" style={{ color: '#a12622', fontSize: 12 }}>Enter a value from {range.min} to {range.max}.</span>}
@@ -840,7 +861,7 @@ function ExercisePrescription({
 
           <RegimenSopCard exercise={selectedExercise} />
 
-          {(selectedExercise.id === 'jaw-stretch' || selectedExercise.id === 'neck-shoulder-rom') && <ExerciseMotion key={selectedExercise.id} exerciseId={selectedExercise.id} />}
+          {(selectedExercise.id === 'jaw-stretch' || selectedExercise.id === 'neck-shoulder-rom') && <OptionalMotion key={selectedExercise.id} exerciseId={selectedExercise.id} />}
 
           <ExercisePanels
             key={`${selectedExercise.id}-${patientLanguage}`}
@@ -1087,6 +1108,7 @@ function ExercisePanels({
 
 function PatientPortalPreview({
   fieldState,
+  update,
   selectedExercise,
   setSelectedExerciseId,
   prescribedExerciseIds,
@@ -1094,6 +1116,7 @@ function PatientPortalPreview({
   setActiveSectionId,
 }: {
   fieldState: FieldState;
+  update: (patch: FieldState) => void;
   selectedExercise: ExerciseProtocol;
   setSelectedExerciseId: (id: string) => void;
   prescribedExerciseIds: string[];
@@ -1106,8 +1129,11 @@ function PatientPortalPreview({
   const patientExercise = prescribedExercises.find((exercise) => exercise.id === selectedExercise.id) ?? prescribedExercises[0];
   const selectedLocalizedExercise = patientExercise && (localizedBundle.exercises[patientExercise.id] ?? exerciseTranslations.en.exercises[patientExercise.id]);
 
+  if (!isReleased(fieldState, prescribedExerciseIds)) return <section className="suite-panel"><h3>No current released prescription</h3><p>The clinician must review healing findings, document clearance and set the individual dose before releasing this plan.</p><button type="button" onClick={() => setActiveSectionId('exercise')}>Review prescription</button></section>;
+
   return (
     <div style={styles.workspaceGrid}>
+      <PatientSessionLog state={fieldState} ids={prescribedExerciseIds} update={update} />
       <SectionHeader
         eyebrow="Patient app surface"
         title="Daily exercise queue, symptom check-in, and caregiver-safe education."
@@ -1123,7 +1149,7 @@ function PatientPortalPreview({
         <section className="deglutech-patient-phone" style={styles.patientPhone}>
           <div style={styles.phoneTop} />
           <h3 style={styles.phoneTitle}>Today&apos;s exercises</h3>
-          <p style={styles.phoneSub}>{localizedBundle.nativeName} / {HNC_PATIENT_SNAPSHOT.currentRoute}</p>
+          <p style={styles.phoneSub}>{localizedBundle.nativeName} / {String(fieldState.route || 'Route not recorded')}</p>
           {prescribedExercises.map((exercise) => {
             const localizedExercise = localizedBundle.exercises[exercise.id] ?? exerciseTranslations.en.exercises[exercise.id];
 
@@ -1132,9 +1158,8 @@ function PatientPortalPreview({
                 <span style={styles.homeCheck} />
                 <span>
                   <strong>{localizedExercise.title}</strong>
-                  <small style={styles.phoneTaskDose}>{localizedExercise.dosage}</small>
-                  <small style={styles.phoneTaskDose}>{exercise.regimen.frequency}</small>
-                  <small style={styles.phoneTaskDose}>Session time: {exercise.regimen.sessionDuration}</small>
+                  <small style={styles.phoneTaskDose}>{readDoses(fieldState)[exercise.id]?.instructions}</small>
+                  <small style={styles.phoneTaskDose}>{readDoses(fieldState)[exercise.id]?.sessionsPerDay} sessions/day</small>
                 </span>
               </button>
             );
@@ -1165,19 +1190,19 @@ function PatientPortalPreview({
           <div style={styles.phoneRegimenGrid}>
             <div style={styles.phoneRegimenGridItem}>
               <span>Frequency</span>
-              <strong>{patientExercise.regimen.frequency}</strong>
+              <strong>{readDoses(fieldState)[patientExercise.id]?.sessionsPerDay} sessions/day</strong>
             </div>
             <div style={styles.phoneRegimenGridItem}>
               <span>How much</span>
-              <strong>{patientExercise.regimen.setsAndReps}</strong>
+              <strong>{readDoses(fieldState)[patientExercise.id]?.instructions}</strong>
             </div>
             <div style={styles.phoneRegimenGridItem}>
-              <span>Session time</span>
-              <strong>{patientExercise.regimen.sessionDuration}</strong>
+              <span>Stop and contact plan</span>
+              <strong>{String(fieldState.painLimit || '')}</strong>
             </div>
             <div style={styles.phoneRegimenGridItem}>
               <span>Review</span>
-              <strong>{patientExercise.regimen.reviewCadence}</strong>
+              <strong>{String(fieldState.followUp || 'Ask your clinician')}</strong>
             </div>
           </div>
           <ExercisePanels

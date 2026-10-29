@@ -1,0 +1,1778 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0-review",
+  "accent": "#0f8ea8",
+  "reviewRequired": true,
+  "exercises": [
+    {
+      "id": "masako",
+      "name": {
+        "en": "Masako / tongue-hold swallow",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "tongue",
+      "target": "Tongue base and pharyngeal coordination",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "effortful-swallow",
+      "name": {
+        "en": "Effortful swallow",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "swallow",
+      "target": "Swallowing effort",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "mendelsohn",
+      "name": {
+        "en": "Mendelsohn manoeuvre",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "swallow",
+      "target": "Hyolaryngeal elevation timing",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "supraglottic",
+      "name": {
+        "en": "Supraglottic swallow",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "airway",
+      "target": "Airway-protection sequence",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "jaw-stretch",
+      "name": {
+        "en": "Active jaw opening",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "jaw",
+      "target": "Mandibular opening",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "lingual-resistance",
+      "name": {
+        "en": "Lingual resistance at cheek",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "tongue",
+      "target": "Lingual strength",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "velar-drills",
+      "name": {
+        "en": "Back-tongue speech drills",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "speech",
+      "target": "Posterior articulatory contact",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "neck-shoulder-rom",
+      "name": {
+        "en": "Neck and shoulder range of motion",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "neck",
+      "target": "Cervical and shoulder mobility",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": true,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "jaw-lateral",
+      "name": {
+        "en": "Lateral jaw excursion",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "jaw",
+      "target": "Mandibular excursion",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "jaw-protrusion",
+      "name": {
+        "en": "Jaw protrusion",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "jaw",
+      "target": "Mandibular translation",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "jaw-stack",
+      "name": {
+        "en": "Passive stretch with tongue depressors",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "jaw",
+      "target": "Mandibular range",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "jaw-device",
+      "name": {
+        "en": "Passive stretch with a jaw device",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "jaw",
+      "target": "Mandibular range",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "lip-seal",
+      "name": {
+        "en": "Lip seal / press",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "lips",
+      "target": "Labial closure",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "pucker-smile",
+      "name": {
+        "en": "Pucker-smile alternation",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "lips",
+      "target": "Labial range",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "cheek-puff",
+      "name": {
+        "en": "Cheek puff",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "lips",
+      "target": "Buccal control",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "tongue-protrusion",
+      "name": {
+        "en": "Tongue protrusion",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "tongue",
+      "target": "Lingual range",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "tongue-elevation",
+      "name": {
+        "en": "Tongue elevation",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "tongue",
+      "target": "Lingual range",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "tongue-lateral",
+      "name": {
+        "en": "Tongue lateralisation",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "tongue",
+      "target": "Lingual range",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "tongue-retraction",
+      "name": {
+        "en": "Tongue retraction",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "tongue",
+      "target": "Lingual range",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "palate-press",
+      "name": {
+        "en": "Tongue-to-palate press",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "tongue",
+      "target": "Lingual strength",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "super-supraglottic",
+      "name": {
+        "en": "Super-supraglottic swallow",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "airway",
+      "target": "Airway-protection sequence",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "shaker",
+      "name": {
+        "en": "Shaker head-lift",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "neck",
+      "target": "Suprahyoid loading",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "ctar",
+      "name": {
+        "en": "Chin tuck against resistance (CTAR)",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "neck",
+      "target": "Suprahyoid loading",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "pitch-glide",
+      "name": {
+        "en": "Falsetto / pitch glide",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "voice",
+      "target": "Laryngeal elevation",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "yawn",
+      "name": {
+        "en": "Tongue-base retraction: yawn",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "tongue",
+      "target": "Tongue-base movement",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "gargle",
+      "name": {
+        "en": "Tongue-base retraction: gargle",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "tongue",
+      "target": "Tongue-base movement",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "emst",
+      "name": {
+        "en": "Expiratory muscle strength training (EMST)",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "respiratory",
+      "target": "Expiratory pressure",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "chin-tuck",
+      "name": {
+        "en": "Chin-tuck posture",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "posture",
+      "target": "Compensatory positioning",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "head-turn",
+      "name": {
+        "en": "Head-turn posture",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "posture",
+      "target": "Compensatory positioning",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    },
+    {
+      "id": "head-tilt",
+      "name": {
+        "en": "Head-tilt posture",
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "category": "posture",
+      "target": "Compensatory positioning",
+      "indications": "Individual clinical indication to be documented by the treating SLP.",
+      "contraindications": [
+        "Unhealed fistula or fresh flap requires individual surgical/SLP clearance.",
+        "Patient-specific contraindications await exercise-specific review."
+      ],
+      "stopRules": [
+        "Stop and contact the clinician for pain, choking, coughing during swallowing or breathing distress."
+      ],
+      "defaultDose": {
+        "repetitions": null,
+        "sets": null,
+        "frequencyPerDay": null,
+        "holdSeconds": null
+      },
+      "evidenceNote": "Candidate catalogue entry; exercise-specific evidence and indications require clinician verification. No universal dose is assigned.",
+      "coPrescribeWithPhysiotherapy": false,
+      "clinicalStatus": "awaiting-clinician-verification",
+      "translationStatus": "awaiting-native-speaker-SLP-verification",
+      "assets": {
+        "external": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "sagittal": {
+          "mp4_1080": null,
+          "mp4_720": null,
+          "webm_1080": null,
+          "webm_720": null,
+          "poster": null,
+          "steps": null
+        },
+        "glb": null,
+        "blend": null,
+        "captions": {
+          "en": null,
+          "kn": null,
+          "ml": null,
+          "te": null,
+          "hi": null,
+          "ta": null
+        }
+      }
+    }
+  ]
+}

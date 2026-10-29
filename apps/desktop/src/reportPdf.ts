@@ -7,8 +7,8 @@ import {
   generateSmartDefaults,
   type FieldState,
   type IcfTableRow,
-} from './reportEngine';
-import { HNC_PATIENT_SNAPSHOT } from '../../../packages/core/src/hncClinicalModel';
+} from './reportEngine.ts';
+import { HNC_CLINICAL_SECTIONS } from '../../../packages/core/src/hncClinicalModel.ts';
 
 export interface ReportFacility {
   facilityName: string;
@@ -47,7 +47,7 @@ const renderIcfRows = (rows: IcfTableRow[]): string =>
           <div class="muted">${escapeHtml(row.domain)}</div>
         </td>
         <td class="center">
-          <div class="qualifier-pill q-${row.qualifier}">${row.qualifier}</div>
+          <div class="qualifier-pill q-${row.qualifier}">${row.qualifier < 0 ? 'Not recorded' : row.qualifier}</div>
           <div class="muted small">${escapeHtml(row.severityLabel)}</div>
         </td>
         <td class="manifestation">${escapeHtml(row.manifestation)}</td>
@@ -81,14 +81,22 @@ export function buildReportHtml(
     completion.reduce((sum, section) => sum + section.percent, 0) / Math.max(1, completion.length)
   );
 
-  const evaluationDate = String(fieldState.evaluationDate || generatedAt.toISOString().slice(0, 10));
+  const patientId = String(fieldState.studyId || 'Not recorded');
+  const evaluationDate = String(fieldState.evaluationDate || 'Not recorded');
+  const findings = HNC_CLINICAL_SECTIONS.filter(section => !['command', 'exercise', 'patient', 'report'].includes(section.id)).map(section => {
+    const rows = section.blocks.flatMap(block => block.fields).filter(field => {
+      const value = fieldState[field.id];
+      return Array.isArray(value) ? value.length > 0 : typeof value === 'string' && value.trim().length > 0;
+    }).map(field => `<tr><td style="padding:6px;border-bottom:1px solid #ddd">${escapeHtml(field.label)}</td><td style="padding:6px;border-bottom:1px solid #ddd;white-space:pre-wrap;overflow-wrap:anywhere">${escapeHtml(Array.isArray(fieldState[field.id]) ? (fieldState[field.id] as string[]).join(', ') : String(fieldState[field.id]))}</td></tr>`).join('');
+    return rows ? `<h3 class="section-title">${escapeHtml(section.label)}</h3><table style="width:100%;border-collapse:collapse">${rows}</table>` : '';
+  }).join('');
   const tnm = `${fieldState.tCategory || '—'} ${fieldState.nCategory || '—'} ${fieldState.mCategory || '—'}`;
 
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>DegluTech Diagnostic Report — ${escapeHtml(String(HNC_PATIENT_SNAPSHOT.patientId))}</title>
+<title>DegluTech Review Report — ${escapeHtml(patientId)}</title>
 <style>
   @page { size: A4; margin: 14mm 14mm 18mm 14mm; }
   * { box-sizing: border-box; }
@@ -347,15 +355,15 @@ export function buildReportHtml(
         <div class="subtitle" style="margin-top:6px;font-weight:700;color:#0f172a">Speech-Language Pathology Diagnostic Report — Head &amp; Neck Cancer Rehabilitation</div>
       </div>
       <div class="meta">
-        <strong>Report ID:</strong> DTR-${escapeHtml(String(HNC_PATIENT_SNAPSHOT.patientId))}-${generatedAt.getTime().toString(36).toUpperCase()}<br />
+        <strong>Report ID:</strong> DTR-${escapeHtml(patientId)}-${generatedAt.getTime().toString(36).toUpperCase()}<br />
         <strong>Generated:</strong> ${generatedAt.toLocaleString()}<br />
         <strong>Evaluation:</strong> ${escapeHtml(evaluationDate)}
       </div>
     </header>
 
     <section class="demographics">
-      <div class="cell"><span class="label">Patient ID</span><span class="value">${escapeHtml(String(HNC_PATIENT_SNAPSHOT.patientId))}</span></div>
-      <div class="cell"><span class="label">Age / Sex</span><span class="value">${escapeHtml(String(fieldState.age || HNC_PATIENT_SNAPSHOT.age))} / ${escapeHtml(String(fieldState.gender || '—'))}</span></div>
+      <div class="cell"><span class="label">Study ID</span><span class="value">${escapeHtml(patientId)}</span></div>
+      <div class="cell"><span class="label">Age / Sex</span><span class="value">${escapeHtml(String(fieldState.age || 'Not recorded'))} / ${escapeHtml(String(fieldState.gender || 'Not recorded'))}</span></div>
       <div class="cell"><span class="label">Primary Site</span><span class="value">${escapeHtml(String(fieldState.tumorSite || '—'))}</span></div>
       <div class="cell"><span class="label">AJCC TNM</span><span class="value">${escapeHtml(tnm)}</span></div>
       <div class="cell"><span class="label">Care Phase</span><span class="value">${escapeHtml(String(fieldState.phase || '—'))}</span></div>
@@ -426,9 +434,11 @@ export function buildReportHtml(
     </div>
     <div class="completion-text">
       <span>Sections 1–12 captured: ${completion.filter((s) => s.status === 'complete').length} of ${completion.length} complete</span>
-      <span>Overall data quality: ${overallComplete}%</span>
+      <span>Field completion: ${overallComplete}% (not clinical validity)</span>
     </div>
 
+    <h2 class="section-title">Recorded Findings Appendix</h2>
+    ${findings || '<p>No assessment fields recorded.</p>'}
     <section class="signoff">
       <div>
         <p style="margin:0 0 6px;font-weight:800;color:#0f172a">Clinician Sign-off</p>
@@ -445,8 +455,7 @@ export function buildReportHtml(
     </section>
 
     <p class="footer">
-      Generated by DegluTech — Head &amp; Neck Cancer SLP Rehabilitation Workspace. This report is intended for clinical documentation and inter-disciplinary
-      communication. Verify all auto-suggested fields before deposit into the EHR.
+      DegluTech 0.2.0-review. Fictitious-data review build. Recorded findings require clinician verification. No electronic signature or EHR submission is performed.
     </p>
   </div>
 </body>
@@ -458,10 +467,11 @@ export function exportDiagnosticReport(
   facility: ReportFacility = DEFAULT_FACILITY
 ): boolean {
   const html = buildReportHtml(fieldState, facility);
-  const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=900,height=1200');
+  const printWindow = window.open('', '_blank', 'width=900,height=1200');
   if (!printWindow) {
     return false;
   }
+  printWindow.opener = null;
   printWindow.document.open();
   printWindow.document.write(html);
   printWindow.document.close();

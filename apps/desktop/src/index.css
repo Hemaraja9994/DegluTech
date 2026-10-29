@@ -454,3 +454,40 @@
 @keyframes guide-enter { from { opacity: .5; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 600px) { .exercise-guide-heading { align-items: flex-start; } .exercise-guide-tab { padding: 10px 5px; flex-direction: column; text-align: center; } .exercise-guide-tab strong { font-size: 11px; } .exercise-guide-content { padding: 22px 16px; gap: 14px; } }
 @media (prefers-reduced-motion: reduce) { .exercise-guide-content { animation: none; } }
+
+/* Review-release controls share a compact, mobile-first form rhythm. */
+.suite-panel, .suite-catalogue, .suite-motion { min-width: 0; margin: 16px 0; padding: 20px 0; border-top: 1px solid #d5e0e5; color: #253b47; }
+.suite-panel h3, .suite-catalogue h3 { margin: 0 0 16px; font-size: 18px; }
+.suite-panel p, .suite-catalogue p { line-height: 1.6; overflow-wrap: anywhere; }
+.suite-panel label { display: grid; gap: 6px; margin: 12px 0; font-size: 14px; font-weight: 600; }
+.suite-panel input, .suite-panel select, .suite-panel textarea, .suite-toolbar input, .suite-toolbar select { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid #a9bdc7; border-radius: 6px; background: #fff; color: #253b47; font: inherit; }
+.suite-panel textarea { min-height: 100px; resize: vertical; }
+.suite-panel button, .suite-catalogue-list button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 14px; border: 1px solid #9fb4bf; border-radius: 6px; background: #fff; color: #174c59; cursor: pointer; font: inherit; font-weight: 600; overflow-wrap: anywhere; }
+.suite-panel button:disabled { cursor: not-allowed; color: #62727c; background: #edf1f3; }
+.suite-panel button:not(:disabled):hover, .suite-catalogue-list button:hover { border-color: #0f8ea8; background: #eaf5f8; }
+.suite-dose-grid, .suite-session-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.suite-dose-grid > div, .suite-session-grid > div { min-width: 0; padding: 16px 0; border-bottom: 1px solid #d5e0e5; }
+.suite-measures { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 24px; padding: 16px; background: #e8f3f5; border-left: 3px solid #0f8ea8; }
+.suite-measures span, .suite-measures strong { display: block; }
+.suite-measures span { margin-bottom: 4px; font-size: 13px; color: #425c69; }
+.suite-catalogue summary, .suite-motion summary { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; font-weight: 600; }
+.suite-toolbar { display: flex; gap: 12px; margin: 12px 0; }
+.suite-toolbar > label { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.suite-toolbar select { width: auto; max-width: 45%; }
+.suite-catalogue-layout { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(0, 2fr); gap: 24px; }
+.suite-catalogue-list { display: grid; align-content: start; gap: 6px; max-height: 380px; overflow-y: auto; padding: 3px; }
+.suite-catalogue-list button { justify-content: flex-start; text-align: left; }
+.suite-catalogue-list button[aria-pressed="true"] { border-color: #0f8ea8; background: #e8f3f5; }
+.suite-review { padding: 12px; background: #fff6e4; border-left: 3px solid #8a6318; color: #624715; }
+.suite-data { margin: 16px 0; padding: 12px 16px; background: #fff8e9; border: 1px solid #e2d3ac; border-radius: 6px; color: #624715; font-size: 14px; }
+.suite-data summary { cursor: pointer; min-height: 32px; font-weight: 600; }
+.suite-data-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.suite-data-actions button { min-height: 44px; padding: 8px 12px; color: #253b47; background: white; border: 1px solid #a9bdc7; border-radius: 6px; cursor: pointer; }
+:focus-visible { outline: 3px solid #0f8ea8; outline-offset: 3px; }
+@media (max-width: 680px) {
+  .suite-dose-grid, .suite-session-grid, .suite-catalogue-layout { grid-template-columns: minmax(0, 1fr); }
+  .suite-catalogue-list { max-height: 220px; }
+  .suite-toolbar { flex-direction: column; }
+  .suite-toolbar select { width: 100%; max-width: none; }
+  .suite-panel, .suite-catalogue { padding: 16px 0; }
+}

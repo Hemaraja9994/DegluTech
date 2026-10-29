@@ -38,10 +38,10 @@ interface ReportWorkspaceProps {
   onJump: (sectionId: HncSectionId) => void;
 }
 
-const SEVERITY_OPTIONS: SeverityTier[] = ['None', 'Mild', 'Moderate', 'Severe', 'Profound'];
+const SEVERITY_OPTIONS: SeverityTier[] = ['Unknown', 'None', 'Mild', 'Moderate', 'Severe', 'Profound'];
 
 const formatSourceLabel = (source: 'clinician' | 'auto'): string =>
-  source === 'auto' ? 'AUTO' : 'CLINICIAN';
+  source === 'auto' ? 'NOT RECORDED' : 'CLINICIAN';
 
 export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   fieldState,
@@ -92,14 +92,14 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
     <div style={styles.workspaceGrid}>
       <SectionHeader
         eyebrow="Summary, validation, and handoff"
-        title={draft.slpDiagnosis}
-        description="Smart defaults pre-populate this section from oncology, OPME, and swallow data. Review and apply before exporting the diagnostic report for EHR deposit or onco-surgical referral."
+        title={draft.slpDiagnosis || 'Clinical report'}
+        description="Review clinician-entered findings and decisions before exporting. Field completion does not establish clinical readiness."
         icon={<ClipboardCheck size={20} />}
         accent="#2563eb"
         action={(
           <div style={styles.introActions}>
           <button type="button" style={styles.iconPillSecondary} onClick={applyAllDefaults}>
-            <Sparkles size={16} /> Apply all smart defaults
+            <ClipboardCheck size={16} /> Preserve recorded entries
           </button>
           <button type="button" style={styles.iconPillPrimary} onClick={handleExportPdf}>
             <FileDown size={16} /> Export diagnostic report
@@ -147,7 +147,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
           <ExecCell label="Diet route" value={summary.dietRoute} />
           <ExecCell label="Texture / route plan" value={summary.textureGuidance} wide />
           <ExecCell label="Primary concerns" value={summary.primaryConcerns.join(' • ')} wide />
-          <ExecCell label="Patient ID" value={HNC_PATIENT_SNAPSHOT.patientId} />
+          <ExecCell label="Study ID" value={String(fieldState.studyId || 'Not recorded')} />
           <ExecCell label="TNM" value={`${fieldState.tCategory ?? '—'} ${fieldState.nCategory ?? '—'} ${fieldState.mCategory ?? '—'}`} />
         </div>
       </section>
@@ -192,7 +192,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
                   </td>
                   <td style={{ ...styles.icfTd, textAlign: 'center' }}>
                     <span style={{ ...styles.qualifierPill, background: qualifierColor(row.qualifier) }}>
-                      {row.qualifier}
+                      {row.qualifier < 0 ? '\u2014' : row.qualifier}
                     </span>
                     <div style={styles.icfMutedSmall}>{row.severityLabel}</div>
                   </td>
@@ -236,7 +236,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
       <section className="deglutech-signoff-panel" style={styles.signoffPanel}>
         <div>
           <p style={styles.overline}>Clinician sign-off (PDF deposit)</p>
-          <h3 style={styles.panelTitle}>Authorize and deposit to EHR</h3>
+          <h3 style={styles.panelTitle}>Manual review and signature</h3>
           <p style={styles.introText}>
             The exported PDF includes a medical header, demographics, executive summary, ICF table, and
             structured recommendations. Sign before depositing to the patient chart or routing to oncology.
@@ -247,7 +247,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
           <div>
             <strong style={{ color: '#0f172a' }}>[Clinician Name]</strong>
             <div style={styles.signoffMeta}>M.Sc. (SLP) · RCI / ISHA No. ________</div>
-            <div style={styles.signoffMeta}>Confirm electronic signature in the PDF preview window.</div>
+            <div style={styles.signoffMeta}>Sign the exported document using your approved clinical workflow. No electronic signature or EHR submission is performed here.</div>
           </div>
         </div>
       </section>
@@ -286,13 +286,13 @@ function ValidationPanel({
           <p style={styles.overline}>Pre-publication validation</p>
           <h3 style={styles.panelTitle}>Sections 1–12 readiness</h3>
           <p style={styles.panelSubtitle}>
-            {sectionsReady} of {sectionsTotal} sections complete. Overall data quality: <strong>{completion}%</strong>.
+            {sectionsReady} of {sectionsTotal} sections filled. Field completion: <strong>{completion}%</strong>. This does not measure clinical validity.
             Click any block to jump back and complete it.
           </p>
         </div>
         <div style={styles.readinessBadge(sectionsReady === sectionsTotal)}>
           {sectionsReady === sectionsTotal ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
-          {sectionsReady === sectionsTotal ? 'Ready for sign-off' : `${sectionsTotal - sectionsReady} need review`}
+          {sectionsReady === sectionsTotal ? 'Clinician review required' : `${sectionsTotal - sectionsReady} have missing fields`}
         </div>
       </div>
 
@@ -339,10 +339,10 @@ function ValidationPanel({
         <div style={styles.warnBanner}>
           <AlertTriangle size={18} color="#b45309" />
           <div>
-            <strong>Severity vs. ICF qualifier mismatch detected.</strong>
+            <strong>Clinical interpretation required</strong>
             <p style={styles.warnText}>{correlation.mismatchReason}</p>
             <p style={styles.warnSub}>
-              Recommended severity based on instrumental assessment: <strong>{correlation.recommendedSeverity}</strong>
+              Recorded clinician severity: <strong>{correlation.recommendedSeverity}</strong>
             </p>
           </div>
         </div>
@@ -383,11 +383,10 @@ function SmartDefaultsPanel({
     <section style={styles.panel}>
       <div className="deglutech-panel-header" style={styles.panelHeader}>
         <div>
-          <p style={styles.overline}>Smart defaults &amp; clinical authoring</p>
+          <p style={styles.overline}>Clinical authoring</p>
           <h3 style={styles.panelTitle}>Clinical impression</h3>
           <p style={styles.panelSubtitle}>
-            Suggested values are derived from oncology staging, swallow safety, OPME, and ICF qualifiers.
-            Override any field; clinician edits are preserved.
+            Diagnosis, severity, treatment and follow-up are entered by the clinician. The app does not infer them from other scores.
           </p>
         </div>
         <Info size={18} color="#1d4ed8" />
@@ -410,6 +409,7 @@ function SmartDefaultsPanel({
 
               {kind === 'select' ? (
                 <select
+                  aria-label={label}
                   value={currentValue || draftValue}
                   onChange={(event) =>
                     setFieldState((prev) => ({ ...prev, [key as string]: event.target.value }))
@@ -424,6 +424,7 @@ function SmartDefaultsPanel({
                 </select>
               ) : (
                 <textarea
+                  aria-label={label}
                   value={currentValue}
                   placeholder={draftValue}
                   onChange={(event) =>
@@ -488,6 +489,7 @@ function RecommendationCard({
 }
 
 const qualifierColor = (value: number): string => {
+  if (value < 0) return '#64748b';
   if (value >= 4) return '#dc2626';
   if (value >= 3) return '#ea580c';
   if (value >= 2) return '#ca8a04';

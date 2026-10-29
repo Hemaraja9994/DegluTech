@@ -8,6 +8,9 @@
     "packages/*"
   ],
   "scripts": {
+    "test:clinical": "node --experimental-strip-types --test tests/clinical.test.ts",
+    "build:web": "corepack pnpm --filter @laryngoos/desktop run build:web",
+    "deploy:web": "corepack pnpm run test:clinical && corepack pnpm run build:web && corepack pnpm --filter @laryngoos/desktop run deploy",
     "build": "corepack pnpm -r --if-present --sort run build",
     "dev": "corepack pnpm -r --parallel --if-present run dev",
     "lint": "corepack pnpm -r --if-present run lint",
