@@ -491,3 +491,35 @@
   .suite-toolbar select { width: 100%; max-width: none; }
   .suite-panel, .suite-catalogue { padding: 16px 0; }
 }
+
+/* Exercise animations (schematic SVG, no WebGL) */
+.exanim { margin: 18px 0; padding: 14px; border: 1px solid #dce5ea; border-radius: 10px; background: #fff; }
+.exanim-views { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.exanim figure { margin: 0; }
+.exanim-frame { position: relative; }
+.exanim-svg { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; border-radius: 10px; }
+.exanim figcaption { margin-top: 6px; text-align: center; font-size: 13px; color: #526775; }
+.exanim-hold { position: absolute; top: 10px; right: 10px; width: 52px; height: 52px; }
+.exanim-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.exanim-controls button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 44px; min-height: 44px; padding: 8px 12px; background: #fff; border: 1px solid #c7d8d8; border-radius: 8px; color: #1c5050; font-weight: 600; cursor: pointer; }
+.exanim-controls button[aria-pressed="true"] { background: #0f8ea8; border-color: #0f8ea8; color: #fff; }
+.exanim-controls button:focus-visible { outline: 3px solid #0f8ea8; outline-offset: 2px; }
+.exanim-phases { display: inline-flex; gap: 6px; margin-left: auto; }
+.exanim-note { margin: 10px 0 0; font-size: 12px; color: #795320; }
+@media (max-width: 560px) { .exanim { padding: 10px; } .exanim-phases { margin-left: 0; } }
+
+/* ---- Clinical tool suite ---- */
+@keyframes ts-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.ts-root button:focus-visible, .ts-overlay button:focus-visible, .ts-root input:focus-visible { outline: 2px solid #118aa3; outline-offset: 2px; }
+.ts-root label:focus-within { border-color: #118aa3; box-shadow: 0 0 0 3px #dff5f8; }
+.ts-card { transition: border-color .15s, box-shadow .15s, transform .15s; }
+.ts-card:hover { border-color: rgba(17,138,163,.45) !important; box-shadow: 0 6px 18px rgba(16,32,47,.08); transform: translateY(-1px); }
+.ts-row:hover { background: #f8fbfd !important; }
+.ts-primary:not(:disabled):hover { background: #07566b !important; }
+@media (prefers-reduced-motion: reduce) { .ts-root *, .ts-overlay * { animation: none !important; transition: none !important; } }
+@media print {
+  body.ts-print #root { display: none !important; }
+  body.ts-print .ts-overlay { position: static !important; background: #fff !important; padding: 0 !important; overflow: visible !important; }
+  body.ts-print .ts-sheet { box-shadow: none !important; border-radius: 0 !important; max-width: none !important; }
+  body.ts-print .ts-noprint { display: none !important; }
+}

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "release": "0.2.0-review",
+  "release": "0.3.0-review",
   "accent": "#0f8ea8",
   "reviewRequired": true,
   "exercises": [
@@ -61,6 +61,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright with your shoulders relaxed and chin level."
+          },
+          {
+            "cue": "Hold the tongue",
+            "instruction": "Rest the tip of your tongue gently between your front teeth."
+          },
+          {
+            "cue": "Swallow",
+            "instruction": "Swallow your saliva firmly while the tongue stays gently held, then relax."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "masako",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -120,6 +150,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright with your shoulders relaxed."
+          },
+          {
+            "cue": "Press the tongue",
+            "instruction": "Press your whole tongue firmly up against the roof of your mouth."
+          },
+          {
+            "cue": "Squeeze and swallow",
+            "instruction": "Swallow hard, squeezing all your throat muscles, then relax."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "effortful-swallow",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -179,6 +239,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright and place a finger lightly on your voice box if your clinician advises."
+          },
+          {
+            "cue": "Swallow and lift",
+            "instruction": "Swallow and feel your voice box rise to its highest point."
+          },
+          {
+            "cue": "Hold, then release",
+            "instruction": "Keep it lifted by holding the squeeze for the time your clinician advises, then relax."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "mendelsohn",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -238,6 +328,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Breathe in and hold",
+            "instruction": "Take a breath and hold it firmly to close your airway."
+          },
+          {
+            "cue": "Swallow",
+            "instruction": "Swallow while still holding your breath."
+          },
+          {
+            "cue": "Cough and swallow",
+            "instruction": "Cough straight after the swallow, then swallow again before breathing normally."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "supraglottic",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -297,6 +417,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright and relax your face and jaw."
+          },
+          {
+            "cue": "Open wide and hold",
+            "instruction": "Open your mouth as wide as is comfortable until you feel a gentle stretch, and hold."
+          },
+          {
+            "cue": "Close slowly",
+            "instruction": "Close your mouth slowly and rest before the next repetition."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "jaw-stretch",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -356,6 +506,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Get ready",
+            "instruction": "Open your mouth slightly and hold a clean tongue depressor at your lips as your clinician showed you."
+          },
+          {
+            "cue": "Push and hold",
+            "instruction": "Push the tip of your tongue firmly against it and hold."
+          },
+          {
+            "cue": "Relax",
+            "instruction": "Relax your tongue and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "lingual-resistance",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -415,6 +595,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright and take a comfortable breath."
+          },
+          {
+            "cue": "Say 'ka'",
+            "instruction": "Repeat 'ka-ka-ka' clearly, lifting the back of your tongue each time."
+          },
+          {
+            "cue": "Vary the sound",
+            "instruction": "Repeat with 'ga' or 'kaa' as your clinician advises, then rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "velar-drills",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -474,6 +684,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Turn",
+            "instruction": "Slowly turn your head to look over one shoulder, then the other."
+          },
+          {
+            "cue": "Tilt",
+            "instruction": "Tilt your ear gently towards each shoulder."
+          },
+          {
+            "cue": "Shrug",
+            "instruction": "Lift your shoulders towards your ears and lower them slowly."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "neck-shoulder-rom",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -533,6 +773,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Open slightly",
+            "instruction": "Part your teeth slightly."
+          },
+          {
+            "cue": "Slide to one side",
+            "instruction": "Slide your lower jaw to one side and hold."
+          },
+          {
+            "cue": "Slide to the other side",
+            "instruction": "Return to the centre, then slide to the other side and hold."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "jaw-lateral",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -592,6 +862,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Open slightly",
+            "instruction": "Part your teeth slightly."
+          },
+          {
+            "cue": "Jaw forward",
+            "instruction": "Push your lower jaw forward so your lower teeth move in front of your upper teeth, and hold."
+          },
+          {
+            "cue": "Return",
+            "instruction": "Bring your jaw back slowly and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "jaw-protrusion",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -651,6 +951,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Place the stack",
+            "instruction": "Place the stack of clean tongue depressors between your front teeth as your clinician showed you."
+          },
+          {
+            "cue": "Stretch and hold",
+            "instruction": "Open around the stack until you feel a gentle stretch, and hold."
+          },
+          {
+            "cue": "Rest",
+            "instruction": "Relax and rest before repeating."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "jaw-stack",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -710,6 +1040,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Position the device",
+            "instruction": "Place the jaw-stretching device between your teeth as your clinician showed you."
+          },
+          {
+            "cue": "Stretch and hold",
+            "instruction": "Open the device gently until you feel a stretch, and hold."
+          },
+          {
+            "cue": "Release",
+            "instruction": "Release slowly and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "jaw-device",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -769,6 +1129,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Relax",
+            "instruction": "Sit upright with your face relaxed."
+          },
+          {
+            "cue": "Press the lips",
+            "instruction": "Press your lips firmly together and hold."
+          },
+          {
+            "cue": "Relax",
+            "instruction": "Release and relax your lips."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "lip-seal",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -828,6 +1218,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Relax",
+            "instruction": "Sit upright with your face relaxed."
+          },
+          {
+            "cue": "Pucker",
+            "instruction": "Push your lips forward into a tight kiss and hold."
+          },
+          {
+            "cue": "Smile",
+            "instruction": "Stretch your lips into a wide smile and hold, then relax."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "pucker-smile",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -887,6 +1307,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Relax",
+            "instruction": "Sit upright with your face relaxed."
+          },
+          {
+            "cue": "Puff and hold",
+            "instruction": "Close your lips tightly, fill your cheeks with air and hold without letting it escape."
+          },
+          {
+            "cue": "Release",
+            "instruction": "Let the air out slowly and relax."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "cheek-puff",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -946,6 +1396,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Open",
+            "instruction": "Open your mouth comfortably."
+          },
+          {
+            "cue": "Tongue out and hold",
+            "instruction": "Stick your tongue straight out as far as is comfortable and hold."
+          },
+          {
+            "cue": "Back in",
+            "instruction": "Bring your tongue back slowly and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "tongue-protrusion",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1005,6 +1485,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Open slightly",
+            "instruction": "Open your mouth slightly."
+          },
+          {
+            "cue": "Tip up and hold",
+            "instruction": "Lift the tip of your tongue to the ridge behind your upper front teeth and hold."
+          },
+          {
+            "cue": "Relax",
+            "instruction": "Lower your tongue and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "tongue-elevation",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1064,6 +1574,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Open",
+            "instruction": "Open your mouth comfortably."
+          },
+          {
+            "cue": "To one corner",
+            "instruction": "Move your tongue to one corner of your mouth and hold."
+          },
+          {
+            "cue": "To the other corner",
+            "instruction": "Move it to the other corner and hold, then relax."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "tongue-lateral",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1123,6 +1663,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright with your shoulders relaxed."
+          },
+          {
+            "cue": "Pull back and hold",
+            "instruction": "Pull the back of your tongue straight back towards your throat and hold."
+          },
+          {
+            "cue": "Relax",
+            "instruction": "Relax your tongue and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "tongue-retraction",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1182,6 +1752,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright with your shoulders relaxed."
+          },
+          {
+            "cue": "Press up and hold",
+            "instruction": "Press your whole tongue firmly against the roof of your mouth and hold."
+          },
+          {
+            "cue": "Relax",
+            "instruction": "Relax your tongue and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "palate-press",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1241,6 +1841,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Breathe in and bear down",
+            "instruction": "Take a breath, hold it and bear down hard as if lifting something heavy."
+          },
+          {
+            "cue": "Swallow",
+            "instruction": "Swallow while still holding your breath and bearing down."
+          },
+          {
+            "cue": "Cough and swallow",
+            "instruction": "Cough straight after the swallow, then swallow again before breathing normally."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "super-supraglottic",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1300,6 +1930,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Lie flat",
+            "instruction": "Lie flat on your back on a firm surface with your shoulders down."
+          },
+          {
+            "cue": "Lift the head and hold",
+            "instruction": "Raise your head to look at your toes, keeping your shoulders on the surface, and hold."
+          },
+          {
+            "cue": "Lower",
+            "instruction": "Lower your head slowly and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "shaker",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1359,6 +2019,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Ball under the chin",
+            "instruction": "Sit upright and place the soft ball between your chin and upper chest."
+          },
+          {
+            "cue": "Press down and hold",
+            "instruction": "Press your chin down firmly into the ball and hold."
+          },
+          {
+            "cue": "Release",
+            "instruction": "Lift your chin slowly and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "ctar",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1418,6 +2108,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Start low",
+            "instruction": "Say 'eee' at a comfortable low pitch."
+          },
+          {
+            "cue": "Glide up",
+            "instruction": "Slide your voice smoothly up to a high pitch and hold it briefly."
+          },
+          {
+            "cue": "Glide down",
+            "instruction": "Slide back down and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "pitch-glide",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1477,6 +2197,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright with your shoulders relaxed."
+          },
+          {
+            "cue": "Yawn and hold",
+            "instruction": "Open into a big yawn, feeling the back of your throat stretch, and hold."
+          },
+          {
+            "cue": "Close slowly",
+            "instruction": "Close your mouth slowly and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "yawn",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1536,6 +2286,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright with your shoulders relaxed."
+          },
+          {
+            "cue": "Dry gargle",
+            "instruction": "Without any water, pull the back of your tongue back and make a gargling movement."
+          },
+          {
+            "cue": "Relax",
+            "instruction": "Relax and rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "gargle",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1595,6 +2375,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Get ready",
+            "instruction": "Sit upright, put on the nose clip and hold the trainer at your lips."
+          },
+          {
+            "cue": "Breathe in",
+            "instruction": "Take a deep breath in, then seal your lips around the mouthpiece."
+          },
+          {
+            "cue": "Blow hard",
+            "instruction": "Blow out fast and hard until the valve opens, then rest."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "emst",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1654,6 +2464,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright with your shoulders relaxed."
+          },
+          {
+            "cue": "Chin down",
+            "instruction": "Bring your chin down towards your chest."
+          },
+          {
+            "cue": "Swallow",
+            "instruction": "Swallow in this position, then lift your head."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "chin-tuck",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1713,6 +2553,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright facing forward."
+          },
+          {
+            "cue": "Turn",
+            "instruction": "Turn your head towards the side your clinician tells you."
+          },
+          {
+            "cue": "Swallow",
+            "instruction": "Swallow with your head turned, then return to the centre."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "head-turn",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     },
     {
@@ -1772,6 +2642,36 @@
           "hi": null,
           "ta": null
         }
+      },
+      "steps": {
+        "en": [
+          {
+            "cue": "Sit tall",
+            "instruction": "Sit upright facing forward."
+          },
+          {
+            "cue": "Tilt",
+            "instruction": "Tilt your head towards the side your clinician tells you."
+          },
+          {
+            "cue": "Swallow",
+            "instruction": "Swallow with your head tilted, then straighten up."
+          }
+        ],
+        "kn": null,
+        "ml": null,
+        "te": null,
+        "hi": null,
+        "ta": null
+      },
+      "animation": {
+        "engine": "svg-motion",
+        "spec": "head-tilt",
+        "views": [
+          "external",
+          "sagittal"
+        ],
+        "status": "awaiting-clinician-verification"
       }
     }
   ]

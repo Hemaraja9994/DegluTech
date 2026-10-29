@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   Apple,
@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
+  ClipboardList,
   Download,
   Dumbbell,
   FileText,
@@ -43,11 +44,8 @@ import { ClinicalMeasures } from './components/ClinicalMeasures';
 import { WorkspaceNotice } from './components/WorkspaceNotice';
 import { ExerciseCatalogue } from './components/ExerciseCatalogue';
 import { PrescriptionRelease, PatientSessionLog, isReleased, readDoses } from './components/PrescriptionRelease';
-const ExerciseMotion = lazy(() => import('./components/ExerciseMotion').then(module => ({ default: module.ExerciseMotion })));
-function OptionalMotion({ exerciseId }: { exerciseId: 'jaw-stretch' | 'neck-shoulder-rom' }) {
-  const [open, setOpen] = useState(false);
-  return <details className="suite-motion" onToggle={event => setOpen(event.currentTarget.open)}><summary>Illustrative 3D prototype: not an anatomical demonstration</summary>{open && <Suspense fallback={<p role="status">Loading illustrative viewer...</p>}><ExerciseMotion exerciseId={exerciseId} /></Suspense>}</details>;
-}
+import { ExerciseAnimation } from './components/ExerciseAnimation';
+import { ClinicalToolSuite } from './components/ClinicalToolSuite';
 import { FloatingBadge, SectionHeader } from './components/ui/ClinicalPrimitives';
 import { T } from './theme';
 
@@ -168,6 +166,8 @@ const initialFieldState: FieldState = {
 
 export const App: React.FC = () => {
   const [activeSectionId, setActiveSectionId] = useState<HncSectionId>('command');
+  // The tool suite is a separate view, not a 14th section (the protocol fixes 13 sections).
+  const [toolSuiteOpen, setToolSuiteOpen] = useState(false);
   const [fieldState, setFieldState] = useState<FieldState>(initialFieldState);
   const [selectedExerciseId, setSelectedExerciseId] = useState('masako');
   const [patientLanguage, setPatientLanguage] = useState<ExerciseLanguageCode>('en');
@@ -259,9 +259,16 @@ export const App: React.FC = () => {
   };
 
   const navigateToSection = (sectionId: HncSectionId) => {
+    setToolSuiteOpen(false);
     setActiveSectionId(sectionId);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
   };
+
+  const openToolSuite = () => {
+    setToolSuiteOpen(true);
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
+  };
+  const shownId: HncSectionId | 'tools' = toolSuiteOpen ? 'tools' : activeSection.id;
 
   const togglePrescribedExercise = (exerciseId: string) => {
     setPrescribedExerciseIds((current) => {
@@ -297,7 +304,7 @@ export const App: React.FC = () => {
         <nav className="deglutech-nav-list" style={styles.navList}>
           {HNC_CLINICAL_SECTIONS.map((section, index) => {
             const Icon = sectionIcons[section.id];
-            const isActive = activeSectionId === section.id;
+            const isActive = !toolSuiteOpen && activeSectionId === section.id;
             const group = sectionGroupFor(section.id);
             const previousGroup = index > 0 ? sectionGroupFor(HNC_CLINICAL_SECTIONS[index - 1].id) : undefined;
             return (
@@ -317,6 +324,18 @@ export const App: React.FC = () => {
                   <span style={styles.navLabel}>{section.label}</span>
                   <span style={styles.navIndex}>{section.order}</span>
                 </button>
+                {section.id === 'instrumental' && (
+                  <button
+                    type="button"
+                    aria-current={toolSuiteOpen ? 'page' : undefined}
+                    onClick={openToolSuite}
+                    style={{ ...styles.navButton, ...(toolSuiteOpen ? styles.navButtonActive : {}), borderLeftColor: toolSuiteOpen ? '#118aa3' : 'transparent' }}
+                  >
+                    <ClipboardList size={16} />
+                    <span style={styles.navLabel}>Clinical tool suite</span>
+                    <span style={styles.navIndex}>T</span>
+                  </button>
+                )}
               </React.Fragment>
             );
           })}
@@ -327,14 +346,14 @@ export const App: React.FC = () => {
         <div className="demo-notice">Demonstration workspace. The caseload and initial chart contain example data.</div>
         <label className="mobile-section-select">
           <span>Clinical section</span>
-          <select value={activeSectionId} onChange={(event) => navigateToSection(event.target.value as HncSectionId)}>
-            {HNC_CLINICAL_SECTIONS.map((section) => <option key={section.id} value={section.id}>{section.order}. {section.label}</option>)}
+          <select value={toolSuiteOpen ? '__tools' : activeSectionId} onChange={(event) => { if (event.target.value === '__tools') openToolSuite(); else navigateToSection(event.target.value as HncSectionId); }}>
+            {HNC_CLINICAL_SECTIONS.map((section) => <React.Fragment key={section.id}><option value={section.id}>{section.order}. {section.label}</option>{section.id === 'instrumental' && <option value="__tools">Clinical tool suite</option>}</React.Fragment>)}
           </select>
         </label>
         <header className="deglutech-topbar" style={styles.topbar}>
           <div>
             <p style={styles.overline}>Head and neck cancer clinical workspace</p>
-            <h2 style={styles.pageTitle}>{activeSection.label}</h2>
+            <h2 style={styles.pageTitle}>{toolSuiteOpen ? 'Clinical tool suite' : activeSection.label}</h2>
           </div>
           <div className="deglutech-topbar-actions" style={styles.topbarActions}>
             <div className="deglutech-progress-wrap" style={styles.progressWrap}>
@@ -358,7 +377,7 @@ export const App: React.FC = () => {
           setFieldState({}); setPrescribedExerciseIds([]); setSelectedExerciseId('masako'); setPatientLanguage('en'); setSavedAt('Not saved this session');
         }} />
 
-        {activeSection.id !== 'command' && (
+        {shownId !== 'command' && shownId !== 'tools' && (
           <SectionNavigator
             activeSection={activeSection}
             activeSectionIndex={activeSectionIndex}
@@ -368,7 +387,7 @@ export const App: React.FC = () => {
           />
         )}
 
-        {activeSection.id === 'command' && (
+        {shownId === 'command' && (
           <>
           <section className="workspace-overview" aria-labelledby="overview-title">
             <div className="overview-heading">
@@ -397,7 +416,7 @@ export const App: React.FC = () => {
           </>
         )}
 
-        {activeSection.id !== 'command' && activeSection.id !== 'exercise' && activeSection.id !== 'patient' && activeSection.id !== 'report' && (
+        {shownId !== 'command' && shownId !== 'exercise' && shownId !== 'patient' && shownId !== 'report' && shownId !== 'tools' && (
           <SectionWorkspace
             section={activeSection}
             fieldState={fieldState}
@@ -405,7 +424,7 @@ export const App: React.FC = () => {
           />
         )}
 
-        {activeSection.id === 'exercise' && (
+        {shownId === 'exercise' && (
           <><PrescriptionRelease state={fieldState} ids={prescribedExerciseIds} update={patch => setFieldState(prev => ({ ...prev, ...patch }))} /><ExerciseCatalogue /><ExercisePrescription
             selectedExercise={selectedExercise}
             selectedExerciseId={selectedExerciseId}
@@ -419,7 +438,7 @@ export const App: React.FC = () => {
           /></>
         )}
 
-        {activeSection.id === 'patient' && (
+        {shownId === 'patient' && (
           <PatientPortalPreview
             fieldState={fieldState}
             update={patch => setFieldState(prev => ({ ...prev, ...patch }))}
@@ -431,7 +450,16 @@ export const App: React.FC = () => {
           />
         )}
 
-        {activeSection.id === 'report' && (
+        {shownId === 'tools' && (
+          <ClinicalToolSuite
+            fieldState={fieldState}
+            update={patch => setFieldState(prev => ({ ...prev, ...patch }))}
+            onOpenSection={navigateToSection}
+            patientFallbackId={HNC_PATIENT_SNAPSHOT.patientId}
+          />
+        )}
+
+        {shownId === 'report' && (
           <ReportErrorBoundary>
             <ReportWorkspace
               fieldState={fieldState}
@@ -442,7 +470,7 @@ export const App: React.FC = () => {
           </ReportErrorBoundary>
         )}
 
-        {activeSection.id !== 'command' && (
+        {shownId !== 'command' && shownId !== 'tools' && (
           <SectionPager
             previousSection={previousSection}
             nextSection={nextSection}
@@ -451,7 +479,7 @@ export const App: React.FC = () => {
         )}
 
         <footer style={styles.footer}>
-          Team: Mr. Prasanna Hegde, Ms. Priyanka Nayak, Mr. Hemaraja Nayaka.S, Mr. Joju Joseph
+          Team: Mr. Prasanna Hegde, Ms. Priyanka Nayak, Mr. Hemaraja Nayaka.S, Mr. Sumanth A V, Mr. Joju Joseph
         </footer>
       </main>
     </div>
@@ -861,7 +889,7 @@ function ExercisePrescription({
 
           <RegimenSopCard exercise={selectedExercise} />
 
-          {(selectedExercise.id === 'jaw-stretch' || selectedExercise.id === 'neck-shoulder-rom') && <OptionalMotion key={selectedExercise.id} exerciseId={selectedExercise.id} />}
+          <ExerciseAnimation key={selectedExercise.id} exerciseId={selectedExercise.id} language={patientLanguage} label={localizedExercise.title} />
 
           <ExercisePanels
             key={`${selectedExercise.id}-${patientLanguage}`}
@@ -1205,6 +1233,7 @@ function PatientPortalPreview({
               <strong>{String(fieldState.followUp || 'Ask your clinician')}</strong>
             </div>
           </div>
+          <ExerciseAnimation key={patientExercise.id} exerciseId={patientExercise.id} language={patientLanguage} label={selectedLocalizedExercise.title} />
           <ExercisePanels
             key={`${patientExercise.id}-${patientLanguage}`}
             exercise={patientExercise}

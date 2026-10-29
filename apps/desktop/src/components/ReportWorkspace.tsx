@@ -13,10 +13,7 @@ import {
   Stethoscope,
   TimerReset,
 } from 'lucide-react';
-import {
-  HNC_PATIENT_SNAPSHOT,
-  type HncSectionId,
-} from '../../../../packages/core/src/hncClinicalModel';
+import type { HncSectionId } from '../../../../packages/core/src/hncClinicalModel';
 import { FloatingBadge, HeaderSeparator, SectionHeader } from './ui/ClinicalPrimitives';
 import {
   buildExecutiveSummary,
