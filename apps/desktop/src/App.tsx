@@ -39,7 +39,8 @@ import {
 import { ReportErrorBoundary, ReportWorkspace } from './components/ReportWorkspace';
 import { ClinicianDashboard } from './components/ClinicianDashboard';
 import { DegluTechLogo } from './components/DegluTechLogo';
-import { FloatingBadge, HeaderSeparator, SectionHeader } from './components/ui/ClinicalPrimitives';
+import { ExerciseMotion } from './components/ExerciseMotion';
+import { FloatingBadge, SectionHeader } from './components/ui/ClinicalPrimitives';
 import { T } from './theme';
 
 type FieldState = Record<string, string | string[]>;
@@ -251,9 +252,8 @@ export const App: React.FC = () => {
   const togglePrescribedExercise = (exerciseId: string) => {
     setPrescribedExerciseIds((current) => {
       if (current.includes(exerciseId)) {
-        if (current.length === 1) return current;
         const next = current.filter((id) => id !== exerciseId);
-        if (selectedExerciseId === exerciseId) setSelectedExerciseId(next[0]);
+        if (selectedExerciseId === exerciseId && next.length) setSelectedExerciseId(next[0]);
         return next;
       }
 
@@ -291,6 +291,7 @@ export const App: React.FC = () => {
                 {group !== previousGroup && <div style={styles.navGroup}>{group}</div>}
                 <button
                   type="button"
+                  aria-current={isActive ? 'page' : undefined}
                   onClick={() => navigateToSection(section.id)}
                   style={{
                     ...styles.navButton,
@@ -309,6 +310,7 @@ export const App: React.FC = () => {
       </aside>
 
       <main className="deglutech-main" style={styles.main}>
+        <div className="demo-notice">Demonstration workspace. The caseload and initial chart contain example data.</div>
         <label className="mobile-section-select">
           <span>Clinical section</span>
           <select value={activeSectionId} onChange={(event) => navigateToSection(event.target.value as HncSectionId)}>
@@ -348,12 +350,32 @@ export const App: React.FC = () => {
         )}
 
         {activeSection.id === 'command' && (
+          <>
+          <section className="workspace-overview" aria-labelledby="overview-title">
+            <div className="overview-heading">
+              <div><p className="overview-eyebrow">HEAD AND NECK REHABILITATION</p><h3 id="overview-title">Clinical workspace</h3><p>Move from assessment to rehabilitation planning and reporting.</p></div>
+              <span className="overview-local">Local draft</span>
+            </div>
+            <div className="overview-actions">
+              {([
+                ['demographics', 'Referral and patient details'],
+                ['swallow', 'Clinical swallowing assessment'],
+                ['exercise', 'Prescribe and review exercises'],
+                ['report', 'Review and export the clinical report'],
+              ] as [HncSectionId, string][]).map(([id, description]) => {
+                const section = HNC_CLINICAL_SECTIONS.find((item) => item.id === id)!;
+                const Icon = sectionIcons[id];
+                return <button key={id} type="button" onClick={() => navigateToSection(id)}><span className="overview-action-icon"><Icon size={19} /></span><span><strong>{section.shortLabel}</strong><small>{description}</small></span><ChevronRight size={17} /></button>;
+              })}
+            </div>
+          </section>
           <ClinicianDashboard
             completion={completion}
             fieldState={fieldState}
             savedAt={savedAt}
             onJump={navigateToSection}
           />
+          </>
         )}
 
         {activeSection.id !== 'command' && activeSection.id !== 'exercise' && activeSection.id !== 'patient' && activeSection.id !== 'report' && (
@@ -409,7 +431,7 @@ export const App: React.FC = () => {
         )}
 
         <footer style={styles.footer}>
-          Concept by Mr. Prasanna Hegde, Ms. Priyanka Nayak. Created by Mr. Hemaraja Nayaka.S
+          Team: Mr. Prasanna Hegde, Ms. Priyanka Nayak, Mr. Hemaraja Nayaka.S, Mr. Joju Joseph
         </footer>
       </main>
     </div>
@@ -475,7 +497,7 @@ function SectionNavigator({
         </div>
       </div>
 
-      <HeaderSeparator label="Clinical workflow map" icon={<Map size={15} />} />
+      <details className="workflow-map"><summary><Map size={15} /> Clinical workflow map</summary>
       <div style={styles.workflowRail}>
         {HNC_CLINICAL_SECTIONS.map((section) => {
           const isActive = section.id === activeSection.id;
@@ -507,6 +529,7 @@ function SectionNavigator({
           );
         })}
       </div>
+      </details>
     </section>
   );
 }
@@ -686,7 +709,7 @@ function FieldControl({
       <div style={styles.field} role="group" aria-label={field.label}>
         <span style={styles.fieldLabel}>{field.label}</span>
         <div style={styles.scaleRow}>
-          {['0', '1', '2', '3', '4'].map((score) => (
+          {(field.id === 'painScore' ? Array.from({ length: 11 }, (_, i) => String(i)) : ['0', '1', '2', '3', '4']).map((score) => (
             <button
               key={score}
               type="button"
@@ -703,6 +726,13 @@ function FieldControl({
     );
   }
 
+  const bounds: Record<string, { min: number; max: number }> = {
+    eat10: { min: 0, max: 40 }, pas: { min: 1, max: 8 },
+    intelligibility: { min: 0, max: 100 },
+  };
+  const range = bounds[field.id];
+  const numberValue = typeof value === 'string' && value !== '' ? Number(value) : undefined;
+  const invalid = range && numberValue !== undefined && (numberValue < range.min || numberValue > range.max);
   return (
     <label style={styles.field}>
       <span style={styles.fieldLabel}>{field.label}</span>
@@ -711,7 +741,12 @@ function FieldControl({
         value={typeof value === 'string' ? value : ''}
         onChange={(event) => onChange(event.target.value)}
         style={styles.input}
+        min={range?.min}
+        max={range?.max}
+        step={field.kind === 'metric' ? 'any' : undefined}
+        aria-invalid={invalid || undefined}
       />
+      {invalid && <span role="alert" style={{ color: '#a12622', fontSize: 12 }}>Enter a value from {range.min} to {range.max}.</span>}
       {field.unit && <span style={styles.fieldHelper}>Unit: {field.unit}</span>}
       {field.helper && <span style={styles.fieldHelper}>{field.helper}</span>}
     </label>
@@ -804,6 +839,8 @@ function ExercisePrescription({
           </div>
 
           <RegimenSopCard exercise={selectedExercise} />
+
+          {(selectedExercise.id === 'jaw-stretch' || selectedExercise.id === 'neck-shoulder-rom') && <ExerciseMotion key={selectedExercise.id} exerciseId={selectedExercise.id} />}
 
           <ExercisePanels
             key={`${selectedExercise.id}-${patientLanguage}`}
@@ -1165,8 +1202,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'var(--sans)',
   },
   sidebar: {
-    background: '#ffffff',
-    borderRight: '1px solid #e2e8f0',
+    background: '#171a2d',
+    borderRight: '1px solid #2c3045',
     minHeight: '100vh',
     padding: 0,
     position: 'sticky',
@@ -1182,7 +1219,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: '54px',
     marginBottom: 0,
     padding: '10px 12px',
-    borderBottom: '1px solid #e2e8f0',
+    borderBottom: '1px solid #33374c',
   },
   logoMark: {
     width: '42px',
@@ -1199,29 +1236,29 @@ const styles: Record<string, React.CSSProperties> = {
     lineHeight: 1.1,
     fontWeight: 850,
     letterSpacing: 0,
-    color: '#0f172a',
+    color: '#ffffff',
   },
   brandSub: {
     margin: '2px 0 0',
-    color: '#64748b',
+    color: '#b0b7c9',
     fontSize: '10.5px',
     fontWeight: 700,
   },
   patientMini: {
-    border: '1px solid #e2e8f0',
+    border: '1px solid #3c4357',
     borderRadius: '8px',
     padding: '12px',
     margin: '12px',
-    background: '#f8fafc',
+    background: '#252a3e',
     boxShadow: 'none',
   },
   patientName: {
     fontWeight: 800,
     fontSize: '14px',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   patientMeta: {
-    color: '#64748b',
+    color: '#c1c7d5',
     fontSize: '12px',
     marginTop: '2px',
   },
@@ -1242,7 +1279,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   navGroup: {
     margin: '10px 6px 3px',
-    color: '#94a3b8',
+    color: '#aab1c4',
     fontSize: '10px',
     fontWeight: 900,
     textTransform: 'uppercase',
@@ -1259,14 +1296,14 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
     padding: '8px 9px',
     borderRadius: '7px',
-    color: '#475569',
+    color: '#c6ccda',
     cursor: 'pointer',
     textAlign: 'left',
     minHeight: '34px',
   },
   navButtonActive: {
-    background: '#eef7f9',
-    color: '#0f172a',
+    background: '#354058',
+    color: '#ffffff',
     fontWeight: 800,
     boxShadow: 'inset 0 0 0 1px rgba(17, 138, 163, 0.12)',
   },

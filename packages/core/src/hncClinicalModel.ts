@@ -407,8 +407,8 @@ export const HNC_CLINICAL_SECTIONS: ClinicalSection[] = [
         title: 'Document Ingestion',
         description: 'Reports, images, audio, and safety summaries.',
         fields: [
-          { id: 'upload', label: 'Upload report or media', kind: 'text' },
-          { id: 'summary', label: 'Parsed clinical summary', kind: 'textarea' },
+          { id: 'upload', label: 'Report or media reference', kind: 'text', helper: 'Record a reference here; this field does not upload files.' },
+          { id: 'summary', label: 'Clinical study summary', kind: 'textarea' },
         ],
       },
     ],
@@ -451,7 +451,7 @@ export const HNC_CLINICAL_SECTIONS: ClinicalSection[] = [
     order: 11,
     label: 'Exercise Prescription',
     shortLabel: 'Exercises',
-    purpose: 'Patient-safe exercise plans with illustrated steps, dosage, contraindications, and adherence tracking.',
+    purpose: 'Review exercise instructions and select the home program for the patient.',
     accent: '#059669',
     status: 'ready',
     blocks: [
@@ -472,7 +472,7 @@ export const HNC_CLINICAL_SECTIONS: ClinicalSection[] = [
     order: 12,
     label: 'Patient Portal',
     shortLabel: 'Portal',
-    purpose: 'Plain-language home program, symptom check-in, education, caregiver instructions, and reminders.',
+    purpose: 'Review the prescribed home program and recorded symptoms.',
     accent: '#0d9488',
     status: 'ready',
     blocks: [

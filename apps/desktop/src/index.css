@@ -389,6 +389,35 @@
   }
 }
 .mobile-section-select { display: none; }
+.motion-demo { margin-top: 22px; border-top: 1px solid #dce5ea; padding-top: 18px; }
+.motion-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; color: #17343c; }
+.motion-heading span { color: #795320; background: #fff4dd; padding: 4px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.motion-canvas { height: 300px; width: 100%; background: #edf5f4; overflow: hidden; margin-top: 12px; }
+.motion-canvas canvas { display: block; width: 100%; height: 100%; }
+.motion-controls { display: flex; gap: 8px; margin-top: 10px; }
+.motion-controls button { display: inline-flex; gap: 6px; align-items: center; padding: 8px 12px; background: #fff; border: 1px solid #c7d8d8; border-radius: 6px; color: #1c5050; cursor: pointer; }
+.motion-controls button:disabled { opacity: .5; cursor: default; }
+.motion-fallback { color: #705624; }
+.demo-notice { margin-bottom: 12px; padding: 9px 12px; border: 1px solid #e5d6b5; border-radius: 6px; background: #fff9ed; color: #684b20; font-size: 13px; }
+.workspace-overview { margin: 0 0 22px; padding: 8px 0 0; }
+.overview-heading { display: flex; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 18px; }
+.overview-heading h3 { margin: 2px 0 4px; color: #172438; font-size: 25px; line-height: 1.2; }
+.overview-heading p { margin: 0; color: #596b79; font-size: 14px; }
+.overview-heading .overview-eyebrow { color: #a74e29; font-size: 11px; font-weight: 800; }
+.overview-local { white-space: nowrap; padding: 5px 10px; border-radius: 20px; color: #176646; background: #dff3e9; font-size: 12px; font-weight: 700; }
+.overview-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.overview-actions button { display: flex; align-items: flex-start; gap: 11px; min-width: 0; min-height: 104px; padding: 16px; text-align: left; border: 1px solid #dfe6eb; border-radius: 8px; background: #fff; color: #1c3040; cursor: pointer; }
+.overview-actions button > span:nth-child(2) { flex: 1; min-width: 0; }
+.overview-actions strong, .overview-actions small { display: block; }
+.overview-actions strong { font-size: 14px; }
+.overview-actions small { margin-top: 5px; color: #60717e; font-size: 12px; line-height: 1.45; }
+.overview-action-icon { display: grid; place-items: center; flex: 0 0 34px; width: 34px; height: 34px; border-radius: 6px; background: #e6f3f1; color: #16766f; }
+.overview-actions button > svg { flex-shrink: 0; color: #82929c; }
+.workflow-map summary { display: flex; align-items: center; gap: 7px; color: #506878; font-size: 13px; font-weight: 700; cursor: pointer; }
+.workflow-map[open] summary { margin-bottom: 12px; }
+.deglutech-sidebar button[aria-current="page"] { border-left-color: #f3a56a !important; }
+@media (max-width: 1180px) { .overview-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .overview-actions { grid-template-columns: 1fr; } .overview-actions button { min-height: 78px; } .overview-heading h3 { font-size: 22px; } }
 .workspace-save-status { color: #526775; font-size: 12px; max-width: 180px; }
 .patient-safety { margin: 18px 0; padding: 14px 16px; border-left: 4px solid #b7791f; background: #fff9ee; color: #624318; border-radius: 4px; }
 .patient-safety p { margin: 4px 0 0; line-height: 1.5; }

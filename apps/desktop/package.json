@@ -21,20 +21,22 @@
     "@laryngoos/db": "workspace:*",
     "lucide-react": "^0.468.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
+    "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "electron": "^25.3.0",
-    "typescript": "^5.1.6",
+    "electron-builder": "^24.6.3",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "vite": "^4.4.5",
-    "electron-builder": "^24.6.3"
+    "typescript": "^5.1.6",
+    "vite": "^4.4.5"
   },
   "build": {
     "appId": "in.deglutech.clinical",
