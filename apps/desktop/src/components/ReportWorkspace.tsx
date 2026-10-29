@@ -17,6 +17,7 @@ import {
   HNC_PATIENT_SNAPSHOT,
   type HncSectionId,
 } from '../../../../packages/core/src/hncClinicalModel';
+import { FloatingBadge, HeaderSeparator, SectionHeader } from './ui/ClinicalPrimitives';
 import {
   buildExecutiveSummary,
   buildIcfTable,
@@ -89,16 +90,14 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
 
   return (
     <div style={styles.workspaceGrid}>
-      <section style={styles.sectionIntro}>
-        <div>
-          <p style={styles.overline}>Summary, validation, and handoff</p>
-          <h3 style={styles.introTitle}>{draft.slpDiagnosis}</h3>
-          <p style={styles.introText}>
-            Smart defaults pre-populate this section from oncology, OPME, and swallow data. Review and apply
-            before exporting the diagnostic report for EHR deposit or onco-surgical referral.
-          </p>
-        </div>
-        <div style={styles.introActions}>
+      <SectionHeader
+        eyebrow="Summary, validation, and handoff"
+        title={draft.slpDiagnosis}
+        description="Smart defaults pre-populate this section from oncology, OPME, and swallow data. Review and apply before exporting the diagnostic report for EHR deposit or onco-surgical referral."
+        icon={<ClipboardCheck size={20} />}
+        accent="#2563eb"
+        action={(
+          <div style={styles.introActions}>
           <button type="button" style={styles.iconPillSecondary} onClick={applyAllDefaults}>
             <Sparkles size={16} /> Apply all smart defaults
           </button>
@@ -108,8 +107,9 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
           <button type="button" style={styles.iconPillGhost} onClick={() => window.print()}>
             <Printer size={16} /> Print current view
           </button>
-        </div>
-      </section>
+          </div>
+        )}
+      />
 
       <ValidationPanel
         sections={sections}
@@ -119,6 +119,8 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
         correlation={correlation}
         onJump={onJump}
       />
+
+      <HeaderSeparator label="Section 13 report authoring" icon={<FileDown size={15} />} />
 
       <SmartDefaultsPanel
         draft={draft}
@@ -133,12 +135,14 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
             <p style={{ ...styles.overline, color: tone.fg }}>Executive summary</p>
             <h3 style={{ ...styles.execTitle, color: '#0f172a' }}>{summary.diagnosis}</h3>
           </div>
-          <div style={{ ...styles.aspirationBadge, background: tone.border }}>
-            <ShieldAlert size={16} />
+          <FloatingBadge
+            tone={summary.aspirationRiskTone === 'red' ? 'danger' : summary.aspirationRiskTone === 'amber' ? 'warning' : 'success'}
+            icon={<ShieldAlert size={16} />}
+          >
             Aspiration risk: {summary.aspirationRiskLabel}
-          </div>
+          </FloatingBadge>
         </div>
-        <div style={styles.execGrid}>
+        <div className="deglutech-exec-grid" style={styles.execGrid}>
           <ExecCell label="Severity" value={String(summary.severity)} />
           <ExecCell label="Diet route" value={summary.dietRoute} />
           <ExecCell label="Texture / route plan" value={summary.textureGuidance} wide />
@@ -149,7 +153,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
       </section>
 
       <section style={styles.panel}>
-        <div style={styles.panelHeader}>
+        <div className="deglutech-panel-header" style={styles.panelHeader}>
           <div>
             <h3 style={styles.panelTitle}>WHO-ICF HNC Profile (cross-referenced)</h3>
             <p style={styles.panelSubtitle}>
@@ -200,7 +204,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
         </div>
       </section>
 
-      <section style={styles.recommendationGrid}>
+      <section className="deglutech-recommendation-grid" style={styles.recommendationGrid}>
         <RecommendationCard
           title="Force / Range-of-Motion Exercises"
           icon={<Dumbbell size={16} color="#0f766e" />}
@@ -229,7 +233,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
         />
       </section>
 
-      <section style={styles.signoffPanel}>
+      <section className="deglutech-signoff-panel" style={styles.signoffPanel}>
         <div>
           <p style={styles.overline}>Clinician sign-off (PDF deposit)</p>
           <h3 style={styles.panelTitle}>Authorize and deposit to EHR</h3>
@@ -277,7 +281,7 @@ function ValidationPanel({
 }) {
   return (
     <section style={styles.validationPanel}>
-      <div style={styles.panelHeader}>
+      <div className="deglutech-panel-header" style={styles.panelHeader}>
         <div>
           <p style={styles.overline}>Pre-publication validation</p>
           <h3 style={styles.panelTitle}>Sections 1–12 readiness</h3>
@@ -377,7 +381,7 @@ function SmartDefaultsPanel({
 
   return (
     <section style={styles.panel}>
-      <div style={styles.panelHeader}>
+      <div className="deglutech-panel-header" style={styles.panelHeader}>
         <div>
           <p style={styles.overline}>Smart defaults &amp; clinical authoring</p>
           <h3 style={styles.panelTitle}>Clinical impression</h3>
@@ -389,7 +393,7 @@ function SmartDefaultsPanel({
         <Info size={18} color="#1d4ed8" />
       </div>
 
-      <div style={styles.draftGrid}>
+      <div className="deglutech-draft-grid" style={styles.draftGrid}>
         {fields.map(({ key, label, kind }) => {
           const source = draft.source[key as keyof ReportDraft['source']];
           const draftValue = String(draft[key] ?? '');
@@ -617,18 +621,22 @@ const styles: Record<string, any> = {
     fontSize: '13px',
   },
   validationPanel: {
-    background: '#ffffff',
-    border: '1px solid #dbe4ef',
-    borderRadius: '10px',
+    background: 'rgba(255, 255, 255, 0.92)',
+    border: '1px solid rgba(215, 227, 234, 0.92)',
+    borderRadius: '18px',
     padding: '16px 18px',
     display: 'grid',
     gap: '14px',
+    boxShadow: '0 18px 48px rgba(16, 32, 47, 0.07)',
+    backdropFilter: 'blur(16px)',
   },
   panel: {
-    background: '#ffffff',
-    border: '1px solid #dbe4ef',
-    borderRadius: '10px',
+    background: 'rgba(255, 255, 255, 0.92)',
+    border: '1px solid rgba(215, 227, 234, 0.92)',
+    borderRadius: '18px',
     padding: '16px 18px',
+    boxShadow: '0 18px 48px rgba(16, 32, 47, 0.07)',
+    backdropFilter: 'blur(16px)',
   },
   panelHeader: {
     display: 'flex',
@@ -636,6 +644,7 @@ const styles: Record<string, any> = {
     alignItems: 'flex-start',
     gap: '14px',
     marginBottom: '12px',
+    flexWrap: 'wrap',
   },
   panelTitle: {
     margin: '4px 0 0',
@@ -742,10 +751,11 @@ const styles: Record<string, any> = {
   },
   execSummary: {
     border: '2px solid',
-    borderRadius: '12px',
+    borderRadius: '18px',
     padding: '18px',
     display: 'grid',
     gap: '14px',
+    boxShadow: '0 18px 48px rgba(16, 32, 47, 0.06)',
   },
   execHeader: {
     display: 'flex',
@@ -771,25 +781,25 @@ const styles: Record<string, any> = {
   },
   execGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))',
     gap: '10px',
   },
   execCell: {
     border: '1px solid rgba(15, 23, 42, 0.08)',
-    background: 'rgba(255, 255, 255, 0.7)',
-    borderRadius: '8px',
-    padding: '8px 10px',
+    background: 'rgba(255, 255, 255, 0.82)',
+    borderRadius: '13px',
+    padding: '10px 12px',
     display: 'grid',
     gap: '3px',
   },
   execCellWide: {
     border: '1px solid rgba(15, 23, 42, 0.08)',
-    background: 'rgba(255, 255, 255, 0.7)',
-    borderRadius: '8px',
-    padding: '8px 10px',
+    background: 'rgba(255, 255, 255, 0.82)',
+    borderRadius: '13px',
+    padding: '10px 12px',
     display: 'grid',
     gap: '3px',
-    gridColumn: 'span 2',
+    gridColumn: '1 / -1',
   },
   execCellLabel: {
     fontSize: '10.5px',
@@ -805,8 +815,8 @@ const styles: Record<string, any> = {
   },
   icfTableWrap: {
     overflowX: 'auto',
-    borderRadius: '8px',
-    border: '1px solid #e2e8f0',
+    borderRadius: '14px',
+    border: '1px solid #d7e3ea',
   },
   icfTable: {
     width: '100%',
@@ -814,7 +824,7 @@ const styles: Record<string, any> = {
     fontSize: '13px',
   },
   icfTh: {
-    background: '#0f172a',
+    background: '#102235',
     color: '#ffffff',
     padding: '10px 12px',
     textAlign: 'left',
@@ -861,14 +871,14 @@ const styles: Record<string, any> = {
   },
   draftGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
     gap: '12px',
   },
   draftRow: {
-    border: '1px solid #e2e8f0',
-    borderRadius: '8px',
+    border: '1px solid #d7e3ea',
+    borderRadius: '14px',
     padding: '10px 12px',
-    background: '#f8fafc',
+    background: '#fbfdff',
     display: 'grid',
     gap: '8px',
   },
@@ -905,8 +915,8 @@ const styles: Record<string, any> = {
   draftTextarea: {
     minHeight: '80px',
     width: '100%',
-    border: '1px solid #cbd5e1',
-    borderRadius: '6px',
+    border: '1px solid #d7e3ea',
+    borderRadius: '12px',
     padding: '8px 10px',
     fontFamily: 'inherit',
     fontSize: '13px',
@@ -917,8 +927,8 @@ const styles: Record<string, any> = {
   },
   draftSelect: {
     width: '100%',
-    border: '1px solid #cbd5e1',
-    borderRadius: '6px',
+    border: '1px solid #d7e3ea',
+    borderRadius: '12px',
     padding: '8px 10px',
     fontFamily: 'inherit',
     fontSize: '13px',
@@ -942,23 +952,23 @@ const styles: Record<string, any> = {
     lineHeight: 1.4,
   },
   applyButton: {
-    border: '1px solid #1d4ed8',
-    background: '#1d4ed8',
+    border: '1px solid #118aa3',
+    background: '#118aa3',
     color: '#ffffff',
     fontSize: '11px',
     fontWeight: 800,
     padding: '4px 10px',
-    borderRadius: '6px',
+    borderRadius: '10px',
     cursor: 'pointer',
   },
   recommendationGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
     gap: '12px',
   },
   recCard: {
     border: '1px solid',
-    borderRadius: '10px',
+    borderRadius: '16px',
     padding: '14px 16px',
     display: 'grid',
     gap: '10px',
@@ -989,14 +999,15 @@ const styles: Record<string, any> = {
     lineHeight: 1.5,
   },
   signoffPanel: {
-    background: '#ffffff',
-    border: '1px solid #dbe4ef',
-    borderRadius: '10px',
+    background: 'rgba(255, 255, 255, 0.92)',
+    border: '1px solid rgba(215, 227, 234, 0.92)',
+    borderRadius: '18px',
     padding: '16px 18px',
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1fr) 280px',
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(240px, 280px)',
     gap: '18px',
     alignItems: 'center',
+    boxShadow: '0 18px 48px rgba(16, 32, 47, 0.07)',
   },
   signoffBox: {
     border: '1px dashed #cbd5e1',

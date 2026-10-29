@@ -1,18 +1,26 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   AlertTriangle,
+  ArrowDown,
+  ArrowUp,
   CalendarClock,
+  Check,
   ChevronRight,
   ClipboardList,
+  Dumbbell,
+  FileText,
   Filter,
   HeartPulse,
   LineChart,
+  MessageSquare,
+  MoreHorizontal,
   Search,
   Sparkles,
   TrendingDown,
   TrendingUp,
   Users,
+  X,
 } from 'lucide-react';
 import {
   CASELOAD_PATIENTS,
@@ -23,6 +31,7 @@ import {
 } from '../caseloadData';
 import type { FieldState } from '../reportEngine';
 import type { HncSectionId } from '../../../../packages/core/src/hncClinicalModel';
+import { FloatingBadge } from './ui/ClinicalPrimitives';
 
 interface ClinicianDashboardProps {
   fieldState: FieldState;
@@ -31,14 +40,11 @@ interface ClinicianDashboardProps {
   onJump: (section: HncSectionId) => void;
 }
 
-type SortKey = 'risk' | 'review' | 'adherence' | 'severity';
+type SortKey = 'risk' | 'review' | 'adherence' | 'severity' | 'eat10' | 'jaw';
+type SortDirection = 'asc' | 'desc';
 type RiskFilter = 'all' | RiskLevel;
-
-const RISK_PALETTE: Record<RiskLevel, { bg: string; fg: string; border: string }> = {
-  high: { bg: '#fef2f2', fg: '#991b1b', border: '#dc2626' },
-  moderate: { bg: '#fffbeb', fg: '#92400e', border: '#f59e0b' },
-  low: { bg: '#ecfdf5', fg: '#065f46', border: '#10b981' },
-};
+type PhaseFilter = 'all' | PatientCaseloadEntry['phase'];
+type DrawerTab = 'overview' | 'icf' | 'trends' | 'plan';
 
 const SEVERITY_ORDER: Record<string, number> = {
   None: 0,
@@ -48,6 +54,55 @@ const SEVERITY_ORDER: Record<string, number> = {
   Profound: 4,
 };
 
+const RISK_PALETTE: Record<RiskLevel, { bg: string; fg: string; border: string; soft: string }> = {
+  high: { bg: '#fee2e2', fg: '#991b1b', border: '#dc2626', soft: 'rgba(220, 38, 38, 0.12)' },
+  moderate: { bg: '#fef3c7', fg: '#92400e', border: '#f59e0b', soft: 'rgba(245, 158, 11, 0.14)' },
+  low: { bg: '#dcfce7', fg: '#166534', border: '#10b981', soft: 'rgba(16, 185, 129, 0.14)' },
+};
+
+const PHASES: PhaseFilter[] = ['all', 'Prehab', 'Post-op', 'During RT', 'Post-CRT', 'Survivorship'];
+
+const cleanText = (value: string): string =>
+  value
+    .replace(/â€”/g, '-')
+    .replace(/Â·/g, '/')
+    .replace(/â€“/g, '-')
+    .replace(/Ã—/g, 'x')
+    .replace(/â‰¥/g, '>=')
+    .replace(/â‰¤/g, '<=');
+
+const todayAtStart = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+};
+
+const daysBetween = (date: string, reference: Date = todayAtStart()) => {
+  const target = new Date(date);
+  if (Number.isNaN(target.getTime())) return 0;
+  target.setHours(0, 0, 0, 0);
+  return Math.round((target.getTime() - reference.getTime()) / 86400000);
+};
+
+const formatReviewDate = (date: string) => {
+  const diff = daysBetween(date);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  if (diff === -1) return 'Yesterday';
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return date;
+  return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(parsed);
+};
+
+const initialsFor = (name: string) =>
+  cleanText(name)
+    .replace(/\([^)]*\)/g, '')
+    .split(/[\s-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('') || 'PT';
+
 export const ClinicianDashboard: React.FC<ClinicianDashboardProps> = ({
   fieldState,
   completion,
@@ -55,9 +110,12 @@ export const ClinicianDashboard: React.FC<ClinicianDashboardProps> = ({
   onJump,
 }) => {
   const [selectedId, setSelectedId] = useState<string>('HNC-2026-001');
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
+  const [phaseFilter, setPhaseFilter] = useState<PhaseFilter>('all');
   const [sortBy, setSortBy] = useState<SortKey>('risk');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   const patients = useMemo<PatientCaseloadEntry[]>(() => {
     return CASELOAD_PATIENTS.map((patient) =>
@@ -65,349 +123,911 @@ export const ClinicianDashboard: React.FC<ClinicianDashboardProps> = ({
     );
   }, [fieldState]);
 
+  const kpis = useMemo(() => computeCaseloadKpis(patients), [patients]);
+  const selectedPatient =
+    patients.find((patient) => patient.id === selectedId) ??
+    patients.find((patient) => patient.isActive) ??
+    patients[0];
+
   const filteredPatients = useMemo(() => {
     const lower = search.trim().toLowerCase();
-    let result = patients.filter((patient) => {
-      if (riskFilter !== 'all' && patient.riskLevel !== riskFilter) return false;
-      if (lower.length === 0) return true;
-      return (
-        patient.displayName.toLowerCase().includes(lower) ||
-        patient.id.toLowerCase().includes(lower) ||
-        patient.diagnosis.toLowerCase().includes(lower) ||
-        patient.tumorSite.toLowerCase().includes(lower)
-      );
-    });
+    const riskWeight: Record<RiskLevel, number> = { low: 1, moderate: 2, high: 3 };
 
-    const riskWeight: Record<RiskLevel, number> = { high: 0, moderate: 1, low: 2 };
-    result = [...result].sort((a, b) => {
+    const valueFor = (patient: PatientCaseloadEntry) => {
       switch (sortBy) {
         case 'risk':
-          return riskWeight[a.riskLevel] - riskWeight[b.riskLevel];
+          return riskWeight[patient.riskLevel];
         case 'review':
-          return new Date(a.nextReview).getTime() - new Date(b.nextReview).getTime();
+          return new Date(patient.nextReview).getTime();
         case 'adherence':
-          return a.adherence - b.adherence;
+          return patient.adherence;
         case 'severity':
-          return (SEVERITY_ORDER[b.severity] ?? 0) - (SEVERITY_ORDER[a.severity] ?? 0);
+          return SEVERITY_ORDER[patient.severity] ?? 0;
+        case 'eat10':
+          return patient.eat10;
+        case 'jaw':
+          return patient.jawOpening;
         default:
           return 0;
       }
-    });
+    };
 
-    return result;
-  }, [patients, search, riskFilter, sortBy]);
+    return patients
+      .filter((patient) => {
+        if (riskFilter !== 'all' && patient.riskLevel !== riskFilter) return false;
+        if (phaseFilter !== 'all' && patient.phase !== phaseFilter) return false;
+        if (!lower) return true;
 
-  const kpis = useMemo(() => computeCaseloadKpis(patients), [patients]);
+        return [
+          patient.displayName,
+          patient.id,
+          patient.diagnosis,
+          patient.tumorSite,
+          patient.stage,
+          patient.phase,
+        ].some((item) => cleanText(String(item)).toLowerCase().includes(lower));
+      })
+      .sort((a, b) => {
+        const av = valueFor(a);
+        const bv = valueFor(b);
+        if (av === bv) return cleanText(a.displayName).localeCompare(cleanText(b.displayName));
+        return sortDirection === 'asc' ? av - bv : bv - av;
+      });
+  }, [patients, phaseFilter, riskFilter, search, sortBy, sortDirection]);
 
-  const selectedPatient =
-    patients.find((p) => p.id === selectedId) ??
-    patients.find((p) => p.isActive) ??
-    patients[0];
+  const dueOrOverdue = patients.filter((patient) => daysBetween(patient.nextReview) <= 7).length;
+  const overdue = patients.filter((patient) => daysBetween(patient.nextReview) < 0).length;
+  const alertCount = patients.reduce((sum, patient) => sum + patient.alerts.length, 0);
+
+  const selectSort = (key: SortKey) => {
+    if (sortBy === key) {
+      setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortBy(key);
+      setSortDirection(key === 'review' || key === 'adherence' || key === 'jaw' ? 'asc' : 'desc');
+    }
+  };
+
+  const openPatient = (patient: PatientCaseloadEntry) => {
+    setSelectedId(patient.id);
+    setDrawerOpen(true);
+  };
 
   return (
-    <div style={styles.workspaceGrid}>
-      <section style={styles.heroPanel}>
-        <div style={styles.heroCopy}>
+    <div style={styles.dashboardShell}>
+      <header style={styles.dashboardTopbar}>
+        <div>
           <p style={styles.overline}>Clinician dashboard</p>
-          <h3 style={styles.heroTitle}>HNC SLP caseload — live overview</h3>
-          <p style={styles.heroText}>
-            Triage your full panel, monitor progress trends, and drill into any patient for an ICF-aligned
-            analytics view. The active workspace patient updates live as you edit upstream sections.
-          </p>
+          <h2 style={styles.dashboardTitle}>Caseload command center</h2>
         </div>
-        <div style={styles.statusPanel}>
-          <div style={styles.largeNumber}>{completion}%</div>
-          <div style={styles.statusLabel}>active-patient data quality</div>
-          <div style={styles.savedLine}>Saved: {savedAt}</div>
+        <div style={styles.topbarActions}>
+          <span style={styles.topbarBadge}>{completion}% active chart quality</span>
+          <span style={styles.topbarMeta}>Saved: {savedAt}</span>
         </div>
+      </header>
+
+      <section className="deglutech-kpi-strip" style={styles.kpiStrip} aria-label="Caseload key performance indicators">
+        <KpiCell label="Active caseload" value={kpis.total} sub="+ live local chart" icon={<Users size={15} />} />
+        <KpiCell label="High risk" value={kpis.highRisk} sub={`${Math.round((kpis.highRisk / Math.max(kpis.total, 1)) * 100)}% of panel`} icon={<AlertTriangle size={15} />} tone="high" />
+        <KpiCell label="Due within 7d" value={dueOrOverdue} sub={overdue > 0 ? `${overdue} overdue` : 'on schedule'} icon={<CalendarClock size={15} />} tone="moderate" />
+        <KpiCell label="Mean adherence" value={`${kpis.adherenceMean}%`} sub="home program" icon={<Activity size={15} />} tone="low" />
+        <KpiCell label="Severe / profound" value={kpis.severeOrProfound} sub="requires close review" icon={<HeartPulse size={15} />} tone="high" />
+        <KpiCell label="Alerts" value={alertCount} sub="clinical flags" icon={<Sparkles size={15} />} tone="info" />
       </section>
 
-      <KpiBar kpis={kpis} />
-
-      <section style={styles.panel}>
-        <div style={styles.panelHeader}>
-          <div>
-            <p style={styles.overline}>Caseload</p>
-            <h3 style={styles.panelTitle}>
-              {filteredPatients.length} of {patients.length} patients shown
-            </h3>
-          </div>
-          <CaseloadFilters
+      <div className="deglutech-dashboard-columns" style={styles.dashboardColumns}>
+        <section style={styles.queuePanel}>
+          <CaseloadToolbar
             search={search}
             setSearch={setSearch}
             riskFilter={riskFilter}
             setRiskFilter={setRiskFilter}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
+            phaseFilter={phaseFilter}
+            setPhaseFilter={setPhaseFilter}
+            shown={filteredPatients.length}
+            total={patients.length}
           />
-        </div>
 
-        <div style={styles.caseloadGrid}>
-          {filteredPatients.map((patient) => (
-            <PatientCard
-              key={patient.id}
-              patient={patient}
-              isSelected={patient.id === selectedPatient?.id}
-              onSelect={() => setSelectedId(patient.id)}
-            />
-          ))}
-          {filteredPatients.length === 0 && (
-            <div style={styles.emptyState}>
-              <Search size={20} color="#94a3b8" />
-              <span>No patients match the current filters.</span>
-            </div>
+          <CaseloadTable
+            patients={filteredPatients}
+            selectedId={selectedPatient?.id}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            onSort={selectSort}
+            onOpenPatient={openPatient}
+          />
+        </section>
+
+        <aside style={styles.sideRail} aria-label="Cohort insights">
+          <CohortRiskPanel patients={patients} />
+          <PhaseMixPanel patients={patients} />
+          <PopulationTrendPanel patients={patients} />
+          <InsightsPanel patients={patients} onOpenPatient={openPatient} />
+          {selectedPatient && (
+            <ActivePatientCard patient={selectedPatient} onOpen={() => setDrawerOpen(true)} onJump={onJump} />
           )}
-        </div>
-      </section>
+        </aside>
+      </div>
 
-      {selectedPatient && (
-        <PatientAnalytics patient={selectedPatient} onJump={onJump} />
+      {drawerOpen && selectedPatient && (
+        <PatientDrawer
+          patient={selectedPatient}
+          onClose={() => setDrawerOpen(false)}
+          onJump={onJump}
+        />
       )}
     </div>
   );
 };
 
-function KpiBar({ kpis }: { kpis: ReturnType<typeof computeCaseloadKpis> }) {
-  const tiles = [
-    { label: 'Active patients', value: kpis.total, icon: <Users size={16} />, accent: '#1d4ed8' },
-    { label: 'High risk', value: kpis.highRisk, icon: <AlertTriangle size={16} />, accent: '#dc2626' },
-    { label: 'Review within 7d', value: kpis.reviewDue, icon: <CalendarClock size={16} />, accent: '#0f766e' },
-    { label: 'Mean adherence', value: `${kpis.adherenceMean}%`, icon: <Activity size={16} />, accent: '#7c3aed' },
-    { label: 'Severe / profound', value: kpis.severeOrProfound, icon: <HeartPulse size={16} />, accent: '#b45309' },
-    { label: 'PEG / NGT', value: kpis.pegOrNgtDependent, icon: <ClipboardList size={16} />, accent: '#0891b2' },
-  ];
+function KpiCell({
+  label,
+  value,
+  sub,
+  icon,
+  tone = 'neutral',
+}: {
+  label: string;
+  value: string | number;
+  sub: string;
+  icon: React.ReactNode;
+  tone?: 'neutral' | 'high' | 'moderate' | 'low' | 'info';
+}) {
+  const color =
+    tone === 'high' ? '#dc2626' :
+    tone === 'moderate' ? '#d97706' :
+    tone === 'low' ? '#0f766e' :
+    tone === 'info' ? '#2563eb' :
+    '#10202f';
 
   return (
-    <section style={styles.kpiGrid}>
-      {tiles.map((tile) => (
-        <div key={tile.label} style={styles.kpiCard}>
-          <div style={{ ...styles.kpiIcon, color: tile.accent, background: `${tile.accent}15` }}>
-            {tile.icon}
-          </div>
-          <div style={styles.kpiBody}>
-            <div style={styles.kpiLabel}>{tile.label}</div>
-            <div style={styles.kpiValue}>{tile.value}</div>
-          </div>
-        </div>
-      ))}
-    </section>
+    <div style={styles.kpiCell}>
+      <div style={styles.kpiLabelRow}>
+        <span style={{ ...styles.kpiIcon, color, background: `${color}14` }}>{icon}</span>
+        <span>{label}</span>
+      </div>
+      <div style={{ ...styles.kpiValue, color }}>{value}</div>
+      <div style={styles.kpiSub}>{sub}</div>
+    </div>
   );
 }
 
-function CaseloadFilters({
+function CaseloadToolbar({
   search,
   setSearch,
   riskFilter,
   setRiskFilter,
-  sortBy,
-  setSortBy,
+  phaseFilter,
+  setPhaseFilter,
+  shown,
+  total,
 }: {
   search: string;
   setSearch: (value: string) => void;
   riskFilter: RiskFilter;
   setRiskFilter: (value: RiskFilter) => void;
-  sortBy: SortKey;
-  setSortBy: (value: SortKey) => void;
+  phaseFilter: PhaseFilter;
+  setPhaseFilter: (value: PhaseFilter) => void;
+  shown: number;
+  total: number;
 }) {
   return (
-    <div style={styles.filterRow}>
-      <label style={styles.searchWrap}>
-        <Search size={14} color="#64748b" />
-        <input
-          type="search"
-          placeholder="Search patient, ID, diagnosis…"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          style={styles.searchInput}
-        />
-      </label>
-      <div style={styles.filterChips}>
+    <div style={styles.queueToolbar}>
+      <div style={styles.queueTitleBlock}>
+        <div style={styles.queueTitle}>Caseload queue</div>
+        <div style={styles.queueCount}>{shown} of {total} patients</div>
+      </div>
+
+      <div style={styles.filterGroup} aria-label="Risk filter">
         <Filter size={14} color="#64748b" />
         {(['all', 'high', 'moderate', 'low'] as const).map((option) => (
           <button
             key={option}
             type="button"
             onClick={() => setRiskFilter(option)}
-            style={riskFilter === option ? styles.filterChipActive : styles.filterChip}
+            style={riskFilter === option ? styles.segmentActive : styles.segment}
           >
-            {option === 'all' ? 'All risk' : option.charAt(0).toUpperCase() + option.slice(1)}
+            {option === 'all' ? 'All' : option.charAt(0).toUpperCase() + option.slice(1)}
           </button>
         ))}
       </div>
+
       <select
-        value={sortBy}
-        onChange={(event) => setSortBy(event.target.value as SortKey)}
-        style={styles.sortSelect}
-        aria-label="Sort caseload"
+        value={phaseFilter}
+        onChange={(event) => setPhaseFilter(event.target.value as PhaseFilter)}
+        style={styles.phaseSelect}
+        aria-label="Filter by treatment phase"
       >
-        <option value="risk">Sort: Risk (high → low)</option>
-        <option value="review">Sort: Next review (soonest)</option>
-        <option value="adherence">Sort: Adherence (lowest)</option>
-        <option value="severity">Sort: Severity (highest)</option>
+        {PHASES.map((phase) => (
+          <option key={phase} value={phase}>
+            {phase === 'all' ? 'All phases' : phase}
+          </option>
+        ))}
       </select>
+
+      <label style={styles.searchWrap}>
+        <Search size={14} color="#64748b" />
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Name, ID, diagnosis..."
+          style={styles.searchInput}
+        />
+      </label>
     </div>
   );
 }
 
-function PatientCard({
-  patient,
-  isSelected,
-  onSelect,
+function CaseloadTable({
+  patients,
+  selectedId,
+  sortBy,
+  sortDirection,
+  onSort,
+  onOpenPatient,
 }: {
-  patient: PatientCaseloadEntry;
-  isSelected: boolean;
-  onSelect: () => void;
+  patients: PatientCaseloadEntry[];
+  selectedId?: string;
+  sortBy: SortKey;
+  sortDirection: SortDirection;
+  onSort: (key: SortKey) => void;
+  onOpenPatient: (patient: PatientCaseloadEntry) => void;
 }) {
-  const palette = RISK_PALETTE[patient.riskLevel];
-  const trend = patient.trends[patient.trends.length - 1]?.eat10 ?? 0;
-  const previous = patient.trends[patient.trends.length - 2]?.eat10 ?? trend;
-  const delta = trend - previous;
-  const improving = delta < 0;
+  return (
+    <div className="deglutech-caseload-table" style={styles.tableWrap}>
+      <div className="deglutech-caseload-row-head" style={styles.tableHeader}>
+        <span />
+        <SortHeader label="Patient" sortKey="risk" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+        <span>Diagnosis / phase</span>
+        <SortHeader label="Risk" sortKey="risk" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+        <SortHeader label="PAS" sortKey="severity" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} align="right" />
+        <span style={styles.alignRight}>FOIS</span>
+        <SortHeader label="EAT-10" sortKey="eat10" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} align="right" />
+        <SortHeader label="Jaw" sortKey="jaw" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} align="right" />
+        <SortHeader label="Adh" sortKey="adherence" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} align="right" />
+        <span>Trend</span>
+        <SortHeader label="Review" sortKey="review" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+        <span>Alerts</span>
+        <span style={styles.alignRight}>Actions</span>
+      </div>
 
+      <div style={styles.tableBody}>
+        {patients.map((patient) => (
+          <PatientRow
+            key={patient.id}
+            patient={patient}
+            selected={patient.id === selectedId}
+            onOpen={() => onOpenPatient(patient)}
+          />
+        ))}
+        {patients.length === 0 && (
+          <div style={styles.emptyState}>
+            <Search size={18} />
+            No patients match the current filters.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SortHeader({
+  label,
+  sortKey,
+  sortBy,
+  sortDirection,
+  onSort,
+  align,
+}: {
+  label: string;
+  sortKey: SortKey;
+  sortBy: SortKey;
+  sortDirection: SortDirection;
+  onSort: (key: SortKey) => void;
+  align?: 'right';
+}) {
+  const active = sortKey === sortBy;
   return (
     <button
       type="button"
-      onClick={onSelect}
+      onClick={() => onSort(sortKey)}
       style={{
-        ...styles.patientCard,
-        borderColor: isSelected ? '#1d4ed8' : '#dbe4ef',
-        boxShadow: isSelected ? '0 0 0 3px rgba(29, 78, 216, 0.12)' : 'none',
-        background: isSelected ? '#f8fafc' : '#ffffff',
+        ...styles.sortButton,
+        ...(align === 'right' ? styles.sortButtonRight : {}),
+        color: active ? '#10202f' : '#64748b',
       }}
-      aria-pressed={isSelected}
     >
-      <div style={styles.patientCardHeader}>
-        <div>
-          <div style={styles.patientName}>{patient.displayName}</div>
-          <div style={styles.patientId}>
-            {patient.id} · {patient.age} y · {patient.gender}
-          </div>
-        </div>
-        <span
-          style={{
-            ...styles.riskBadge,
-            background: palette.bg,
-            color: palette.fg,
-            border: `1px solid ${palette.border}`,
-          }}
-        >
-          {patient.riskLevel.toUpperCase()}
-        </span>
-      </div>
-
-      <div style={styles.diagnosisLine}>{patient.diagnosis}</div>
-      <div style={styles.metaRow}>
-        <span>{patient.stage}</span>
-        <span>·</span>
-        <span>{patient.phase}</span>
-      </div>
-
-      <div style={styles.patientStats}>
-        <Stat label="Severity" value={patient.severity} />
-        <Stat label="PAS" value={patient.pas} />
-        <Stat label="FOIS" value={patient.fois} />
-        <Stat label="Jaw" value={`${patient.jawOpening} mm`} />
-      </div>
-
-      <Sparkline points={patient.trends.map((t) => t.eat10)} accent={palette.border} />
-
-      <div style={styles.cardFooter}>
-        <span style={styles.footerLabel}>
-          EAT-10 {trend} {delta !== 0 && (
-            <span style={{ color: improving ? '#065f46' : '#991b1b', fontWeight: 800 }}>
-              {improving ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
-              {delta > 0 ? `+${delta}` : delta}
-            </span>
-          )}
-        </span>
-        <span style={styles.footerReview}>
-          <CalendarClock size={12} /> {patient.nextReview}
-        </span>
-      </div>
+      <span>{label}</span>
+      {active && (sortDirection === 'asc' ? <ArrowUp size={11} /> : <ArrowDown size={11} />)}
     </button>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
+function PatientRow({
+  patient,
+  selected,
+  onOpen,
+}: {
+  patient: PatientCaseloadEntry;
+  selected: boolean;
+  onOpen: () => void;
+}) {
+  const palette = RISK_PALETTE[patient.riskLevel];
+  const highConcern = patient.alerts.length > 0 || patient.riskLevel === 'high';
+  const trendValues = patient.trends.slice(-8).map((point) => point.eat10);
+
   return (
-    <div style={styles.statCell}>
-      <span style={styles.statLabel}>{label}</span>
-      <strong style={styles.statValue}>{value}</strong>
-    </div>
+    <button
+      type="button"
+      className="deglutech-caseload-row"
+      onClick={onOpen}
+      style={{
+        ...styles.patientRow,
+        ...(selected ? styles.patientRowSelected : {}),
+      }}
+    >
+      <span style={{ ...styles.avatar, background: palette.border }}>{initialsFor(patient.displayName)}</span>
+      <span style={styles.patientIdentity}>
+        <strong>{cleanText(patient.displayName)}</strong>
+        <span>{patient.id}</span>
+      </span>
+      <span style={styles.diagnosisCell}>
+        <strong>{cleanText(patient.diagnosis)}</strong>
+        <span>{cleanText(patient.phase)} / {cleanText(patient.stage)}</span>
+      </span>
+      <RiskPill risk={patient.riskLevel} />
+      <ScoreCell value={patient.pas} bad={patient.pas >= 5} />
+      <ScoreCell value={patient.fois} bad={patient.fois <= 3} />
+      <ScoreCell value={patient.eat10} bad={patient.eat10 >= 20} />
+      <ScoreCell value={patient.jawOpening} suffix="mm" bad={patient.jawOpening <= 30} />
+      <AdherenceBar value={patient.adherence} />
+      <Sparkline points={trendValues} accent={palette.border} width={76} height={22} />
+      <span style={styles.reviewCell}>
+        <strong>{formatReviewDate(patient.nextReview)}</strong>
+        <span>{patient.nextReview}</span>
+      </span>
+      <span style={styles.alertCell}>
+        {highConcern ? (
+          <span style={{ ...styles.alertPill, color: palette.fg, background: palette.bg }}>
+            <Sparkles size={11} /> {patient.alerts.length || 1}
+          </span>
+        ) : (
+          <span style={styles.mutedText}>Stable</span>
+        )}
+      </span>
+      <span style={styles.rowActions}>
+        <span title="Open report" style={styles.rowActionButton}><FileText size={12} /></span>
+        <span title="Message" style={styles.rowActionButton}><MessageSquare size={12} /></span>
+        <span title="More" style={styles.rowActionButton}><MoreHorizontal size={12} /></span>
+      </span>
+    </button>
   );
 }
 
-function Sparkline({ points, accent }: { points: number[]; accent: string }) {
-  if (points.length < 2) {
-    return <div style={styles.sparkPlaceholder}>Single visit recorded — no trend yet.</div>;
-  }
+function RiskPill({ risk }: { risk: RiskLevel }) {
+  const palette = RISK_PALETTE[risk];
+  return (
+    <span style={{ ...styles.riskPill, background: palette.bg, color: palette.fg }}>
+      <span style={{ ...styles.pulseDot, background: palette.border }} />
+      {risk.toUpperCase()}
+    </span>
+  );
+}
 
-  const width = 220;
-  const height = 36;
-  const padding = 4;
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const range = max - min || 1;
-  const stepX = (width - padding * 2) / (points.length - 1);
+function ScoreCell({ value, suffix, bad }: { value: number; suffix?: string; bad?: boolean }) {
+  return (
+    <span style={{ ...styles.scoreCell, color: bad ? '#dc2626' : '#10202f' }}>
+      {Number.isInteger(value) ? value : value.toFixed(1)}
+      {suffix && <small>{suffix}</small>}
+    </span>
+  );
+}
 
-  const coords = points.map((value, index) => {
-    const x = padding + index * stepX;
-    const y = padding + (1 - (value - min) / range) * (height - padding * 2);
-    return { x, y };
-  });
+function AdherenceBar({ value }: { value: number }) {
+  const color = value >= 85 ? '#0f766e' : value >= 65 ? '#d97706' : '#dc2626';
+  return (
+    <span style={styles.adherenceWrap}>
+      <span style={styles.adherenceTrack}>
+        <span style={{ ...styles.adherenceFill, width: `${value}%`, background: color }} />
+      </span>
+      <strong style={{ color }}>{value}</strong>
+    </span>
+  );
+}
 
-  const path = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
-  const areaPath = `${path} L ${coords[coords.length - 1].x.toFixed(1)} ${height - padding} L ${coords[0].x.toFixed(1)} ${height - padding} Z`;
+function CohortRiskPanel({ patients }: { patients: PatientCaseloadEntry[] }) {
+  return (
+    <RailPanel title="Cohort risk stratification" subtitle="Distribution across active HNC panel">
+      <div style={styles.riskPanelBody}>
+        <CohortRiskDonut patients={patients} />
+        <div style={styles.riskLegend}>
+          {(['high', 'moderate', 'low'] as const).map((risk) => {
+            const count = patients.filter((patient) => patient.riskLevel === risk).length;
+            const palette = RISK_PALETTE[risk];
+            return (
+              <div key={risk} style={styles.legendRow}>
+                <span style={{ ...styles.legendSwatch, background: palette.border }} />
+                <span>{risk}</span>
+                <strong>{count}</strong>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </RailPanel>
+  );
+}
+
+function CohortRiskDonut({ patients }: { patients: PatientCaseloadEntry[] }) {
+  const total = Math.max(patients.length, 1);
+  const radius = 45;
+  const stroke = 16;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
 
   return (
-    <svg width={width} height={height} style={styles.sparkSvg} aria-label="EAT-10 trend">
-      <path d={areaPath} fill={`${accent}25`} stroke="none" />
-      <path d={path} stroke={accent} strokeWidth={1.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      {coords.map((c, i) => (
-        <circle key={i} cx={c.x} cy={c.y} r={1.8} fill={accent} />
-      ))}
+    <svg width="124" height="124" viewBox="0 0 124 124" role="img" aria-label="Cohort risk distribution">
+      <circle cx="62" cy="62" r={radius} stroke="#e2e8f0" strokeWidth={stroke} fill="none" />
+      {(['high', 'moderate', 'low'] as const).map((risk) => {
+        const count = patients.filter((patient) => patient.riskLevel === risk).length;
+        const length = (count / total) * circumference;
+        const segmentOffset = offset;
+        offset += length;
+        return (
+          <circle
+            key={risk}
+            cx="62"
+            cy="62"
+            r={radius}
+            stroke={RISK_PALETTE[risk].border}
+            strokeWidth={stroke}
+            fill="none"
+            strokeDasharray={`${length} ${circumference - length}`}
+            strokeDashoffset={-segmentOffset}
+            strokeLinecap="butt"
+            transform="rotate(-90 62 62)"
+          />
+        );
+      })}
+      <text x="62" y="58" textAnchor="middle" fontSize="23" fontWeight="900" fill="#10202f">{patients.length}</text>
+      <text x="62" y="76" textAnchor="middle" fontSize="10" fontWeight="700" fill="#64748b">TOTAL</text>
     </svg>
   );
 }
 
-function PatientAnalytics({
+function PhaseMixPanel({ patients }: { patients: PatientCaseloadEntry[] }) {
+  const phaseColors: Record<PatientCaseloadEntry['phase'], string> = {
+    Prehab: '#2563eb',
+    'Post-op': '#7c3aed',
+    'During RT': '#dc2626',
+    'Post-CRT': '#d97706',
+    Survivorship: '#0f766e',
+  };
+  const total = Math.max(patients.length, 1);
+
+  return (
+    <RailPanel title="Treatment phase mix" subtitle="Patient position in the rehabilitation journey">
+      <div style={styles.phaseStack}>
+        {PHASES.filter((phase): phase is PatientCaseloadEntry['phase'] => phase !== 'all').map((phase) => {
+          const count = patients.filter((patient) => patient.phase === phase).length;
+          if (!count) return null;
+          return (
+            <span
+              key={phase}
+              title={`${phase}: ${count}`}
+              style={{
+                ...styles.phaseSegment,
+                width: `${(count / total) * 100}%`,
+                background: phaseColors[phase],
+              }}
+            />
+          );
+        })}
+      </div>
+      <div style={styles.phaseLegend}>
+        {PHASES.filter((phase): phase is PatientCaseloadEntry['phase'] => phase !== 'all').map((phase) => {
+          const count = patients.filter((patient) => patient.phase === phase).length;
+          if (!count) return null;
+          return (
+            <div key={phase} style={styles.legendRow}>
+              <span style={{ ...styles.legendSwatch, background: phaseColors[phase] }} />
+              <span>{phase}</span>
+              <strong>{count}</strong>
+            </div>
+          );
+        })}
+      </div>
+    </RailPanel>
+  );
+}
+
+function PopulationTrendPanel({ patients }: { patients: PatientCaseloadEntry[] }) {
+  const points = useMemo(() => {
+    const maxLength = Math.max(...patients.map((patient) => patient.trends.length), 0);
+    return Array.from({ length: maxLength }, (_, index) => {
+      const values = patients
+        .map((patient) => patient.trends[Math.min(index, patient.trends.length - 1)]?.eat10)
+        .filter((value): value is number => typeof value === 'number');
+      return values.length === 0
+        ? 0
+        : Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 10) / 10;
+    });
+  }, [patients]);
+
+  return (
+    <RailPanel title="Population EAT-10 curve" subtitle="Mean trend across visible care episodes">
+      <Sparkline points={points} accent="#2563eb" width={290} height={82} filled />
+      <div style={styles.trendCaption}>
+        <span>Lower is better</span>
+        <strong>{points[points.length - 1] ?? 0}</strong>
+      </div>
+    </RailPanel>
+  );
+}
+
+function InsightsPanel({
+  patients,
+  onOpenPatient,
+}: {
+  patients: PatientCaseloadEntry[];
+  onOpenPatient: (patient: PatientCaseloadEntry) => void;
+}) {
+  const flagged = patients
+    .filter((patient) => patient.alerts.length > 0)
+    .sort((a, b) => b.alerts.length - a.alerts.length)
+    .slice(0, 5);
+
+  return (
+    <RailPanel title="Today's flags" subtitle="Traceable clinical concerns">
+      <div style={styles.insightList}>
+        {flagged.map((patient) => (
+          <button
+            key={patient.id}
+            type="button"
+            onClick={() => onOpenPatient(patient)}
+            style={styles.insightRow}
+          >
+            <span style={{ ...styles.insightIcon, color: RISK_PALETTE[patient.riskLevel].fg }}>
+              <AlertTriangle size={14} />
+            </span>
+            <span style={styles.insightText}>
+              <strong>{cleanText(patient.alerts[0])}</strong>
+              <span>{cleanText(patient.displayName)} / {patient.id}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </RailPanel>
+  );
+}
+
+function ActivePatientCard({
+  patient,
+  onOpen,
+  onJump,
+}: {
+  patient: PatientCaseloadEntry;
+  onOpen: () => void;
+  onJump: (section: HncSectionId) => void;
+}) {
+  return (
+    <div style={styles.activeCard}>
+      <div style={styles.activeHeader}>
+        <span style={{ ...styles.avatar, background: RISK_PALETTE[patient.riskLevel].border }}>
+          {initialsFor(patient.displayName)}
+        </span>
+        <div>
+          <p style={styles.overline}>Selected patient</p>
+          <h3 style={styles.activeName}>{cleanText(patient.displayName)}</h3>
+        </div>
+      </div>
+      <div style={styles.activeScores}>
+        <MiniMetric label="PAS" value={patient.pas} />
+        <MiniMetric label="FOIS" value={patient.fois} />
+        <MiniMetric label="Jaw" value={`${patient.jawOpening} mm`} />
+      </div>
+      <div style={styles.activeActions}>
+        <button type="button" style={styles.primaryAction} onClick={onOpen}>
+          Open analytics <ChevronRight size={14} />
+        </button>
+        <button type="button" style={styles.secondaryAction} onClick={() => onJump('report')}>
+          Report
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function RailPanel({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section style={styles.railPanel}>
+      <div style={styles.railHeader}>
+        <div>
+          <h3 style={styles.railTitle}>{title}</h3>
+          <p style={styles.railSub}>{subtitle}</p>
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function MiniMetric({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div style={styles.miniMetric}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function PatientDrawer({
+  patient,
+  onClose,
+  onJump,
+}: {
+  patient: PatientCaseloadEntry;
+  onClose: () => void;
+  onJump: (section: HncSectionId) => void;
+}) {
+  const [tab, setTab] = useState<DrawerTab>('overview');
+
+  useEffect(() => {
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+
+  return (
+    <div style={styles.drawerShell}>
+      <button type="button" aria-label="Close patient analytics" style={styles.drawerBackdrop} onClick={onClose} />
+      <aside className="deglutech-patient-drawer" style={styles.drawerPanel}>
+        <header style={styles.drawerHeader}>
+          <span style={{ ...styles.drawerAvatar, background: RISK_PALETTE[patient.riskLevel].border }}>
+            {initialsFor(patient.displayName)}
+          </span>
+          <div style={styles.drawerIdentity}>
+            <div style={styles.drawerTitleLine}>
+              <h2 style={styles.drawerTitle}>{cleanText(patient.displayName)}</h2>
+              <span style={styles.drawerId}>{patient.id}</span>
+              <RiskPill risk={patient.riskLevel} />
+            </div>
+            <p style={styles.drawerSubtitle}>
+              {cleanText(patient.diagnosis)} / {cleanText(patient.stage)} / {cleanText(patient.phase)}
+            </p>
+          </div>
+          <div style={styles.drawerActions}>
+            <button type="button" style={styles.secondaryAction} onClick={() => onJump('swallow')}>
+              Swallow
+            </button>
+            <button type="button" style={styles.primaryAction} onClick={() => onJump('report')}>
+              Report <ChevronRight size={14} />
+            </button>
+            <button type="button" style={styles.iconAction} onClick={onClose} aria-label="Close">
+              <X size={16} />
+            </button>
+          </div>
+        </header>
+
+        <nav style={styles.drawerTabs} aria-label="Patient analytics tabs">
+          {([
+            ['overview', 'Overview', Activity],
+            ['icf', 'WHO-ICF', HeartPulse],
+            ['trends', 'Score trends', LineChart],
+            ['plan', 'Plan', Dumbbell],
+          ] as const).map(([key, label, Icon]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTab(key)}
+              style={tab === key ? styles.drawerTabActive : styles.drawerTab}
+            >
+              <Icon size={13} /> {label}
+            </button>
+          ))}
+        </nav>
+
+        <div style={styles.drawerBody}>
+          {tab === 'overview' && <PatientOverview patient={patient} />}
+          {tab === 'icf' && <IcfTab patient={patient} />}
+          {tab === 'trends' && <TrendsTab patient={patient} />}
+          {tab === 'plan' && <PlanTab patient={patient} onJump={onJump} />}
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+function PatientOverview({ patient }: { patient: PatientCaseloadEntry }) {
+  return (
+    <div style={styles.drawerGrid}>
+      <section style={styles.drawerCardWide}>
+        <div style={styles.drawerCardHeader}>
+          <h3 style={styles.drawerCardTitle}>Predictive insights</h3>
+          <Sparkles size={15} color="#2563eb" />
+        </div>
+        <div style={styles.insightList}>
+          {patient.alerts.length > 0 ? patient.alerts.map((alert) => (
+            <div key={alert} style={styles.alertInsight}>
+              <AlertTriangle size={15} color="#dc2626" />
+              <span>{cleanText(alert)}</span>
+              <button type="button" style={styles.ackButton}><Check size={12} /> Ack</button>
+            </div>
+          )) : (
+            <div style={styles.okBanner}>No active alerts recorded for this patient.</div>
+          )}
+        </div>
+      </section>
+
+      <section style={styles.drawerMetricGrid}>
+        <ScoreTile label="PAS" value={patient.pas} max={8} bad={patient.pas >= 5} note="Penetration aspiration" />
+        <ScoreTile label="FOIS" value={patient.fois} max={7} bad={patient.fois <= 3} note="Oral intake" />
+        <ScoreTile label="EAT-10" value={patient.eat10} max={40} bad={patient.eat10 >= 20} note="Swallow burden" />
+        <ScoreTile label="Jaw" value={patient.jawOpening} max={50} suffix="mm" bad={patient.jawOpening <= 30} note="Inter-incisal" />
+      </section>
+
+      <RiskHeatmap patient={patient} />
+      <AdherenceDonut patient={patient} />
+      <MilestoneTimeline patient={patient} />
+      <AlertsAndConcerns patient={patient} />
+    </div>
+  );
+}
+
+function IcfTab({ patient }: { patient: PatientCaseloadEntry }) {
+  return (
+    <div style={styles.icfDrawerGrid}>
+      <section style={styles.drawerCard}>
+        <div style={styles.drawerCardHeader}>
+          <h3 style={styles.drawerCardTitle}>WHO-ICF profile</h3>
+          <HeartPulse size={15} color="#2563eb" />
+        </div>
+        <IcfRadar patient={patient} />
+      </section>
+      <section style={styles.drawerCard}>
+        <div style={styles.drawerCardHeader}>
+          <h3 style={styles.drawerCardTitle}>Qualifier dimensions</h3>
+        </div>
+        <div style={styles.icfDimensionList}>
+          {Object.entries(patient.icfQualifiers).map(([code, value]) => (
+            <div key={code} style={styles.icfDimensionRow}>
+              <span style={styles.icfCode}>{code}</span>
+              <span style={styles.icfBars}>
+                {[0, 1, 2, 3].map((level) => (
+                  <span
+                    key={level}
+                    style={{
+                      ...styles.icfBar,
+                      background: level < value ? qualifierColor(value) : '#e2e8f0',
+                    }}
+                  />
+                ))}
+              </span>
+              <strong>{value}</strong>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function TrendsTab({ patient }: { patient: PatientCaseloadEntry }) {
+  return (
+    <div style={styles.trendBlocks}>
+      <TrendBlock patient={patient} dataKey="eat10" title="EAT-10" max={40} color="#dc2626" lowerBetter />
+      <TrendBlock patient={patient} dataKey="fois" title="FOIS" max={7} min={1} color="#0f766e" />
+      <TrendBlock patient={patient} dataKey="jawOpening" title="Jaw opening" max={55} min={15} color="#7c3aed" />
+      <TrendBlock patient={patient} dataKey="pas" title="PAS" max={8} color="#d97706" lowerBetter />
+    </div>
+  );
+}
+
+function PlanTab({
   patient,
   onJump,
 }: {
   patient: PatientCaseloadEntry;
   onJump: (section: HncSectionId) => void;
 }) {
-  return (
-    <section style={styles.analyticsPanel}>
-      <header style={styles.analyticsHeader}>
-        <div>
-          <p style={styles.overline}>Patient analytics</p>
-          <h3 style={styles.analyticsTitle}>{patient.displayName}</h3>
-          <p style={styles.analyticsSub}>
-            {patient.diagnosis} · {patient.stage} · {patient.phase} · Route: {patient.currentRoute}
-          </p>
-        </div>
-        <div style={styles.analyticsActions}>
-          {patient.isActive && (
-            <button type="button" style={styles.actionPrimary} onClick={() => onJump('report')}>
-              <Sparkles size={14} /> Open report
-            </button>
-          )}
-          <button type="button" style={styles.actionGhost} onClick={() => onJump('swallow')}>
-            Swallow workspace <ChevronRight size={14} />
-          </button>
-        </div>
-      </header>
+  const protocols = [
+    ['Effortful swallow', 'Pharyngeal pressure', '3 x 10', patient.adherence],
+    ['Masako maneuver', 'Tongue base drive', '3 x 10', Math.max(52, patient.adherence - 8)],
+    ['Jaw range program', 'Trismus prevention', '5 x 5 sec', Math.max(45, patient.adherence - 14)],
+    ['Speech articulation drills', 'Intelligibility', '15 min', Math.min(99, patient.adherence + 4)],
+  ];
 
-      <div style={styles.analyticsGrid}>
-        <RiskHeatmap patient={patient} />
-        <IcfRadar patient={patient} />
-        <ScoreTrendChart patient={patient} />
-        <AdherenceDonut patient={patient} />
-        <MilestoneTimeline patient={patient} />
-        <AlertsAndConcerns patient={patient} />
+  return (
+    <div style={styles.drawerGrid}>
+      <section style={styles.drawerCardWide}>
+        <div style={styles.drawerCardHeader}>
+          <h3 style={styles.drawerCardTitle}>Active prescription</h3>
+          <FloatingBadge tone={patient.adherence >= 80 ? 'success' : 'warning'}>
+            {patient.adherence}% adherence
+          </FloatingBadge>
+        </div>
+        <div style={styles.protocolTable}>
+          {protocols.map(([name, goal, dose, adherence]) => (
+            <div key={String(name)} style={styles.protocolRow}>
+              <strong>{name}</strong>
+              <span>{goal}</span>
+              <span>{dose}</span>
+              <AdherenceBar value={Number(adherence)} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section style={styles.drawerCard}>
+        <div style={styles.drawerCardHeader}>
+          <h3 style={styles.drawerCardTitle}>Suggested adjustment</h3>
+          <Sparkles size={15} color="#2563eb" />
+        </div>
+        <p style={styles.cardText}>
+          Jaw opening is {patient.jawOpening} mm. Consider increasing low-pain range work and review trismus precautions at the next contact.
+        </p>
+        <button type="button" style={styles.primaryAction} onClick={() => onJump('exercise')}>
+          Open exercise plan <ChevronRight size={14} />
+        </button>
+      </section>
+
+      <section style={styles.drawerCard}>
+        <div style={styles.drawerCardHeader}>
+          <h3 style={styles.drawerCardTitle}>Primary concerns</h3>
+        </div>
+        <div style={styles.concernsChips}>
+          {patient.primaryConcerns.map((concern) => (
+            <span key={concern} style={styles.concernChip}>{cleanText(concern)}</span>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ScoreTile({
+  label,
+  value,
+  max,
+  suffix,
+  bad,
+  note,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  suffix?: string;
+  bad?: boolean;
+  note: string;
+}) {
+  const color = bad ? '#dc2626' : '#0f766e';
+  const percent = Math.max(0, Math.min(100, (value / max) * 100));
+  return (
+    <div style={styles.scoreTile}>
+      <div style={styles.scoreTileTop}>
+        <span>{label}</span>
+        <small>/{max}</small>
       </div>
-    </section>
+      <div style={{ ...styles.scoreTileValue, color }}>
+        {value}
+        {suffix && <small>{suffix}</small>}
+      </div>
+      <div style={styles.adherenceTrack}>
+        <span style={{ ...styles.adherenceFill, width: `${percent}%`, background: color }} />
+      </div>
+      <p style={styles.scoreTileNote}>{note}</p>
+    </div>
   );
 }
 
@@ -417,254 +1037,108 @@ function RiskHeatmap({ patient }: { patient: PatientCaseloadEntry }) {
     { label: 'Airway', value: patient.airwayRisk },
     { label: 'Nutrition', value: patient.nutritionRisk },
     { label: 'PAS', value: Math.min(4, Math.ceil(patient.pas / 2)) },
-    { label: 'FOIS (inverted)', value: Math.max(0, 4 - Math.floor(patient.fois / 2)) },
+    { label: 'FOIS inv.', value: Math.max(0, 4 - Math.floor(patient.fois / 2)) },
   ];
 
-  const cellColor = (value: number): string => {
-    if (value >= 4) return '#dc2626';
-    if (value >= 3) return '#ea580c';
-    if (value >= 2) return '#ca8a04';
-    if (value >= 1) return '#65a30d';
-    return '#10b981';
-  };
-
   return (
-    <div style={styles.analyticsCard}>
-      <h4 style={styles.analyticsCardTitle}>Risk heatmap</h4>
+    <section style={styles.drawerCard}>
+      <div style={styles.drawerCardHeader}>
+        <h3 style={styles.drawerCardTitle}>Risk heatmap</h3>
+        <AlertTriangle size={15} color="#dc2626" />
+      </div>
       <div style={styles.heatGrid}>
         {rows.map((row) => (
           <div key={row.label} style={styles.heatRow}>
-            <span style={styles.heatLabel}>{row.label}</span>
-            <div style={styles.heatCells}>
+            <span>{row.label}</span>
+            <span style={styles.heatCells}>
               {[0, 1, 2, 3, 4].map((level) => (
                 <span
                   key={level}
                   style={{
                     ...styles.heatCell,
-                    background: level <= row.value ? cellColor(row.value) : '#e2e8f0',
+                    background: level < row.value ? qualifierColor(row.value) : '#e2e8f0',
                   }}
                 />
               ))}
-            </div>
-            <span style={{ ...styles.heatValue, color: cellColor(row.value) }}>{row.value}</span>
+            </span>
+            <strong style={{ color: qualifierColor(row.value) }}>{row.value}</strong>
           </div>
         ))}
       </div>
-      <p style={styles.cardFootnote}>0 = none · 4 = severe. Cells fill cumulatively with intensity.</p>
-    </div>
+    </section>
   );
 }
 
 function IcfRadar({ patient }: { patient: PatientCaseloadEntry }) {
-  const axes: Array<keyof typeof patient.icfQualifiers> = [
-    'b5105',
-    'b310',
-    'b320',
-    's320',
-    'd550',
-    'd560',
-    'd330',
-    'e310',
-  ];
-
-  const size = 220;
-  const cx = size / 2;
-  const cy = size / 2;
-  const radius = size / 2 - 28;
+  const axes = Object.keys(patient.icfQualifiers) as Array<keyof typeof patient.icfQualifiers>;
+  const size = 260;
+  const center = size / 2;
+  const radius = center - 36;
   const maxValue = 4;
-
   const angleFor = (index: number) => (Math.PI * 2 * index) / axes.length - Math.PI / 2;
-
-  const points = axes.map((axis, index) => {
+  const pointFor = (index: number, value: number) => {
     const angle = angleFor(index);
-    const value = patient.icfQualifiers[axis];
     const r = (value / maxValue) * radius;
     return {
-      x: cx + Math.cos(angle) * r,
-      y: cy + Math.sin(angle) * r,
-      angle,
-      label: axis,
-      value,
+      x: center + Math.cos(angle) * r,
+      y: center + Math.sin(angle) * r,
     };
-  });
-
-  const polygon = points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-
-  const ringValues = [1, 2, 3, 4];
-
-  return (
-    <div style={styles.analyticsCard}>
-      <h4 style={styles.analyticsCardTitle}>WHO-ICF profile (radar)</h4>
-      <svg width={size} height={size} role="img" aria-label="ICF qualifiers radar chart">
-        {ringValues.map((value) => (
-          <polygon
-            key={value}
-            points={axes
-              .map((_, index) => {
-                const angle = angleFor(index);
-                const r = (value / maxValue) * radius;
-                return `${(cx + Math.cos(angle) * r).toFixed(1)},${(cy + Math.sin(angle) * r).toFixed(1)}`;
-              })
-              .join(' ')}
-            fill="none"
-            stroke="#e2e8f0"
-            strokeWidth={1}
-          />
-        ))}
-        {axes.map((axis, index) => {
-          const angle = angleFor(index);
-          const lx = cx + Math.cos(angle) * (radius + 14);
-          const ly = cy + Math.sin(angle) * (radius + 14);
-          return (
-            <g key={axis}>
-              <line
-                x1={cx}
-                y1={cy}
-                x2={cx + Math.cos(angle) * radius}
-                y2={cy + Math.sin(angle) * radius}
-                stroke="#e2e8f0"
-                strokeWidth={1}
-              />
-              <text
-                x={lx}
-                y={ly}
-                fontSize="10"
-                fontWeight={700}
-                fill="#475569"
-                textAnchor="middle"
-                dominantBaseline="middle"
-              >
-                {axis}
-              </text>
-            </g>
-          );
-        })}
-        <polygon points={polygon} fill="#1d4ed833" stroke="#1d4ed8" strokeWidth={1.8} />
-        {points.map((p) => (
-          <circle key={p.label} cx={p.x} cy={p.y} r={3.2} fill="#1d4ed8" />
-        ))}
-      </svg>
-      <div style={styles.radarLegend}>
-        {axes.map((axis) => (
-          <span key={axis} style={styles.radarLegendItem}>
-            <strong>{axis}</strong>
-            <span>{patient.icfQualifiers[axis]}</span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ScoreTrendChart({ patient }: { patient: PatientCaseloadEntry }) {
-  const series: Array<{ key: keyof typeof patient.trends[0]; label: string; color: string; invert?: boolean }> = [
-    { key: 'eat10', label: 'EAT-10 (lower better)', color: '#dc2626' },
-    { key: 'fois', label: 'FOIS (higher better)', color: '#0f766e', invert: true },
-    { key: 'jawOpening', label: 'Jaw opening (mm)', color: '#7c3aed', invert: true },
-  ];
-
-  const width = 360;
-  const height = 180;
-  const padding = { top: 16, right: 10, bottom: 26, left: 30 };
-  const innerW = width - padding.left - padding.right;
-  const innerH = height - padding.top - padding.bottom;
-  const labels = patient.trends.map((t) => t.label);
-
-  const stepX = labels.length > 1 ? innerW / (labels.length - 1) : innerW;
-
-  const renderSeries = (s: typeof series[number]) => {
-    const values = patient.trends.map((t) => Number(t[s.key]));
-    if (values.length < 2) return null;
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const range = max - min || 1;
-    const coords = values.map((value, index) => {
-      const x = padding.left + index * stepX;
-      const normalized = (value - min) / range;
-      const y = padding.top + (s.invert ? 1 - normalized : normalized) * innerH;
-      return { x, y, value };
-    });
-    const path = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
-    return (
-      <g key={s.key}>
-        <path d={path} fill="none" stroke={s.color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
-        {coords.map((c, i) => (
-          <circle key={i} cx={c.x} cy={c.y} r={2.5} fill={s.color} />
-        ))}
-      </g>
-    );
   };
+  const polygon = axes
+    .map((axis, index) => {
+      const point = pointFor(index, patient.icfQualifiers[axis]);
+      return `${point.x.toFixed(1)},${point.y.toFixed(1)}`;
+    })
+    .join(' ');
 
   return (
-    <div style={{ ...styles.analyticsCard, gridColumn: 'span 2' }}>
-      <div style={styles.cardHeaderRow}>
-        <h4 style={styles.analyticsCardTitle}>Score trends</h4>
-        <LineChart size={16} color="#64748b" />
-      </div>
-      <svg width="100%" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Score trends">
-        <rect
-          x={padding.left}
-          y={padding.top}
-          width={innerW}
-          height={innerH}
-          fill="#f8fafc"
+    <svg width="100%" viewBox={`0 0 ${size} ${size}`} role="img" aria-label="WHO ICF radar chart">
+      {[1, 2, 3, 4].map((level) => (
+        <polygon
+          key={level}
+          points={axes
+            .map((_, index) => {
+              const point = pointFor(index, level);
+              return `${point.x.toFixed(1)},${point.y.toFixed(1)}`;
+            })
+            .join(' ')}
+          fill="none"
           stroke="#e2e8f0"
         />
-        {[0.25, 0.5, 0.75].map((fraction) => (
-          <line
-            key={fraction}
-            x1={padding.left}
-            y1={padding.top + innerH * fraction}
-            x2={padding.left + innerW}
-            y2={padding.top + innerH * fraction}
-            stroke="#e2e8f0"
-            strokeDasharray="3 3"
-          />
-        ))}
-        {labels.map((label, index) => (
-          <text
-            key={label}
-            x={padding.left + index * stepX}
-            y={height - 8}
-            fontSize="10"
-            fill="#64748b"
-            textAnchor="middle"
-          >
-            {label}
-          </text>
-        ))}
-        {series.map(renderSeries)}
-      </svg>
-      <div style={styles.legendRow}>
-        {series.map((s) => (
-          <span key={s.key} style={styles.legendItem}>
-            <span style={{ ...styles.legendSwatch, background: s.color }} />
-            {s.label}
-          </span>
-        ))}
-      </div>
-    </div>
+      ))}
+      {axes.map((axis, index) => {
+        const edge = pointFor(index, maxValue);
+        const label = pointFor(index, maxValue + 0.35);
+        return (
+          <g key={axis}>
+            <line x1={center} y1={center} x2={edge.x} y2={edge.y} stroke="#e2e8f0" />
+            <text x={label.x} y={label.y} textAnchor="middle" dominantBaseline="middle" fontSize="10" fontWeight="700" fill="#475569">
+              {axis}
+            </text>
+          </g>
+        );
+      })}
+      <polygon points={polygon} fill="rgba(37, 99, 235, 0.18)" stroke="#2563eb" strokeWidth="2" />
+    </svg>
   );
 }
 
 function AdherenceDonut({ patient }: { patient: PatientCaseloadEntry }) {
-  const size = 140;
-  const stroke = 14;
+  const size = 128;
+  const stroke = 13;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (patient.adherence / 100) * circumference;
-
-  const color =
-    patient.adherence >= 80 ? '#10b981' : patient.adherence >= 60 ? '#f59e0b' : '#dc2626';
+  const color = patient.adherence >= 85 ? '#0f766e' : patient.adherence >= 65 ? '#d97706' : '#dc2626';
 
   return (
-    <div style={styles.analyticsCard}>
-      <div style={styles.cardHeaderRow}>
-        <h4 style={styles.analyticsCardTitle}>Home program adherence</h4>
-        <Activity size={16} color="#64748b" />
+    <section style={styles.drawerCard}>
+      <div style={styles.drawerCardHeader}>
+        <h3 style={styles.drawerCardTitle}>Home adherence</h3>
+        <Activity size={15} color={color} />
       </div>
       <div style={styles.donutLayout}>
-        <svg width={size} height={size}>
+        <svg width={size} height={size} aria-label="Adherence donut">
           <circle cx={size / 2} cy={size / 2} r={radius} stroke="#e2e8f0" strokeWidth={stroke} fill="none" />
           <circle
             cx={size / 2}
@@ -678,682 +1152,1154 @@ function AdherenceDonut({ patient }: { patient: PatientCaseloadEntry }) {
             strokeLinecap="round"
             transform={`rotate(-90 ${size / 2} ${size / 2})`}
           />
-          <text
-            x={size / 2}
-            y={size / 2}
-            textAnchor="middle"
-            dominantBaseline="central"
-            fontSize="22"
-            fontWeight={900}
-            fill="#0f172a"
-          >
+          <text x={size / 2} y={size / 2} textAnchor="middle" dominantBaseline="central" fontSize="22" fontWeight="900" fill="#10202f">
             {patient.adherence}%
           </text>
         </svg>
         <div style={styles.donutMeta}>
-          <div>
-            <strong style={{ color }}>{adherenceLabel(patient.adherence)}</strong>
-            <div style={styles.donutMetaSub}>Weekly prescribed reps</div>
-          </div>
-          <div style={styles.donutMetaItem}>
-            <span>Last visit</span>
-            <strong>{patient.lastVisit}</strong>
-          </div>
-          <div style={styles.donutMetaItem}>
-            <span>Next review</span>
-            <strong>{patient.nextReview}</strong>
-          </div>
+          <MiniMetric label="Last visit" value={patient.lastVisit} />
+          <MiniMetric label="Next review" value={formatReviewDate(patient.nextReview)} />
         </div>
       </div>
-    </div>
+    </section>
   );
-}
-
-function adherenceLabel(value: number): string {
-  if (value >= 90) return 'Excellent';
-  if (value >= 80) return 'On target';
-  if (value >= 60) return 'At risk';
-  return 'Below threshold';
 }
 
 function MilestoneTimeline({ patient }: { patient: PatientCaseloadEntry }) {
   return (
-    <div style={{ ...styles.analyticsCard, gridColumn: 'span 2' }}>
-      <div style={styles.cardHeaderRow}>
-        <h4 style={styles.analyticsCardTitle}>Treatment milestones</h4>
-        <CalendarClock size={16} color="#64748b" />
+    <section style={styles.drawerCardWide}>
+      <div style={styles.drawerCardHeader}>
+        <h3 style={styles.drawerCardTitle}>Treatment milestones</h3>
+        <CalendarClock size={15} color="#64748b" />
       </div>
       <ol style={styles.timeline}>
         {patient.milestones.map((milestone, index) => {
-          const colors =
-            milestone.status === 'done'
-              ? { bg: '#dcfce7', fg: '#065f46', border: '#10b981' }
-              : milestone.status === 'current'
-              ? { bg: '#dbeafe', fg: '#1d4ed8', border: '#1d4ed8' }
-              : { bg: '#f1f5f9', fg: '#475569', border: '#cbd5e1' };
-
+          const color =
+            milestone.status === 'done' ? '#0f766e' :
+            milestone.status === 'current' ? '#2563eb' :
+            '#94a3b8';
           return (
             <li key={`${milestone.label}-${index}`} style={styles.timelineItem}>
-              <span
-                style={{
-                  ...styles.timelineDot,
-                  background: colors.border,
-                  outline: milestone.status === 'current' ? '4px solid #bfdbfe' : 'none',
-                }}
-              />
-              <div
-                style={{
-                  ...styles.timelineCard,
-                  background: colors.bg,
-                  borderColor: colors.border,
-                  color: colors.fg,
-                }}
-              >
-                <strong>{milestone.label}</strong>
+              <span style={{ ...styles.timelineDot, background: color }} />
+              <div style={styles.timelineCard}>
+                <strong>{cleanText(milestone.label)}</strong>
                 <span>{milestone.date}</span>
-                {milestone.note && <span style={styles.timelineNote}>{milestone.note}</span>}
+                {milestone.note && <small>{cleanText(milestone.note)}</small>}
               </div>
             </li>
           );
         })}
       </ol>
-    </div>
+    </section>
   );
 }
 
 function AlertsAndConcerns({ patient }: { patient: PatientCaseloadEntry }) {
   return (
-    <div style={styles.analyticsCard}>
-      <div style={styles.cardHeaderRow}>
-        <h4 style={styles.analyticsCardTitle}>Active alerts &amp; concerns</h4>
-        <AlertTriangle size={16} color="#dc2626" />
+    <section style={styles.drawerCard}>
+      <div style={styles.drawerCardHeader}>
+        <h3 style={styles.drawerCardTitle}>Concerns</h3>
+        <ClipboardList size={15} color="#64748b" />
       </div>
-      {patient.alerts.length === 0 ? (
-        <div style={styles.noAlerts}>No active alerts — patient is stable.</div>
-      ) : (
-        <ul style={styles.alertList}>
-          {patient.alerts.map((alert) => (
-            <li key={alert} style={styles.alertItem}>
-              <span style={styles.alertDot} />
-              <span>{alert}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-      <div style={styles.concernsBlock}>
-        <span style={styles.concernsLabel}>Primary concerns</span>
-        <div style={styles.concernsChips}>
-          {patient.primaryConcerns.map((concern) => (
-            <span key={concern} style={styles.concernChip}>
-              {concern}
-            </span>
-          ))}
-        </div>
+      <div style={styles.concernsChips}>
+        {patient.primaryConcerns.map((concern) => (
+          <span key={concern} style={styles.concernChip}>{cleanText(concern)}</span>
+        ))}
       </div>
-    </div>
+    </section>
   );
 }
 
-const styles: Record<string, any> = {
-  workspaceGrid: {
+function TrendBlock({
+  patient,
+  dataKey,
+  title,
+  max,
+  min = 0,
+  color,
+  lowerBetter,
+}: {
+  patient: PatientCaseloadEntry;
+  dataKey: keyof PatientCaseloadEntry['trends'][number];
+  title: string;
+  max: number;
+  min?: number;
+  color: string;
+  lowerBetter?: boolean;
+}) {
+  const values = patient.trends.map((point) => Number(point[dataKey]));
+  const first = values[0] ?? 0;
+  const last = values[values.length - 1] ?? first;
+  const delta = Math.round((last - first) * 10) / 10;
+  const good = lowerBetter ? delta <= 0 : delta >= 0;
+
+  return (
+    <section style={styles.drawerCardWide}>
+      <div style={styles.drawerCardHeader}>
+        <div>
+          <h3 style={styles.drawerCardTitle}>{title}</h3>
+          <p style={styles.railSub}>{lowerBetter ? 'Lower is better' : 'Higher is better'}</p>
+        </div>
+        <div style={styles.trendStats}>
+          <MiniMetric label="Baseline" value={first} />
+          <MiniMetric label="Current" value={last} />
+          <span style={{ ...styles.deltaPill, color: good ? '#0f766e' : '#dc2626', background: good ? '#dcfce7' : '#fee2e2' }}>
+            {good ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+            {delta > 0 ? `+${delta}` : delta}
+          </span>
+        </div>
+      </div>
+      <LineChartSvg points={values} max={max} min={min} color={color} />
+    </section>
+  );
+}
+
+function LineChartSvg({
+  points,
+  color,
+  min,
+  max,
+}: {
+  points: number[];
+  color: string;
+  min: number;
+  max: number;
+}) {
+  const width = 720;
+  const height = 190;
+  const padding = { top: 16, right: 18, bottom: 26, left: 34 };
+  const innerW = width - padding.left - padding.right;
+  const innerH = height - padding.top - padding.bottom;
+  const range = max - min || 1;
+  const stepX = points.length > 1 ? innerW / (points.length - 1) : innerW;
+  const coords = points.map((value, index) => ({
+    x: padding.left + index * stepX,
+    y: padding.top + (1 - (value - min) / range) * innerH,
+  }));
+  const path = coords.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
+  const areaPath = `${path} L ${coords[coords.length - 1]?.x ?? padding.left} ${height - padding.bottom} L ${padding.left} ${height - padding.bottom} Z`;
+
+  return (
+    <svg width="100%" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Score trend chart">
+      <rect x={padding.left} y={padding.top} width={innerW} height={innerH} fill="#f8fafc" stroke="#e2e8f0" />
+      {[0.25, 0.5, 0.75].map((fraction) => (
+        <line
+          key={fraction}
+          x1={padding.left}
+          y1={padding.top + innerH * fraction}
+          x2={padding.left + innerW}
+          y2={padding.top + innerH * fraction}
+          stroke="#e2e8f0"
+          strokeDasharray="3 3"
+        />
+      ))}
+      <path d={areaPath} fill={`${color}18`} />
+      <path d={path} fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      {coords.map((point, index) => (
+        <circle key={index} cx={point.x} cy={point.y} r="3" fill={color} />
+      ))}
+    </svg>
+  );
+}
+
+function Sparkline({
+  points,
+  accent,
+  width,
+  height,
+  filled,
+}: {
+  points: number[];
+  accent: string;
+  width: number;
+  height: number;
+  filled?: boolean;
+}) {
+  if (points.length < 2) {
+    return <span style={styles.mutedText}>No trend</span>;
+  }
+  const padding = 3;
+  const min = Math.min(...points);
+  const max = Math.max(...points);
+  const range = max - min || 1;
+  const stepX = (width - padding * 2) / (points.length - 1);
+  const coords = points.map((value, index) => {
+    const x = padding + index * stepX;
+    const y = padding + (1 - (value - min) / range) * (height - padding * 2);
+    return { x, y };
+  });
+  const path = coords.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ');
+  const areaPath = `${path} L ${coords[coords.length - 1].x.toFixed(1)} ${height - padding} L ${coords[0].x.toFixed(1)} ${height - padding} Z`;
+
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={styles.sparkSvg} role="img" aria-label="Trend sparkline">
+      {filled && <path d={areaPath} fill={`${accent}20`} />}
+      <path d={path} stroke={accent} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+const qualifierColor = (value: number): string => {
+  if (value >= 4) return '#dc2626';
+  if (value >= 3) return '#ea580c';
+  if (value >= 2) return '#ca8a04';
+  if (value >= 1) return '#65a30d';
+  return '#10b981';
+};
+
+const styles: Record<string, React.CSSProperties> = {
+  dashboardShell: {
     display: 'grid',
-    gap: '16px',
+    gap: '14px',
   },
-  heroPanel: {
+  dashboardTopbar: {
+    minHeight: '52px',
+    border: '1px solid #e2e8f0',
+    borderRadius: 8,
     background: '#ffffff',
-    border: '1px solid #dbe4ef',
-    borderRadius: '10px',
-    padding: '18px',
-    display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1fr) 220px',
-    gap: '18px',
-  },
-  heroCopy: {
-    minWidth: 0,
-  },
-  heroTitle: {
-    margin: 0,
-    fontSize: '22px',
-    lineHeight: 1.25,
-    color: '#0f172a',
-  },
-  heroText: {
-    margin: '8px 0 0',
-    color: '#475569',
-    fontSize: '13.5px',
-    lineHeight: 1.5,
-    maxWidth: '720px',
-  },
-  statusPanel: {
-    borderRadius: '8px',
-    background: '#f1f5f9',
-    padding: '16px',
-    display: 'grid',
-    alignContent: 'center',
-  },
-  largeNumber: {
-    fontSize: '40px',
-    fontWeight: 900,
-    color: '#0f766e',
-    lineHeight: 1,
-  },
-  statusLabel: {
-    color: '#475569',
-    fontSize: '12px',
-    fontWeight: 700,
-    marginTop: '4px',
-  },
-  savedLine: {
-    color: '#64748b',
-    fontSize: '12px',
-    marginTop: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+    padding: '10px 14px',
   },
   overline: {
     margin: 0,
-    textTransform: 'uppercase',
-    letterSpacing: '0.06em',
-    fontSize: '11px',
     color: '#64748b',
-    fontWeight: 800,
+    fontSize: 10,
+    fontWeight: 900,
+    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
-  kpiGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-    gap: '10px',
+  dashboardTitle: {
+    margin: '2px 0 0',
+    color: '#10202f',
+    fontSize: 18,
+    lineHeight: 1.15,
+    fontWeight: 850,
   },
-  kpiCard: {
-    background: '#ffffff',
-    border: '1px solid #dbe4ef',
-    borderRadius: '10px',
-    padding: '12px 14px',
-    display: 'grid',
-    gridTemplateColumns: '36px minmax(0, 1fr)',
-    gap: '10px',
+  topbarActions: {
+    display: 'flex',
     alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
+  topbarBadge: {
+    border: '1px solid #bfdbfe',
+    background: '#eff6ff',
+    color: '#1d4ed8',
+    borderRadius: 999,
+    padding: '5px 9px',
+    fontSize: 11,
+    fontWeight: 850,
+    whiteSpace: 'nowrap',
+  },
+  topbarMeta: {
+    color: '#64748b',
+    fontSize: 11,
+    fontWeight: 700,
+  },
+  kpiStrip: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(6, minmax(120px, 1fr))',
+    border: '1px solid #e2e8f0',
+    borderRadius: 8,
+    overflow: 'hidden',
+    background: '#ffffff',
+  },
+  kpiCell: {
+    minHeight: 92,
+    padding: '12px 14px',
+    borderRight: '1px solid #e2e8f0',
+    display: 'grid',
+    gap: 4,
+    alignContent: 'start',
+  },
+  kpiLabelRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 7,
+    color: '#64748b',
+    fontSize: 10.5,
+    fontWeight: 850,
+    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   kpiIcon: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '8px',
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    display: 'grid',
+    placeItems: 'center',
+    flex: '0 0 auto',
+  },
+  kpiValue: {
+    fontSize: 26,
+    lineHeight: 1.05,
+    fontWeight: 900,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  kpiSub: {
+    color: '#64748b',
+    fontSize: 11,
+    lineHeight: 1.25,
+  },
+  dashboardColumns: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) 320px',
+    gap: 14,
+    alignItems: 'start',
+  },
+  queuePanel: {
+    minWidth: 0,
+    border: '1px solid #e2e8f0',
+    background: '#ffffff',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  queueToolbar: {
+    minHeight: 48,
+    borderBottom: '1px solid #e2e8f0',
+    padding: '8px 12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    flexWrap: 'wrap',
+  },
+  queueTitleBlock: {
+    display: 'grid',
+    gap: 1,
+    minWidth: 140,
+  },
+  queueTitle: {
+    color: '#10202f',
+    fontSize: 13,
+    fontWeight: 850,
+  },
+  queueCount: {
+    color: '#64748b',
+    fontSize: 11,
+    fontWeight: 650,
+  },
+  filterGroup: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 4,
+    border: '1px solid #e2e8f0',
+    background: '#f8fafc',
+    borderRadius: 8,
+    padding: 3,
+  },
+  segment: {
+    minHeight: 26,
+    border: 0,
+    background: 'transparent',
+    color: '#475569',
+    borderRadius: 6,
+    padding: '0 8px',
+    fontSize: 11,
+    fontWeight: 750,
+    cursor: 'pointer',
+  },
+  segmentActive: {
+    minHeight: 26,
+    border: 0,
+    background: '#ffffff',
+    color: '#10202f',
+    borderRadius: 6,
+    padding: '0 8px',
+    fontSize: 11,
+    fontWeight: 850,
+    cursor: 'pointer',
+    boxShadow: '0 1px 3px rgba(15, 23, 42, 0.08)',
+  },
+  phaseSelect: {
+    minHeight: 34,
+    border: '1px solid #d7e3ea',
+    borderRadius: 8,
+    background: '#ffffff',
+    color: '#10202f',
+    padding: '0 10px',
+    fontSize: 12,
+    fontWeight: 700,
+  },
+  searchWrap: {
+    minHeight: 34,
+    minWidth: 220,
+    marginLeft: 'auto',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 7,
+    border: '1px solid #d7e3ea',
+    background: '#fbfdff',
+    borderRadius: 8,
+    padding: '0 10px',
+    flex: '1 1 220px',
+    maxWidth: 340,
+  },
+  searchInput: {
+    width: '100%',
+    minWidth: 0,
+    border: 0,
+    outline: 0,
+    background: 'transparent',
+    color: '#10202f',
+    fontSize: 12,
+  },
+  tableWrap: {
+    overflowX: 'auto',
+  },
+  tableHeader: {
+    minWidth: 1040,
+    display: 'grid',
+    gridTemplateColumns: '34px minmax(150px, 1.25fr) minmax(190px, 1.55fr) 82px 48px 52px 62px 62px 74px 86px 88px 64px 88px',
+    gap: 8,
+    alignItems: 'center',
+    minHeight: 34,
+    padding: '0 12px',
+    borderBottom: '1px solid #e2e8f0',
+    color: '#64748b',
+    fontSize: 10,
+    fontWeight: 900,
+    textTransform: 'uppercase',
+    letterSpacing: 0,
+    background: '#f8fafc',
+  },
+  tableBody: {
+    minWidth: 1040,
+  },
+  sortButton: {
+    border: 0,
+    padding: 0,
+    background: 'transparent',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 3,
+    cursor: 'pointer',
+    font: 'inherit',
+    textTransform: 'uppercase',
+    letterSpacing: 0,
+  },
+  sortButtonRight: {
+    justifyContent: 'flex-end',
+    textAlign: 'right',
+  },
+  alignRight: {
+    textAlign: 'right',
+  },
+  patientRow: {
+    width: '100%',
+    minWidth: 1040,
+    minHeight: 48,
+    border: 0,
+    borderBottom: '1px solid #eef2f7',
+    background: '#ffffff',
+    display: 'grid',
+    gridTemplateColumns: '34px minmax(150px, 1.25fr) minmax(190px, 1.55fr) 82px 48px 52px 62px 62px 74px 86px 88px 64px 88px',
+    gap: 8,
+    alignItems: 'center',
+    padding: '6px 12px',
+    textAlign: 'left',
+    cursor: 'pointer',
+    color: '#10202f',
+  },
+  patientRowSelected: {
+    background: '#f7fbfd',
+    boxShadow: 'inset 3px 0 0 #118aa3',
+  },
+  avatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 7,
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: 900,
+    display: 'grid',
+    placeItems: 'center',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  patientIdentity: {
+    display: 'grid',
+    minWidth: 0,
+    gap: 1,
+    fontSize: 12,
+  },
+  diagnosisCell: {
+    display: 'grid',
+    minWidth: 0,
+    gap: 1,
+    fontSize: 11.5,
+    color: '#475569',
+  },
+  reviewCell: {
+    display: 'grid',
+    gap: 1,
+    fontSize: 11,
+    color: '#475569',
+  },
+  riskPill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    width: 'fit-content',
+    borderRadius: 6,
+    padding: '4px 7px',
+    fontSize: 10,
+    fontWeight: 900,
+    letterSpacing: 0,
+  },
+  pulseDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 999,
+    boxShadow: '0 0 0 3px currentColor',
+    opacity: 0.72,
+  },
+  scoreCell: {
+    textAlign: 'right',
+    fontSize: 12,
+    fontWeight: 900,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  adherenceWrap: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 6,
+    width: '100%',
+    fontSize: 11,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  adherenceTrack: {
+    position: 'relative',
+    display: 'block',
+    height: 6,
+    minWidth: 44,
+    borderRadius: 999,
+    background: '#e2e8f0',
+    overflow: 'hidden',
+  },
+  adherenceFill: {
+    position: 'absolute',
+    inset: '0 auto 0 0',
+    borderRadius: 999,
+  },
+  alertCell: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  alertPill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 4,
+    borderRadius: 6,
+    padding: '3px 6px',
+    fontSize: 10,
+    fontWeight: 900,
+  },
+  mutedText: {
+    color: '#94a3b8',
+    fontSize: 11,
+    fontWeight: 700,
+  },
+  rowActions: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 4,
+  },
+  rowActionButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    border: '1px solid #e2e8f0',
+    background: '#f8fafc',
+    color: '#64748b',
     display: 'grid',
     placeItems: 'center',
   },
-  kpiBody: {
-    display: 'grid',
-    gap: '2px',
-  },
-  kpiLabel: {
-    color: '#64748b',
-    fontSize: '11.5px',
-    fontWeight: 700,
-    textTransform: 'uppercase',
-    letterSpacing: '0.04em',
-  },
-  kpiValue: {
-    color: '#0f172a',
-    fontSize: '22px',
-    fontWeight: 900,
-    lineHeight: 1.1,
-  },
-  panel: {
-    background: '#ffffff',
-    border: '1px solid #dbe4ef',
-    borderRadius: '10px',
-    padding: '16px 18px',
-  },
-  panelHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: '14px',
-    marginBottom: '14px',
-    flexWrap: 'wrap',
-  },
-  panelTitle: {
-    margin: '4px 0 0',
-    fontSize: '17px',
-    color: '#0f172a',
-  },
-  filterRow: {
-    display: 'flex',
-    gap: '10px',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  searchWrap: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    border: '1px solid #cbd5e1',
-    background: '#ffffff',
-    borderRadius: '8px',
-    padding: '0 10px',
-    minHeight: '36px',
-  },
-  searchInput: {
-    border: 'none',
-    outline: 'none',
-    padding: '7px 4px',
-    minWidth: '220px',
-    fontSize: '13px',
-    color: '#0f172a',
-    background: 'transparent',
-  },
-  filterChips: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-  },
-  filterChip: {
-    border: '1px solid #cbd5e1',
-    background: '#ffffff',
-    color: '#334155',
-    fontSize: '12px',
-    fontWeight: 700,
-    padding: '6px 10px',
-    borderRadius: '999px',
-    cursor: 'pointer',
-  },
-  filterChipActive: {
-    border: '1px solid #1d4ed8',
-    background: '#1d4ed8',
-    color: '#ffffff',
-    fontSize: '12px',
-    fontWeight: 800,
-    padding: '6px 10px',
-    borderRadius: '999px',
-    cursor: 'pointer',
-  },
-  sortSelect: {
-    border: '1px solid #cbd5e1',
-    background: '#ffffff',
-    color: '#0f172a',
-    borderRadius: '8px',
-    fontSize: '12.5px',
-    padding: '7px 10px',
-    minHeight: '36px',
-  },
-  caseloadGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    gap: '12px',
-  },
-  patientCard: {
-    border: '1px solid',
-    borderRadius: '10px',
-    padding: '14px',
-    background: '#ffffff',
-    display: 'grid',
-    gap: '10px',
-    textAlign: 'left',
-    cursor: 'pointer',
-    transition: 'all 0.12s ease',
-  },
-  patientCardHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  patientName: {
-    fontWeight: 800,
-    color: '#0f172a',
-    fontSize: '14px',
-  },
-  patientId: {
-    fontSize: '11.5px',
-    color: '#64748b',
-    marginTop: '2px',
-  },
-  riskBadge: {
-    fontSize: '10.5px',
-    padding: '4px 8px',
-    borderRadius: '999px',
-    fontWeight: 900,
-    letterSpacing: '0.06em',
-  },
-  diagnosisLine: {
-    fontSize: '12.5px',
-    color: '#334155',
-    lineHeight: 1.4,
-  },
-  metaRow: {
-    display: 'flex',
-    gap: '6px',
-    color: '#64748b',
-    fontSize: '11.5px',
-    fontWeight: 600,
-  },
-  patientStats: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-    gap: '6px',
-  },
-  statCell: {
-    background: '#f8fafc',
-    border: '1px solid #e2e8f0',
-    borderRadius: '6px',
-    padding: '6px 8px',
-    display: 'grid',
-    gap: '2px',
-  },
-  statLabel: {
-    fontSize: '10px',
-    color: '#64748b',
-    fontWeight: 700,
-    textTransform: 'uppercase',
-    letterSpacing: '0.04em',
-  },
-  statValue: {
-    fontSize: '13px',
-    color: '#0f172a',
-    fontWeight: 800,
-  },
   sparkSvg: {
     display: 'block',
-    width: '100%',
-    height: '36px',
-  },
-  sparkPlaceholder: {
-    background: '#f8fafc',
-    border: '1px dashed #e2e8f0',
-    borderRadius: '6px',
-    padding: '8px',
-    fontSize: '11px',
-    color: '#64748b',
-    textAlign: 'center',
-  },
-  cardFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    fontSize: '11.5px',
-    color: '#475569',
-  },
-  footerLabel: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '4px',
-    fontWeight: 700,
-  },
-  footerReview: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '4px',
+    maxWidth: '100%',
   },
   emptyState: {
-    gridColumn: '1 / -1',
-    background: '#f8fafc',
-    border: '1px dashed #cbd5e1',
-    borderRadius: '8px',
-    padding: '20px',
-    textAlign: 'center',
-    color: '#475569',
+    padding: 28,
+    color: '#64748b',
     display: 'flex',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    gap: '8px',
+    gap: 8,
+    fontSize: 13,
   },
-  analyticsPanel: {
-    background: '#ffffff',
-    border: '1px solid #dbe4ef',
-    borderRadius: '10px',
-    padding: '18px',
+  sideRail: {
     display: 'grid',
-    gap: '16px',
+    gap: 12,
   },
-  analyticsHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: '16px',
-    flexWrap: 'wrap',
-  },
-  analyticsTitle: {
-    margin: '4px 0 4px',
-    fontSize: '20px',
-    color: '#0f172a',
-  },
-  analyticsSub: {
-    margin: 0,
-    color: '#475569',
-    fontSize: '13px',
-    maxWidth: '760px',
-  },
-  analyticsActions: {
-    display: 'flex',
-    gap: '8px',
-    flexWrap: 'wrap',
-  },
-  actionPrimary: {
-    minHeight: '36px',
-    border: '1px solid #1d4ed8',
-    background: '#1d4ed8',
-    color: '#ffffff',
-    padding: '0 12px',
-    borderRadius: '8px',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontWeight: 800,
-    fontSize: '12.5px',
-    cursor: 'pointer',
-  },
-  actionGhost: {
-    minHeight: '36px',
-    border: '1px solid #cbd5e1',
+  railPanel: {
+    border: '1px solid #e2e8f0',
+    borderRadius: 8,
     background: '#ffffff',
-    color: '#0f172a',
-    padding: '0 12px',
-    borderRadius: '8px',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontWeight: 700,
-    fontSize: '12.5px',
-    cursor: 'pointer',
+    padding: '12px',
+    display: 'grid',
+    gap: 10,
   },
-  analyticsGrid: {
+  railHeader: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  railTitle: {
+    margin: 0,
+    color: '#10202f',
+    fontSize: 13,
+    lineHeight: 1.2,
+    fontWeight: 850,
+  },
+  railSub: {
+    margin: '3px 0 0',
+    color: '#64748b',
+    fontSize: 11,
+    lineHeight: 1.35,
+  },
+  riskPanelBody: {
+    display: 'grid',
+    gridTemplateColumns: '124px minmax(0, 1fr)',
+    gap: 12,
+    alignItems: 'center',
+  },
+  riskLegend: {
+    display: 'grid',
+    gap: 7,
+  },
+  legendRow: {
+    display: 'grid',
+    gridTemplateColumns: '10px minmax(0, 1fr) auto',
+    gap: 7,
+    alignItems: 'center',
+    color: '#475569',
+    fontSize: 11,
+    textTransform: 'capitalize',
+  },
+  legendSwatch: {
+    width: 9,
+    height: 9,
+    borderRadius: 3,
+  },
+  phaseStack: {
+    display: 'flex',
+    width: '100%',
+    height: 12,
+    borderRadius: 8,
+    overflow: 'hidden',
+    background: '#e2e8f0',
+  },
+  phaseSegment: {
+    display: 'block',
+    height: '100%',
+  },
+  phaseLegend: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-    gap: '12px',
+    gap: 7,
   },
-  analyticsCard: {
-    border: '1px solid #e2e8f0',
-    background: '#ffffff',
-    borderRadius: '10px',
-    padding: '14px 16px',
+  trendCaption: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    color: '#64748b',
+    fontSize: 11,
+  },
+  insightList: {
     display: 'grid',
-    gap: '10px',
+    gap: 7,
   },
-  cardHeaderRow: {
+  insightRow: {
+    width: '100%',
+    border: 0,
+    borderRadius: 8,
+    background: '#f8fafc',
+    color: '#10202f',
+    padding: '8px 9px',
+    display: 'grid',
+    gridTemplateColumns: '22px minmax(0, 1fr)',
+    gap: 8,
+    alignItems: 'center',
+    textAlign: 'left',
+    cursor: 'pointer',
+  },
+  insightIcon: {
+    display: 'grid',
+    placeItems: 'center',
+  },
+  insightText: {
+    display: 'grid',
+    gap: 2,
+    minWidth: 0,
+    fontSize: 11.5,
+    color: '#475569',
+  },
+  activeCard: {
+    border: '1px solid #bfdbfe',
+    borderRadius: 8,
+    background: '#eff6ff',
+    padding: 12,
+    display: 'grid',
+    gap: 12,
+  },
+  activeHeader: {
+    display: 'grid',
+    gridTemplateColumns: '32px minmax(0, 1fr)',
+    gap: 10,
+    alignItems: 'center',
+  },
+  activeName: {
+    margin: '3px 0 0',
+    color: '#10202f',
+    fontSize: 14,
+    lineHeight: 1.2,
+    fontWeight: 850,
+  },
+  activeScores: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    gap: 7,
+  },
+  activeActions: {
+    display: 'flex',
+    gap: 7,
+    flexWrap: 'wrap',
+  },
+  miniMetric: {
+    border: '1px solid rgba(15, 39, 59, 0.10)',
+    background: 'rgba(255, 255, 255, 0.72)',
+    borderRadius: 8,
+    padding: '8px 9px',
+    display: 'grid',
+    gap: 2,
+    color: '#64748b',
+    fontSize: 10.5,
+    fontWeight: 750,
+  },
+  primaryAction: {
+    minHeight: 34,
+    border: '1px solid #2563eb',
+    borderRadius: 8,
+    background: '#2563eb',
+    color: '#ffffff',
+    padding: '0 11px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    cursor: 'pointer',
+    fontSize: 12,
+    fontWeight: 850,
+  },
+  secondaryAction: {
+    minHeight: 34,
+    border: '1px solid #cbd5e1',
+    borderRadius: 8,
+    background: '#ffffff',
+    color: '#10202f',
+    padding: '0 11px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    cursor: 'pointer',
+    fontSize: 12,
+    fontWeight: 800,
+  },
+  drawerShell: {
+    position: 'fixed',
+    inset: 0,
+    zIndex: 60,
+    display: 'flex',
+    justifyContent: 'flex-end',
+  },
+  drawerBackdrop: {
+    position: 'absolute',
+    inset: 0,
+    border: 0,
+    background: 'rgba(15, 23, 42, 0.28)',
+    cursor: 'pointer',
+  },
+  drawerPanel: {
+    position: 'relative',
+    zIndex: 1,
+    width: 'min(980px, 72vw)',
+    minWidth: 760,
+    height: '100%',
+    background: '#ffffff',
+    borderLeft: '1px solid #d7e3ea',
+    display: 'flex',
+    flexDirection: 'column',
+    boxShadow: '-24px 0 60px rgba(15, 23, 42, 0.18)',
+  },
+  drawerHeader: {
+    borderBottom: '1px solid #e2e8f0',
+    padding: '14px 18px',
+    display: 'grid',
+    gridTemplateColumns: '44px minmax(0, 1fr) auto',
+    gap: 12,
+    alignItems: 'center',
+  },
+  drawerAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    color: '#ffffff',
+    display: 'grid',
+    placeItems: 'center',
+    fontWeight: 900,
+    fontSize: 13,
+  },
+  drawerIdentity: {
+    minWidth: 0,
+    display: 'grid',
+    gap: 3,
+  },
+  drawerTitleLine: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  drawerTitle: {
+    margin: 0,
+    fontSize: 18,
+    lineHeight: 1.2,
+    color: '#10202f',
+  },
+  drawerId: {
+    color: '#64748b',
+    fontSize: 11,
+    fontWeight: 800,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  drawerSubtitle: {
+    margin: 0,
+    color: '#475569',
+    fontSize: 12,
+    lineHeight: 1.35,
+  },
+  drawerActions: {
+    display: 'flex',
+    gap: 7,
+    alignItems: 'center',
+  },
+  iconAction: {
+    width: 34,
+    height: 34,
+    border: '1px solid #cbd5e1',
+    borderRadius: 8,
+    background: '#ffffff',
+    color: '#10202f',
+    display: 'grid',
+    placeItems: 'center',
+    cursor: 'pointer',
+  },
+  drawerTabs: {
+    display: 'flex',
+    gap: 0,
+    borderBottom: '1px solid #e2e8f0',
+    padding: '0 18px',
+  },
+  drawerTab: {
+    height: 40,
+    border: 0,
+    borderBottom: '2px solid transparent',
+    background: 'transparent',
+    color: '#64748b',
+    padding: '0 12px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    cursor: 'pointer',
+    fontSize: 12,
+    fontWeight: 800,
+  },
+  drawerTabActive: {
+    height: 40,
+    border: 0,
+    borderBottom: '2px solid #2563eb',
+    background: 'transparent',
+    color: '#2563eb',
+    padding: '0 12px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    cursor: 'pointer',
+    fontSize: 12,
+    fontWeight: 900,
+  },
+  drawerBody: {
+    flex: 1,
+    overflowY: 'auto',
+    padding: 18,
+    background: '#f5f7fa',
+  },
+  drawerGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: 12,
+  },
+  icfDrawerGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) 320px',
+    gap: 12,
+  },
+  drawerCard: {
+    border: '1px solid #e2e8f0',
+    borderRadius: 8,
+    background: '#ffffff',
+    padding: 14,
+    display: 'grid',
+    gap: 10,
+  },
+  drawerCardWide: {
+    gridColumn: '1 / -1',
+    border: '1px solid #e2e8f0',
+    borderRadius: 8,
+    background: '#ffffff',
+    padding: 14,
+    display: 'grid',
+    gap: 10,
+  },
+  drawerCardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
   },
-  analyticsCardTitle: {
+  drawerCardTitle: {
     margin: 0,
-    fontSize: '13px',
+    color: '#10202f',
+    fontSize: 13,
     fontWeight: 900,
-    color: '#0f172a',
     textTransform: 'uppercase',
-    letterSpacing: '0.06em',
+    letterSpacing: 0,
+  },
+  drawerMetricGrid: {
+    gridColumn: '1 / -1',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    gap: 10,
+  },
+  alertInsight: {
+    display: 'grid',
+    gridTemplateColumns: '20px minmax(0, 1fr) auto',
+    gap: 8,
+    alignItems: 'center',
+    border: '1px solid #fee2e2',
+    background: '#fff7f7',
+    color: '#7f1d1d',
+    borderRadius: 8,
+    padding: '8px 10px',
+    fontSize: 12,
+  },
+  ackButton: {
+    minHeight: 26,
+    border: '1px solid #fecaca',
+    background: '#ffffff',
+    color: '#991b1b',
+    borderRadius: 7,
+    padding: '0 8px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 4,
+    fontSize: 11,
+    fontWeight: 850,
+    cursor: 'pointer',
+  },
+  okBanner: {
+    border: '1px solid #bbf7d0',
+    background: '#f0fdf4',
+    color: '#166534',
+    borderRadius: 8,
+    padding: '10px 12px',
+    fontSize: 12,
+    fontWeight: 750,
+  },
+  scoreTile: {
+    border: '1px solid #e2e8f0',
+    background: '#ffffff',
+    borderRadius: 8,
+    padding: 12,
+    display: 'grid',
+    gap: 6,
+  },
+  scoreTileTop: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    color: '#64748b',
+    fontSize: 10.5,
+    fontWeight: 900,
+    textTransform: 'uppercase',
+    letterSpacing: 0,
+  },
+  scoreTileValue: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: 4,
+    fontSize: 25,
+    lineHeight: 1,
+    fontWeight: 900,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  scoreTileNote: {
+    margin: 0,
+    color: '#64748b',
+    fontSize: 11,
+    lineHeight: 1.25,
   },
   heatGrid: {
     display: 'grid',
-    gap: '6px',
+    gap: 8,
   },
   heatRow: {
     display: 'grid',
-    gridTemplateColumns: '120px minmax(0, 1fr) 28px',
-    gap: '10px',
+    gridTemplateColumns: '86px minmax(0, 1fr) 24px',
+    gap: 8,
     alignItems: 'center',
-  },
-  heatLabel: {
-    fontSize: '12px',
-    color: '#334155',
-    fontWeight: 700,
+    color: '#475569',
+    fontSize: 12,
+    fontWeight: 750,
   },
   heatCells: {
     display: 'grid',
     gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
-    gap: '3px',
+    gap: 3,
   },
   heatCell: {
-    height: '14px',
-    borderRadius: '3px',
-  },
-  heatValue: {
-    fontWeight: 900,
-    textAlign: 'right',
-    fontSize: '12.5px',
-  },
-  cardFootnote: {
-    margin: 0,
-    fontSize: '11px',
-    color: '#64748b',
-  },
-  radarLegend: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-    gap: '6px',
-  },
-  radarLegendItem: {
-    background: '#f8fafc',
-    border: '1px solid #e2e8f0',
-    borderRadius: '6px',
-    padding: '4px 6px',
-    fontSize: '11px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontWeight: 700,
-    color: '#334155',
-  },
-  legendRow: {
-    display: 'flex',
-    gap: '12px',
-    flexWrap: 'wrap',
-    fontSize: '11.5px',
-    color: '#475569',
-  },
-  legendItem: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-  },
-  legendSwatch: {
-    width: '12px',
-    height: '12px',
-    borderRadius: '3px',
+    height: 13,
+    borderRadius: 3,
   },
   donutLayout: {
     display: 'grid',
-    gridTemplateColumns: '140px minmax(0, 1fr)',
-    gap: '14px',
+    gridTemplateColumns: '132px minmax(0, 1fr)',
+    gap: 12,
     alignItems: 'center',
   },
   donutMeta: {
     display: 'grid',
-    gap: '8px',
-    fontSize: '12px',
-    color: '#475569',
-  },
-  donutMetaSub: {
-    fontSize: '11px',
-    color: '#64748b',
-  },
-  donutMetaItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    color: '#0f172a',
-    fontWeight: 700,
-    fontSize: '12px',
+    gap: 8,
   },
   timeline: {
     listStyle: 'none',
     margin: 0,
     padding: 0,
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-    gap: '10px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    gap: 9,
   },
   timelineItem: {
     display: 'grid',
-    gap: '6px',
-    alignItems: 'start',
+    gap: 6,
   },
   timelineDot: {
-    width: '12px',
-    height: '12px',
-    borderRadius: '999px',
-    marginLeft: '4px',
+    width: 10,
+    height: 10,
+    borderRadius: 999,
   },
   timelineCard: {
-    border: '1px solid',
-    borderRadius: '8px',
-    padding: '8px 10px',
-    fontSize: '12px',
+    border: '1px solid #e2e8f0',
+    background: '#f8fafc',
+    borderRadius: 8,
+    padding: '8px 9px',
+    color: '#475569',
+    fontSize: 11,
     display: 'grid',
-    gap: '2px',
-  },
-  timelineNote: {
-    fontSize: '11px',
-    fontWeight: 700,
-  },
-  alertList: {
-    listStyle: 'none',
-    margin: 0,
-    padding: 0,
-    display: 'grid',
-    gap: '8px',
-  },
-  alertItem: {
-    display: 'grid',
-    gridTemplateColumns: '10px minmax(0, 1fr)',
-    gap: '10px',
-    alignItems: 'center',
-    color: '#0f172a',
-    fontSize: '12.5px',
-  },
-  alertDot: {
-    width: '8px',
-    height: '8px',
-    borderRadius: '999px',
-    background: '#dc2626',
-  },
-  noAlerts: {
-    background: '#ecfdf5',
-    border: '1px solid #10b981',
-    color: '#065f46',
-    borderRadius: '6px',
-    padding: '8px 10px',
-    fontSize: '12px',
-  },
-  concernsBlock: {
-    display: 'grid',
-    gap: '6px',
-    paddingTop: '8px',
-    borderTop: '1px dashed #e2e8f0',
-  },
-  concernsLabel: {
-    fontSize: '11px',
-    color: '#64748b',
-    fontWeight: 800,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
+    gap: 2,
   },
   concernsChips: {
     display: 'flex',
-    gap: '6px',
     flexWrap: 'wrap',
+    gap: 7,
   },
   concernChip: {
+    border: '1px solid #bfdbfe',
     background: '#eff6ff',
     color: '#1d4ed8',
-    border: '1px solid #bfdbfe',
-    fontSize: '11.5px',
-    fontWeight: 700,
-    padding: '4px 8px',
-    borderRadius: '999px',
+    borderRadius: 999,
+    padding: '5px 9px',
+    fontSize: 11,
+    fontWeight: 850,
+  },
+  icfDimensionList: {
+    display: 'grid',
+    gap: 8,
+  },
+  icfDimensionRow: {
+    display: 'grid',
+    gridTemplateColumns: '58px minmax(0, 1fr) 22px',
+    gap: 8,
+    alignItems: 'center',
+    color: '#475569',
+    fontSize: 12,
+  },
+  icfCode: {
+    color: '#1d4ed8',
+    background: '#eff6ff',
+    borderRadius: 5,
+    padding: '3px 6px',
+    fontFamily: 'Consolas, monospace',
+    fontSize: 11,
+    fontWeight: 900,
+  },
+  icfBars: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    gap: 3,
+  },
+  icfBar: {
+    height: 9,
+    borderRadius: 3,
+  },
+  trendBlocks: {
+    display: 'grid',
+    gap: 12,
+  },
+  trendStats: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
+  deltaPill: {
+    minHeight: 30,
+    borderRadius: 999,
+    padding: '0 9px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 5,
+    fontSize: 12,
+    fontWeight: 900,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  protocolTable: {
+    border: '1px solid #e2e8f0',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  protocolRow: {
+    minHeight: 42,
+    borderBottom: '1px solid #e2e8f0',
+    padding: '8px 10px',
+    display: 'grid',
+    gridTemplateColumns: 'minmax(150px, 1.2fr) minmax(150px, 1fr) 90px 92px',
+    gap: 10,
+    alignItems: 'center',
+    color: '#475569',
+    fontSize: 12,
+  },
+  cardText: {
+    margin: 0,
+    color: '#475569',
+    fontSize: 12,
+    lineHeight: 1.5,
   },
 };

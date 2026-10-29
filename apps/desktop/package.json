@@ -1,13 +1,20 @@
 {
   "name": "@laryngoos/desktop",
   "version": "1.0.0",
+  "description": "DegluTech clinical workspace for speech-language pathology head and neck cancer rehabilitation.",
+  "author": "Hemaraja Nayaka.S",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "corepack pnpm run build:web && corepack pnpm run build:electron",
+    "build:web": "tsc --noEmit && vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
     "lint": "tsc --noEmit",
-    "deploy": "wrangler pages deploy dist --project-name=deglutech --branch=main",
-    "electron:start": "electron ."
+    "deploy": "corepack pnpm dlx wrangler@latest pages deploy dist --project-name=deglutech --branch=main",
+    "electron:start": "corepack pnpm run build && electron .",
+    "electron:dev": "echo Start Vite in one terminal, then set ELECTRON_START_URL=http://localhost:3000 before launching electron in a second terminal.",
+    "desktop:pack": "corepack pnpm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false&& electron-builder --dir",
+    "desktop:win": "corepack pnpm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false&& electron-builder --win nsis"
   },
   "dependencies": {
     "@laryngoos/core": "workspace:*",
@@ -28,5 +35,41 @@
     "tailwindcss": "^3.4.17",
     "vite": "^4.4.5",
     "electron-builder": "^24.6.3"
+  },
+  "build": {
+    "appId": "in.deglutech.clinical",
+    "productName": "DegluTech",
+    "copyright": "Copyright © 2026 DegluTech",
+    "directories": {
+      "output": "release"
+    },
+    "icon": "build/icon.ico",
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "dist-electron/main.js"
+    },
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "DegluTech-${version}-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "DegluTech"
+    }
   }
 }

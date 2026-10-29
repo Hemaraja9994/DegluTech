@@ -18,7 +18,6 @@ import {
   MonitorUp,
   Save,
   ShieldAlert,
-  Stethoscope,
   Syringe,
   UserRound,
   type LucideIcon,
@@ -39,22 +38,14 @@ import {
 } from './translationData';
 import { ReportErrorBoundary, ReportWorkspace } from './components/ReportWorkspace';
 import { ClinicianDashboard } from './components/ClinicianDashboard';
+import { DegluTechLogo } from './components/DegluTechLogo';
+import { FloatingBadge, HeaderSeparator, SectionHeader } from './components/ui/ClinicalPrimitives';
+import { T } from './theme';
 
 type FieldState = Record<string, string | string[]>;
 
 const WORKSPACE_STORAGE_KEY = 'deglutech-hnc-clinical-workspace-v1';
 const DEFAULT_PRESCRIBED_EXERCISE_IDS = ['masako', 'effortful-swallow', 'jaw-stretch', 'velar-drills'];
-
-const exerciseIllustrationUrls: Record<string, string> = {
-  masako: new URL('./assets/masako-maneuver.png', import.meta.url).href,
-  'effortful-swallow': new URL('./assets/effortful-swallow.png', import.meta.url).href,
-  mendelsohn: new URL('./assets/mendelsohn-maneuver.png', import.meta.url).href,
-  supraglottic: new URL('./assets/supraglottic-swallow.png', import.meta.url).href,
-  'jaw-stretch': new URL('./assets/jaw-stretch.png', import.meta.url).href,
-  'lingual-resistance': new URL('./assets/lingual-resistance.png', import.meta.url).href,
-  'velar-drills': new URL('./assets/velar-drills.png', import.meta.url).href,
-  'neck-shoulder-rom': new URL('./assets/neck-shoulder-rom.png', import.meta.url).href,
-};
 
 const isExerciseLanguageCode = (value: string): value is ExerciseLanguageCode =>
   Object.prototype.hasOwnProperty.call(exerciseTranslations, value);
@@ -73,6 +64,14 @@ const sectionIcons: Record<HncSectionId, LucideIcon> = {
   exercise: Dumbbell,
   patient: Home,
   report: FileText,
+};
+
+const sectionGroupFor = (sectionId: HncSectionId): string => {
+  if (sectionId === 'command') return 'Triage';
+  if (['demographics', 'oncology', 'treatment'].includes(sectionId)) return 'Intake';
+  if (['opme', 'swallow', 'voice', 'nutrition', 'instrumental'].includes(sectionId)) return 'Assessment';
+  if (sectionId === 'icf') return 'Synthesis';
+  return 'Plan';
 };
 
 const initialFieldState: FieldState = {
@@ -205,7 +204,7 @@ export const App: React.FC = () => {
         if (parsed.fieldState) setFieldState({ ...initialFieldState, ...parsed.fieldState });
         if (parsed.selectedExerciseId && knownExerciseIds.has(parsed.selectedExerciseId)) setSelectedExerciseId(parsed.selectedExerciseId);
         if (parsed.patientLanguage && isExerciseLanguageCode(parsed.patientLanguage)) setPatientLanguage(parsed.patientLanguage);
-        if (restoredPrescription.length > 0) setPrescribedExerciseIds(restoredPrescription);
+        if (Array.isArray(parsed.prescribedExerciseIds)) setPrescribedExerciseIds(restoredPrescription);
         if (parsed.savedAt) setSavedAt(parsed.savedAt);
         setStoredAt(parsed.storedAt ? `Restored ${new Date(parsed.storedAt).toLocaleString()}` : 'Restored local draft');
       } else {
@@ -263,12 +262,10 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div style={styles.appShell}>
-      <aside style={styles.sidebar}>
+    <div className="deglutech-shell" style={styles.appShell}>
+      <aside className="deglutech-sidebar" style={styles.sidebar}>
         <div style={styles.brandBlock}>
-          <div style={styles.logoMark}>
-            <Stethoscope size={22} />
-          </div>
+          <DegluTechLogo size={46} />
           <div>
             <h1 style={styles.brandTitle}>DegluTech</h1>
             <p style={styles.brandSub}>HNC SLP Rehabilitation</p>
@@ -278,46 +275,59 @@ export const App: React.FC = () => {
         <div style={styles.patientMini}>
           <div style={styles.patientName}>{HNC_PATIENT_SNAPSHOT.name}</div>
           <div style={styles.patientMeta}>{HNC_PATIENT_SNAPSHOT.patientId}</div>
-          <div style={styles.riskPill}>{HNC_PATIENT_SNAPSHOT.riskLevel.toUpperCase()} RISK</div>
+          <FloatingBadge tone="high" style={{ marginTop: 10 }}>
+            {HNC_PATIENT_SNAPSHOT.riskLevel.toUpperCase()} RISK
+          </FloatingBadge>
         </div>
 
-        <nav style={styles.navList}>
-          {HNC_CLINICAL_SECTIONS.map((section) => {
+        <nav className="deglutech-nav-list" style={styles.navList}>
+          {HNC_CLINICAL_SECTIONS.map((section, index) => {
             const Icon = sectionIcons[section.id];
             const isActive = activeSectionId === section.id;
+            const group = sectionGroupFor(section.id);
+            const previousGroup = index > 0 ? sectionGroupFor(HNC_CLINICAL_SECTIONS[index - 1].id) : undefined;
             return (
-              <button
-                key={section.id}
-                type="button"
-                onClick={() => navigateToSection(section.id)}
-                style={{
-                  ...styles.navButton,
-                  ...(isActive ? styles.navButtonActive : {}),
-                  borderLeftColor: isActive ? section.accent : 'transparent',
-                }}
-              >
-                <Icon size={17} />
-                <span style={styles.navLabel}>{section.label}</span>
-                <span style={styles.navIndex}>{section.order}</span>
-              </button>
+              <React.Fragment key={section.id}>
+                {group !== previousGroup && <div style={styles.navGroup}>{group}</div>}
+                <button
+                  type="button"
+                  onClick={() => navigateToSection(section.id)}
+                  style={{
+                    ...styles.navButton,
+                    ...(isActive ? styles.navButtonActive : {}),
+                    borderLeftColor: isActive ? section.accent : 'transparent',
+                  }}
+                >
+                  <Icon size={16} />
+                  <span style={styles.navLabel}>{section.label}</span>
+                  <span style={styles.navIndex}>{section.order}</span>
+                </button>
+              </React.Fragment>
             );
           })}
         </nav>
       </aside>
 
-      <main style={styles.main}>
-        <header style={styles.topbar}>
+      <main className="deglutech-main" style={styles.main}>
+        <label className="mobile-section-select">
+          <span>Clinical section</span>
+          <select value={activeSectionId} onChange={(event) => navigateToSection(event.target.value as HncSectionId)}>
+            {HNC_CLINICAL_SECTIONS.map((section) => <option key={section.id} value={section.id}>{section.order}. {section.label}</option>)}
+          </select>
+        </label>
+        <header className="deglutech-topbar" style={styles.topbar}>
           <div>
             <p style={styles.overline}>Head and neck cancer clinical workspace</p>
             <h2 style={styles.pageTitle}>{activeSection.label}</h2>
           </div>
-          <div style={styles.topbarActions}>
-            <div style={styles.progressWrap}>
+          <div className="deglutech-topbar-actions" style={styles.topbarActions}>
+            <div className="deglutech-progress-wrap" style={styles.progressWrap}>
               <span style={styles.progressText}>{completion}% complete</span>
               <div style={styles.progressTrack}>
                 <div style={{ ...styles.progressFill, width: `${completion}%` }} />
               </div>
             </div>
+            <span className="workspace-save-status" role="status">{storedAt}</span>
             <button type="button" onClick={saveSession} style={styles.iconButton} aria-label="Save session">
               <Save size={18} />
             </button>
@@ -327,13 +337,15 @@ export const App: React.FC = () => {
           </div>
         </header>
 
-        <SectionNavigator
-          activeSection={activeSection}
-          activeSectionIndex={activeSectionIndex}
-          previousSection={previousSection}
-          nextSection={nextSection}
-          onJump={navigateToSection}
-        />
+        {activeSection.id !== 'command' && (
+          <SectionNavigator
+            activeSection={activeSection}
+            activeSectionIndex={activeSectionIndex}
+            previousSection={previousSection}
+            nextSection={nextSection}
+            onJump={navigateToSection}
+          />
+        )}
 
         {activeSection.id === 'command' && (
           <ClinicianDashboard
@@ -370,6 +382,7 @@ export const App: React.FC = () => {
           <PatientPortalPreview
             fieldState={fieldState}
             selectedExercise={selectedExercise}
+            setSelectedExerciseId={setSelectedExerciseId}
             prescribedExerciseIds={prescribedExerciseIds}
             patientLanguage={patientLanguage}
             setActiveSectionId={navigateToSection}
@@ -387,11 +400,17 @@ export const App: React.FC = () => {
           </ReportErrorBoundary>
         )}
 
-        <SectionPager
-          previousSection={previousSection}
-          nextSection={nextSection}
-          onJump={navigateToSection}
-        />
+        {activeSection.id !== 'command' && (
+          <SectionPager
+            previousSection={previousSection}
+            nextSection={nextSection}
+            onJump={navigateToSection}
+          />
+        )}
+
+        <footer style={styles.footer}>
+          Concept by Mr. Prasanna Hegde, Ms. Priyanka Nayak. Created by Mr. Hemaraja Nayaka.S
+        </footer>
       </main>
     </div>
   );
@@ -413,9 +432,9 @@ function SectionNavigator({
   const ActiveIcon = sectionIcons[activeSection.id];
 
   return (
-    <section style={styles.workflowNav} aria-label="Clinical section navigation">
-      <div style={styles.workflowNavHeader}>
-        <div style={styles.workflowCurrent}>
+    <section className="deglutech-workflow-nav" style={styles.workflowNav} aria-label="Clinical section navigation">
+      <div className="deglutech-workflow-header" style={styles.workflowNavHeader}>
+        <div className="deglutech-workflow-current" style={styles.workflowCurrent}>
           <div style={{ ...styles.workflowCurrentIcon, background: activeSection.accent }}>
             <ActiveIcon size={19} />
           </div>
@@ -428,7 +447,7 @@ function SectionNavigator({
           </div>
         </div>
 
-        <div style={styles.workflowControls}>
+        <div className="deglutech-workflow-controls" style={styles.workflowControls}>
           <button
             type="button"
             onClick={() => previousSection && onJump(previousSection.id)}
@@ -456,14 +475,10 @@ function SectionNavigator({
         </div>
       </div>
 
-      <div style={styles.workflowRailHeader}>
-        <Map size={15} />
-        <span>Clinical workflow map</span>
-      </div>
+      <HeaderSeparator label="Clinical workflow map" icon={<Map size={15} />} />
       <div style={styles.workflowRail}>
         {HNC_CLINICAL_SECTIONS.map((section) => {
           const isActive = section.id === activeSection.id;
-          const isComplete = section.order < activeSection.order;
 
           return (
             <button
@@ -481,8 +496,8 @@ function SectionNavigator({
               <span
                 style={{
                   ...styles.workflowStepNumber,
-                  background: isActive ? section.accent : isComplete ? '#0f766e' : '#e2e8f0',
-                  color: isActive || isComplete ? '#ffffff' : '#475569',
+                  background: isActive ? section.accent : '#e2e8f0',
+                  color: isActive ? '#ffffff' : '#475569',
                 }}
               >
                 {section.order}
@@ -506,7 +521,7 @@ function SectionPager({
   onJump: (section: HncSectionId) => void;
 }) {
   return (
-    <section style={styles.sectionPager} aria-label="Move between clinical sections">
+    <section className="deglutech-section-pager" style={styles.sectionPager} aria-label="Move between clinical sections">
       <button
         type="button"
         disabled={!previousSection}
@@ -547,22 +562,22 @@ function SectionWorkspace({
 }) {
   return (
     <div style={styles.workspaceGrid}>
-      <section style={styles.sectionIntro}>
-        <div>
-          <p style={styles.overline}>{section.shortLabel} module</p>
-          <h3 style={styles.introTitle}>{section.purpose}</h3>
-        </div>
-        <div style={{ ...styles.moduleBadge, backgroundColor: section.accent }}>{section.status}</div>
-      </section>
+      <SectionHeader
+        eyebrow={`${section.shortLabel} module`}
+        title={section.purpose}
+        icon={React.createElement(sectionIcons[section.id], { size: 20 })}
+        accent={section.accent}
+        action={<FloatingBadge tone="info">{section.status}</FloatingBadge>}
+      />
 
-      <div style={styles.blockGrid}>
+      <div className="deglutech-block-grid" style={styles.blockGrid}>
         {section.blocks.map((block) => (
           <section key={block.title} style={styles.panel}>
             <div style={styles.blockHeaderLine}>
               <h3 style={styles.panelTitle}>{block.title}</h3>
               <p style={styles.blockDescription}>{block.description}</p>
             </div>
-            <div style={styles.formGrid}>
+            <div className="deglutech-form-grid" style={styles.formGrid}>
               {block.fields.map((field) => (
                 <FieldControl
                   key={field.id}
@@ -608,7 +623,7 @@ function FieldControl({
   if (field.kind === 'multi') {
     const selected = Array.isArray(value) ? value : [];
     return (
-      <label style={styles.fieldWide}>
+      <div style={styles.fieldWide} role="group" aria-label={field.label}>
         <span style={styles.fieldLabel}>{field.label}</span>
         <div style={styles.chipGroup}>
           {(field.options ?? []).map((option) => {
@@ -617,6 +632,7 @@ function FieldControl({
               <button
                 key={option}
                 type="button"
+                aria-pressed={isSelected}
                 onClick={() =>
                   onChange(isSelected ? selected.filter((item) => item !== option) : [...selected, option])
                 }
@@ -628,7 +644,7 @@ function FieldControl({
           })}
         </div>
         {field.helper && <span style={styles.fieldHelper}>{field.helper}</span>}
-      </label>
+      </div>
     );
   }
 
@@ -655,6 +671,7 @@ function FieldControl({
           onChange={(event) => onChange(event.target.value)}
           style={styles.input}
         >
+          <option value="">Select an option</option>
           {(field.options ?? []).map((option) => (
             <option key={option} value={option}>{option}</option>
           ))}
@@ -666,13 +683,14 @@ function FieldControl({
 
   if (field.kind === 'scale') {
     return (
-      <label style={styles.field}>
+      <div style={styles.field} role="group" aria-label={field.label}>
         <span style={styles.fieldLabel}>{field.label}</span>
         <div style={styles.scaleRow}>
           {['0', '1', '2', '3', '4'].map((score) => (
             <button
               key={score}
               type="button"
+              aria-pressed={value === score}
               onClick={() => onChange(score)}
               style={value === score ? styles.scaleButtonActive : styles.scaleButton}
             >
@@ -681,7 +699,7 @@ function FieldControl({
           ))}
         </div>
         {field.helper && <span style={styles.fieldHelper}>{field.helper}</span>}
-      </label>
+      </div>
     );
   }
 
@@ -721,20 +739,19 @@ function ExercisePrescription({
   storageReady: boolean;
   storedAt: string;
 }) {
-  const illustrationUrl = exerciseIllustrationUrls[selectedExercise.id];
   const localizedBundle = exerciseTranslations[patientLanguage];
   const localizedExercise = localizedBundle.exercises[selectedExercise.id] ?? exerciseTranslations.en.exercises[selectedExercise.id];
   const prescribedExercises = HNC_EXERCISE_LIBRARY.filter((exercise) => prescribedExerciseIds.includes(exercise.id));
 
   return (
     <div style={styles.workspaceGrid}>
-      <section style={styles.sectionIntro}>
-        <div>
-          <p style={styles.overline}>Exercise prescription</p>
-          <h3 style={styles.introTitle}>Illustrated home program with clinical dosage and safety stop rules.</h3>
-        </div>
-        <div style={styles.moduleBadge}>patient-ready</div>
-      </section>
+      <SectionHeader
+        eyebrow="Exercise prescription"
+        title="Illustrated home program with clinical dosage and safety stop rules."
+        icon={<Dumbbell size={20} />}
+        accent="#0f766e"
+        action={<FloatingBadge tone="success">patient-ready</FloatingBadge>}
+      />
 
       <LanguageSelector selectedLanguage={patientLanguage} onSelect={setPatientLanguage} />
 
@@ -748,7 +765,7 @@ function ExercisePrescription({
         storedAt={storedAt}
       />
 
-      <div style={styles.exerciseLayout}>
+      <div className="deglutech-exercise-layout" style={styles.exerciseLayout}>
         <section style={styles.exerciseMenu}>
           {HNC_EXERCISE_LIBRARY.map((exercise) => {
             const isPatientVisible = prescribedExerciseIds.includes(exercise.id);
@@ -771,7 +788,7 @@ function ExercisePrescription({
         </section>
 
         <section style={styles.panel}>
-          <div style={styles.exerciseHeaderBlock}>
+          <div className="deglutech-exercise-header" style={styles.exerciseHeaderBlock}>
             <div>
               <p style={styles.overline}>{selectedExercise.category} {localizedBundle.protocolLabel}</p>
               <h3 style={styles.panelTitle}>{localizedExercise.title}</h3>
@@ -786,21 +803,16 @@ function ExercisePrescription({
             </div>
           </div>
 
-          {illustrationUrl && (
-            <div style={styles.generatedImageFrame}>
-              <img src={illustrationUrl} alt={`${selectedExercise.name} illustrated exercise steps`} style={styles.generatedImage} />
-            </div>
-          )}
-
           <RegimenSopCard exercise={selectedExercise} />
 
           <ExercisePanels
+            key={`${selectedExercise.id}-${patientLanguage}`}
             exercise={selectedExercise}
             steps={localizedExercise.steps}
             stepLabel={localizedBundle.stepLabel}
           />
 
-          <div style={styles.prescriptionGrid}>
+          <div className="deglutech-prescription-grid" style={styles.prescriptionGrid}>
             <div style={styles.prescriptionBand}>
               <h4 style={styles.smallTitle}>{localizedBundle.indicationTitle}</h4>
               <p style={styles.smallText}>{localizedExercise.indication}</p>
@@ -846,7 +858,7 @@ function RegimenSopCard({ exercise }: { exercise: ExerciseProtocol }) {
         <div style={styles.adherenceBadge}>{exercise.regimen.adherenceTarget}</div>
       </div>
 
-      <div style={styles.regimenGrid}>
+      <div className="deglutech-regimen-grid" style={styles.regimenGrid}>
         {regimenRows.map(([label, value]) => (
           <div key={label} style={styles.regimenItem}>
             <span>{label}</span>
@@ -855,7 +867,7 @@ function RegimenSopCard({ exercise }: { exercise: ExerciseProtocol }) {
         ))}
       </div>
 
-      <div style={styles.regimenTwoColumn}>
+      <div className="deglutech-regimen-two-column" style={styles.regimenTwoColumn}>
         <div style={styles.regimenCallout}>
           <span>Progression rule</span>
           <strong>{exercise.regimen.progressionRule}</strong>
@@ -942,7 +954,7 @@ function ClinicianPlanControl({
 }) {
   return (
     <section style={styles.clinicianPlanPanel}>
-      <div style={styles.clinicianPlanHeader}>
+      <div className="deglutech-clinician-plan-header" style={styles.clinicianPlanHeader}>
         <div>
           <p style={styles.overline}>Clinician controlled prescription</p>
           <h3 style={styles.clinicianPlanTitle}>Choose what appears in the patient phone exercise module.</h3>
@@ -958,7 +970,7 @@ function ClinicianPlanControl({
         </div>
       </div>
 
-      <div style={styles.prescribedSummary}>
+      <div className="deglutech-prescribed-summary" style={styles.prescribedSummary}>
         <div style={styles.prescribedCount}>
           <strong>{prescribedExercises.length}</strong>
           <span>patient-visible exercises</span>
@@ -977,7 +989,7 @@ function ClinicianPlanControl({
         </div>
       </div>
 
-      <div style={styles.exerciseToggleGrid}>
+      <div className="deglutech-exercise-toggle-grid" style={styles.exerciseToggleGrid}>
         {HNC_EXERCISE_LIBRARY.map((exercise) => {
           const isChecked = prescribedExerciseIds.includes(exercise.id);
 
@@ -1013,38 +1025,40 @@ function ExercisePanels({
   steps: [LocalizedExerciseStep, LocalizedExerciseStep, LocalizedExerciseStep];
   stepLabel: string;
 }) {
+  const [activeStep, setActiveStep] = useState(0);
   return (
-    <div style={styles.infographicGrid}>
-      {steps.map((step, index) => (
-        <div key={`${exercise.id}-${index}`} style={styles.infographicPanel}>
-          <div style={styles.stepLabel}>{stepLabel} {index + 1}</div>
-          <div style={styles.patientFigure}>
-            <div style={styles.headCircle}>
-              {exercise.id === 'masako' && index === 1 && <span style={styles.tongueMark} />}
-            </div>
-            <div style={styles.neckLine} />
-            <div style={styles.bodyLine} />
-            <div style={index === 0 ? styles.postureGuide : styles.motionArrow}>
-              {index === 0 ? '' : 'v'}
-            </div>
-          </div>
-          <div style={styles.stepCue}>{step.cue}</div>
-          <p style={styles.stepInstruction}>{step.instruction}</p>
-        </div>
-      ))}
-    </div>
+    <section className="exercise-guide" aria-label={`${exercise.name} instructions`}>
+      <div className="exercise-guide-heading"><strong>{exercise.name}</strong><span>{stepLabel} {activeStep + 1} / {steps.length}</span></div>
+      <div className="exercise-guide-progress" role="group" aria-label="Exercise steps">
+        {steps.map((step, index) => (
+          <button key={index} type="button" className={index === activeStep ? 'exercise-guide-tab active' : 'exercise-guide-tab'} onClick={() => setActiveStep(index)} aria-current={index === activeStep ? 'step' : undefined}>
+            <span>{index + 1}</span><strong>{step.cue}</strong>
+          </button>
+        ))}
+      </div>
+      <div className="exercise-guide-content" key={activeStep} aria-live="polite">
+        <span className="exercise-guide-number">{String(activeStep + 1).padStart(2, '0')}</span>
+        <div><h4>{steps[activeStep].cue}</h4><p>{steps[activeStep].instruction}</p></div>
+      </div>
+      <div className="exercise-guide-actions">
+        <button type="button" onClick={() => setActiveStep(activeStep - 1)} disabled={activeStep === 0}><ChevronLeft size={16} /> Previous</button>
+        <button type="button" onClick={() => setActiveStep(activeStep + 1)} disabled={activeStep === steps.length - 1}>Next <ChevronRight size={16} /></button>
+      </div>
+    </section>
   );
 }
 
 function PatientPortalPreview({
   fieldState,
   selectedExercise,
+  setSelectedExerciseId,
   prescribedExerciseIds,
   patientLanguage,
   setActiveSectionId,
 }: {
   fieldState: FieldState;
   selectedExercise: ExerciseProtocol;
+  setSelectedExerciseId: (id: string) => void;
   prescribedExerciseIds: string[];
   patientLanguage: ExerciseLanguageCode;
   setActiveSectionId: (id: HncSectionId) => void;
@@ -1052,23 +1066,24 @@ function PatientPortalPreview({
   const symptoms = Array.isArray(fieldState.symptoms) ? fieldState.symptoms : [];
   const localizedBundle = exerciseTranslations[patientLanguage];
   const prescribedExercises = HNC_EXERCISE_LIBRARY.filter((exercise) => prescribedExerciseIds.includes(exercise.id));
-  const selectedLocalizedExercise = localizedBundle.exercises[selectedExercise.id] ?? exerciseTranslations.en.exercises[selectedExercise.id];
+  const patientExercise = prescribedExercises.find((exercise) => exercise.id === selectedExercise.id) ?? prescribedExercises[0];
+  const selectedLocalizedExercise = patientExercise && (localizedBundle.exercises[patientExercise.id] ?? exerciseTranslations.en.exercises[patientExercise.id]);
 
   return (
     <div style={styles.workspaceGrid}>
-      <section style={styles.sectionIntro}>
-        <div>
-          <p style={styles.overline}>Patient app surface</p>
-          <h3 style={styles.introTitle}>Daily exercise queue, symptom check-in, and caregiver-safe education.</h3>
-        </div>
-        <button type="button" onClick={() => setActiveSectionId('exercise')} style={styles.primaryButton}>
+      <SectionHeader
+        eyebrow="Patient app surface"
+        title="Daily exercise queue, symptom check-in, and caregiver-safe education."
+        icon={<Home size={20} />}
+        accent="#2563eb"
+        action={<button type="button" onClick={() => setActiveSectionId('exercise')} style={styles.primaryButton}>
           <Dumbbell size={17} />
           Edit exercises
-        </button>
-      </section>
+        </button>}
+      />
 
-      <div style={styles.patientPortalGrid}>
-        <section style={styles.patientPhone}>
+      <div className="deglutech-patient-portal-grid" style={styles.patientPortalGrid}>
+        <section className="deglutech-patient-phone" style={styles.patientPhone}>
           <div style={styles.phoneTop} />
           <h3 style={styles.phoneTitle}>Today&apos;s exercises</h3>
           <p style={styles.phoneSub}>{localizedBundle.nativeName} / {HNC_PATIENT_SNAPSHOT.currentRoute}</p>
@@ -1076,7 +1091,7 @@ function PatientPortalPreview({
             const localizedExercise = localizedBundle.exercises[exercise.id] ?? exerciseTranslations.en.exercises[exercise.id];
 
             return (
-              <div key={exercise.id} style={styles.homeTask}>
+              <button key={exercise.id} type="button" onClick={() => setSelectedExerciseId(exercise.id)} aria-pressed={patientExercise?.id === exercise.id} style={{ ...styles.homeTask, width: '100%', textAlign: 'left', cursor: 'pointer', border: patientExercise?.id === exercise.id ? '2px solid #13838a' : '1px solid #dce5ea' }}>
                 <span style={styles.homeCheck} />
                 <span>
                   <strong>{localizedExercise.title}</strong>
@@ -1084,7 +1099,7 @@ function PatientPortalPreview({
                   <small style={styles.phoneTaskDose}>{exercise.regimen.frequency}</small>
                   <small style={styles.phoneTaskDose}>Session time: {exercise.regimen.sessionDuration}</small>
                 </span>
-              </div>
+              </button>
             );
           })}
           {prescribedExercises.length === 0 && (
@@ -1100,7 +1115,7 @@ function PatientPortalPreview({
           </div>
         </section>
 
-        <section style={styles.panel}>
+        {patientExercise && selectedLocalizedExercise && <section style={styles.panel}>
           <div style={styles.panelHeader}>
             <div>
               <p style={styles.overline}>Patient phone module</p>
@@ -1109,39 +1124,32 @@ function PatientPortalPreview({
             <div style={styles.moduleBadge}>patient-facing</div>
           </div>
           <p style={styles.exerciseText}>{selectedLocalizedExercise.description}</p>
+          <div className="patient-safety"><strong>{localizedBundle.safetyTitle}</strong><p>{selectedLocalizedExercise.safety}</p></div>
           <div style={styles.phoneRegimenGrid}>
             <div style={styles.phoneRegimenGridItem}>
               <span>Frequency</span>
-              <strong>{selectedExercise.regimen.frequency}</strong>
+              <strong>{patientExercise.regimen.frequency}</strong>
             </div>
             <div style={styles.phoneRegimenGridItem}>
               <span>How much</span>
-              <strong>{selectedExercise.regimen.setsAndReps}</strong>
+              <strong>{patientExercise.regimen.setsAndReps}</strong>
             </div>
             <div style={styles.phoneRegimenGridItem}>
               <span>Session time</span>
-              <strong>{selectedExercise.regimen.sessionDuration}</strong>
+              <strong>{patientExercise.regimen.sessionDuration}</strong>
             </div>
             <div style={styles.phoneRegimenGridItem}>
               <span>Review</span>
-              <strong>{selectedExercise.regimen.reviewCadence}</strong>
+              <strong>{patientExercise.regimen.reviewCadence}</strong>
             </div>
           </div>
-          {exerciseIllustrationUrls[selectedExercise.id] && (
-            <div style={styles.generatedImageFrame}>
-              <img
-                src={exerciseIllustrationUrls[selectedExercise.id]}
-                alt={`${selectedExercise.name} patient phone illustration`}
-                style={styles.generatedImage}
-              />
-            </div>
-          )}
           <ExercisePanels
-            exercise={selectedExercise}
+            key={`${patientExercise.id}-${patientLanguage}`}
+            exercise={patientExercise}
             steps={selectedLocalizedExercise.steps}
             stepLabel={localizedBundle.stepLabel}
           />
-        </section>
+        </section>}
       </div>
     </div>
   );
@@ -1151,26 +1159,30 @@ const styles: Record<string, React.CSSProperties> = {
   appShell: {
     minHeight: '100vh',
     display: 'grid',
-    gridTemplateColumns: '284px minmax(0, 1fr)',
-    background: '#f8fafc',
-    color: '#172033',
-    fontFamily: 'Inter, Segoe UI, Arial, sans-serif',
+    gridTemplateColumns: '244px minmax(0, 1fr)',
+    background: '#f5f7fa',
+    color: T.ink1,
+    fontFamily: 'var(--sans)',
   },
   sidebar: {
     background: '#ffffff',
-    borderRight: '1px solid #dbe4ef',
+    borderRight: '1px solid #e2e8f0',
     minHeight: '100vh',
-    padding: '18px 14px',
+    padding: 0,
     position: 'sticky',
     top: 0,
     height: '100vh',
     overflowY: 'auto',
+    boxShadow: 'none',
   },
   brandBlock: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    marginBottom: '18px',
+    gap: '10px',
+    minHeight: '54px',
+    marginBottom: 0,
+    padding: '10px 12px',
+    borderBottom: '1px solid #e2e8f0',
   },
   logoMark: {
     width: '42px',
@@ -1183,24 +1195,30 @@ const styles: Record<string, React.CSSProperties> = {
   },
   brandTitle: {
     margin: 0,
-    fontSize: '19px',
+    fontSize: '15px',
     lineHeight: 1.1,
+    fontWeight: 850,
+    letterSpacing: 0,
+    color: '#0f172a',
   },
   brandSub: {
-    margin: '3px 0 0',
+    margin: '2px 0 0',
     color: '#64748b',
-    fontSize: '12px',
+    fontSize: '10.5px',
+    fontWeight: 700,
   },
   patientMini: {
-    border: '1px solid #dbe4ef',
+    border: '1px solid #e2e8f0',
     borderRadius: '8px',
     padding: '12px',
-    marginBottom: '14px',
+    margin: '12px',
     background: '#f8fafc',
+    boxShadow: 'none',
   },
   patientName: {
     fontWeight: 800,
     fontSize: '14px',
+    color: '#0f172a',
   },
   patientMeta: {
     color: '#64748b',
@@ -1219,7 +1237,16 @@ const styles: Record<string, React.CSSProperties> = {
   },
   navList: {
     display: 'grid',
-    gap: '4px',
+    gap: '3px',
+    padding: '0 8px 12px',
+  },
+  navGroup: {
+    margin: '10px 6px 3px',
+    color: '#94a3b8',
+    fontSize: '10px',
+    fontWeight: 900,
+    textTransform: 'uppercase',
+    letterSpacing: 0,
   },
   navButton: {
     width: '100%',
@@ -1227,25 +1254,27 @@ const styles: Record<string, React.CSSProperties> = {
     borderLeft: '3px solid transparent',
     background: 'transparent',
     display: 'grid',
-    gridTemplateColumns: '22px minmax(0, 1fr) 22px',
+    gridTemplateColumns: '20px minmax(0, 1fr) 20px',
     alignItems: 'center',
-    gap: '9px',
-    padding: '9px 9px',
+    gap: '8px',
+    padding: '8px 9px',
     borderRadius: '7px',
     color: '#475569',
     cursor: 'pointer',
     textAlign: 'left',
+    minHeight: '34px',
   },
   navButtonActive: {
-    background: '#eff6ff',
+    background: '#eef7f9',
     color: '#0f172a',
     fontWeight: 800,
+    boxShadow: 'inset 0 0 0 1px rgba(17, 138, 163, 0.12)',
   },
   navLabel: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-    fontSize: '13px',
+    fontSize: '12px',
   },
   navIndex: {
     color: '#94a3b8',
@@ -1254,30 +1283,33 @@ const styles: Record<string, React.CSSProperties> = {
   },
   main: {
     minWidth: 0,
-    padding: '20px',
+    padding: '16px 18px 22px',
   },
   topbar: {
-    height: '72px',
-    border: '1px solid #dbe4ef',
+    minHeight: '54px',
+    border: '1px solid #e2e8f0',
     borderRadius: '8px',
-    padding: '12px 16px',
+    padding: '10px 14px',
     background: '#ffffff',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '18px',
+    marginBottom: '14px',
+    boxShadow: 'none',
   },
   overline: {
     margin: '0 0 4px',
     textTransform: 'uppercase',
     letterSpacing: '0',
     fontSize: '11px',
-    color: '#64748b',
+    color: T.ink3,
     fontWeight: 800,
   },
   pageTitle: {
     margin: 0,
-    fontSize: '22px',
+    fontSize: '18px',
+    lineHeight: 1.1,
+    fontWeight: 850,
   },
   topbarActions: {
     display: 'flex',
@@ -1286,12 +1318,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   workflowNav: {
     background: '#ffffff',
-    border: '1px solid #dbe4ef',
+    border: '1px solid #e2e8f0',
     borderRadius: '8px',
     padding: '14px',
     marginBottom: '18px',
     display: 'grid',
     gap: '12px',
+    boxShadow: 'none',
   },
   workflowNavHeader: {
     display: 'grid',
@@ -1312,6 +1345,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#ffffff',
     display: 'grid',
     placeItems: 'center',
+    boxShadow: 'none',
   },
   workflowCurrentTitle: {
     margin: 0,
@@ -1320,7 +1354,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   workflowCurrentText: {
     margin: '5px 0 0',
-    color: '#64748b',
+    color: T.ink2,
     fontSize: '13px',
     lineHeight: 1.45,
     maxWidth: '760px',
@@ -1336,7 +1370,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #cbd5e1',
     borderRadius: '8px',
     background: '#ffffff',
-    color: '#172033',
+    color: T.ink1,
     padding: '8px 10px',
     display: 'flex',
     alignItems: 'center',
@@ -1346,7 +1380,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   workflowButtonPrimary: {
     minHeight: '44px',
-    border: '1px solid #1d4ed8',
+    border: '1px solid #2563eb',
     borderRadius: '8px',
     background: '#2563eb',
     color: '#ffffff',
@@ -1361,7 +1395,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: '44px',
     border: '1px solid #e2e8f0',
     borderRadius: '8px',
-    background: '#f8fafc',
+    background: '#f7fafc',
     color: '#94a3b8',
     padding: '8px 10px',
     display: 'flex',
@@ -1381,7 +1415,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '7px',
-    color: '#475569',
+    color: T.ink2,
     fontSize: '12px',
     fontWeight: 900,
     textTransform: 'uppercase',
@@ -1395,7 +1429,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   workflowStep: {
     minHeight: '64px',
-    border: '1px solid #dbe4ef',
+    border: '1px solid #d7e3ea',
     borderRadius: '8px',
     padding: '8px',
     display: 'grid',
@@ -1497,10 +1531,10 @@ const styles: Record<string, React.CSSProperties> = {
     height: '38px',
     display: 'grid',
     placeItems: 'center',
-    borderRadius: '8px',
+    borderRadius: '10px',
     border: '1px solid #cbd5e1',
     background: '#ffffff',
-    color: '#0f172a',
+    color: T.ink1,
     cursor: 'pointer',
   },
   workspaceGrid: {
@@ -1598,9 +1632,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   panel: {
     background: '#ffffff',
-    border: '1px solid #dbe4ef',
+    border: '1px solid #e2e8f0',
     borderRadius: '8px',
-    padding: '16px',
+    padding: '18px',
+    boxShadow: 'none',
   },
   panelHeader: {
     display: 'flex',
@@ -1610,8 +1645,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   panelTitle: {
     margin: 0,
-    fontSize: '17px',
+    fontSize: '18px',
     lineHeight: 1.25,
+    fontWeight: 850,
+    color: T.ink1,
   },
   alertList: {
     display: 'grid',
@@ -1635,9 +1672,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
   },
   queueItem: {
-    border: '1px solid #dbe4ef',
-    background: '#f8fafc',
-    borderRadius: '8px',
+    border: '1px solid #d7e3ea',
+    background: '#f7fafc',
+    borderRadius: '12px',
     padding: '11px 12px',
     display: 'flex',
     alignItems: 'center',
@@ -1700,13 +1737,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sectionIntro: {
     background: '#ffffff',
-    border: '1px solid #dbe4ef',
-    borderRadius: '8px',
+    border: '1px solid #d7e3ea',
+    borderRadius: '12px',
     padding: '18px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: '16px',
+    flexWrap: 'wrap',
   },
   introTitle: {
     margin: 0,
@@ -1725,11 +1763,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   blockGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))',
     gap: '16px',
   },
   blockHeaderLine: {
     marginBottom: '12px',
+    paddingLeft: '12px',
+    borderLeft: '3px solid #118aa3',
   },
   blockDescription: {
     margin: '5px 0 0',
@@ -1739,7 +1779,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   formGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 230px), 1fr))',
     gap: '12px',
   },
   field: {
@@ -1760,23 +1800,23 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     minHeight: '38px',
     boxSizing: 'border-box',
-    border: '1px solid #cbd5e1',
-    borderRadius: '7px',
+    border: '1px solid #d7e3ea',
+    borderRadius: '12px',
     padding: '8px 10px',
     fontSize: '14px',
     color: '#0f172a',
-    background: '#ffffff',
+    background: '#fbfdff',
   },
   textarea: {
     width: '100%',
     minHeight: '86px',
     boxSizing: 'border-box',
-    border: '1px solid #cbd5e1',
-    borderRadius: '7px',
+    border: '1px solid #d7e3ea',
+    borderRadius: '12px',
     padding: '9px 10px',
     fontSize: '14px',
     color: '#0f172a',
-    background: '#ffffff',
+    background: '#fbfdff',
     resize: 'vertical',
     fontFamily: 'inherit',
   },
@@ -1790,7 +1830,7 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   choiceChip: {
-    border: '1px solid #cbd5e1',
+    border: '1px solid #d7e3ea',
     borderRadius: '999px',
     background: '#ffffff',
     color: '#334155',
@@ -1800,10 +1840,10 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '12px',
   },
   choiceChipActive: {
-    border: '1px solid #2563eb',
+    border: '1px solid #118aa3',
     borderRadius: '999px',
-    background: '#eff6ff',
-    color: '#1d4ed8',
+    background: '#e6f7fb',
+    color: '#07566b',
     padding: '7px 10px',
     cursor: 'pointer',
     fontWeight: 800,
@@ -1824,9 +1864,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   scaleButtonActive: {
     height: '34px',
-    border: '1px solid #2563eb',
+    border: '1px solid #118aa3',
     borderRadius: '7px',
-    background: '#2563eb',
+    background: '#118aa3',
     color: '#ffffff',
     cursor: 'pointer',
     fontWeight: 800,
@@ -1847,15 +1887,16 @@ const styles: Record<string, React.CSSProperties> = {
   },
   clinicianPlanPanel: {
     background: '#ffffff',
-    border: '1px solid #dbe4ef',
+    border: '1px solid #e2e8f0',
     borderRadius: '8px',
     padding: '16px',
     display: 'grid',
     gap: '14px',
+    boxShadow: 'none',
   },
   clinicianPlanHeader: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1fr) 280px',
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(240px, 300px)',
     gap: '16px',
     alignItems: 'start',
   },
@@ -1891,7 +1932,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '8px',
     padding: '12px',
     display: 'grid',
-    gridTemplateColumns: '150px minmax(0, 1fr)',
+    gridTemplateColumns: 'minmax(120px, 150px) minmax(0, 1fr)',
     gap: '12px',
     alignItems: 'center',
   },
@@ -1927,7 +1968,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   exerciseToggleGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
     gap: '8px',
   },
   exerciseToggle: {
@@ -1986,12 +2027,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   exerciseLayout: {
     display: 'grid',
-    gridTemplateColumns: '300px minmax(0, 1fr)',
+    gridTemplateColumns: 'minmax(240px, 300px) minmax(0, 1fr)',
     gap: '16px',
   },
   exerciseMenu: {
     background: '#ffffff',
-    border: '1px solid #dbe4ef',
+    border: '1px solid #e2e8f0',
     borderRadius: '8px',
     padding: '10px',
     display: 'grid',
@@ -1999,8 +2040,8 @@ const styles: Record<string, React.CSSProperties> = {
     alignSelf: 'start',
   },
   exerciseMenuItem: {
-    border: '1px solid #dbe4ef',
-    borderRadius: '8px',
+    border: '1px solid #d7e3ea',
+    borderRadius: '13px',
     background: '#ffffff',
     padding: '11px',
     textAlign: 'left',
@@ -2009,9 +2050,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '4px',
   },
   exerciseMenuItemActive: {
-    border: '1px solid #0d9488',
-    borderRadius: '8px',
-    background: '#ecfeff',
+    border: '1px solid #118aa3',
+    borderRadius: '13px',
+    background: '#e6f7fb',
     padding: '11px',
     textAlign: 'left',
     cursor: 'pointer',
@@ -2030,7 +2071,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   exerciseHeaderBlock: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1fr) 220px',
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(190px, 240px)',
     gap: '16px',
     alignItems: 'start',
     marginBottom: '16px',
@@ -2079,7 +2120,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   regimenGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))',
     gap: '8px',
   },
   regimenItem: {
@@ -2126,8 +2167,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   dosageBox: {
     background: '#f0fdfa',
-    color: '#134e4a',
-    border: '1px solid #99f6e4',
+    color: '#07566b',
+    border: '1px solid #b9e8ef',
     borderRadius: '8px',
     padding: '12px',
     display: 'grid',
@@ -2153,7 +2194,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   infographicGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
     gap: '12px',
     marginTop: '8px',
   },
@@ -2253,13 +2294,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   prescriptionGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
     gap: '12px',
     marginTop: '16px',
   },
   prescriptionBand: {
-    background: '#f8fafc',
-    border: '1px solid #e2e8f0',
+    background: '#fbfdff',
+    border: '1px solid #d7e3ea',
     borderRadius: '8px',
     padding: '12px',
   },
@@ -2288,7 +2329,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   patientPortalGrid: {
     display: 'grid',
-    gridTemplateColumns: '330px minmax(0, 1fr)',
+    gridTemplateColumns: 'minmax(280px, 340px) minmax(0, 1fr)',
     gap: '16px',
   },
   patientPhone: {
@@ -2363,7 +2404,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   reportGrid: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(0, 1.1fr) minmax(0, 0.9fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
     gap: '16px',
   },
   reportLine: {
@@ -2411,7 +2452,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   icfGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))',
     gap: '10px',
   },
   icfItem: {
@@ -2420,5 +2461,14 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '10px',
     display: 'grid',
     gap: '6px',
+  },
+  footer: {
+    marginTop: '22px',
+    padding: '16px 8px 4px',
+    color: T.ink2,
+    fontSize: '13px',
+    fontWeight: 700,
+    textAlign: 'center',
+    borderTop: '1px solid #d7e3ea',
   },
 };

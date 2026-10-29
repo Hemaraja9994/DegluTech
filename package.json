@@ -11,7 +11,9 @@
     "build": "corepack pnpm -r --if-present --sort run build",
     "dev": "corepack pnpm -r --parallel --if-present run dev",
     "lint": "corepack pnpm -r --if-present run lint",
-    "clean": "corepack pnpm -r --if-present run clean"
+    "clean": "corepack pnpm -r --if-present run clean",
+    "desktop:pack": "corepack pnpm --filter @laryngoos/desktop run desktop:pack",
+    "desktop:win": "corepack pnpm --filter @laryngoos/desktop run desktop:win"
   },
   "devDependencies": {
     "turbo": "^1.10.15",

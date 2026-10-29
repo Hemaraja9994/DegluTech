@@ -1,0 +1,17 @@
+{
+  "name": "DegluTech Clinical Workspace",
+  "short_name": "DegluTech",
+  "description": "Clinical workspace for speech-language pathology head and neck cancer rehabilitation.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#eef5f7",
+  "theme_color": "#0f8ea8",
+  "icons": [
+    {
+      "src": "/deglutech-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

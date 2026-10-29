@@ -5,14 +5,73 @@
 @layer base {
   :root {
     color-scheme: light;
+
+    /* Surfaces */
+    --bg: #f3f7fb;
+    --surface-1: #ffffff;
+    --surface-2: #f8fbfd;
+    --surface-3: #e6eff5;
+
+    /* Ink (text) */
+    --ink-1: #10202f;
+    --ink-2: #425466;
+    --ink-3: #7b8b9c;
+
+    /* Lines / dividers */
+    --line: rgba(15, 39, 59, 0.10);
+    --line-strong: rgba(15, 39, 59, 0.18);
+
+    /* Accent */
+    --accent: #118aa3;
+    --accent-soft: #dff5f8;
+    --accent-ink: #07566b;
+    --accent-deep: #114e6b;
+    --accent-blue: #2563eb;
+    --accent-teal: #0f766e;
+    --accent-violet: #635bff;
+
+    /* Severity */
+    --safe: #0f766e;
+    --caution: #b7791f;
+    --risk: #b42318;
+
+    /* Type families */
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: Inter, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    --mono: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --shadow-soft: 0 18px 48px rgba(16, 32, 47, 0.08);
+    --shadow-lift: 0 24px 64px rgba(16, 32, 47, 0.14);
   }
 
   * {
     box-sizing: border-box;
   }
 
+  html,
   body {
     margin: 0;
+    min-height: 100%;
+    font-size: 16px;
+  }
+
+  body {
+    background: #f5f7fa;
+    color: var(--ink-1);
+    font-family: var(--sans);
+    font-feature-settings: 'cv11', 'ss01', 'zero';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: none;
+    line-height: 1.5;
+  }
+
+  #root {
+    min-height: 100vh;
   }
 
   button,
@@ -20,5 +79,349 @@
   select,
   textarea {
     font: inherit;
+    color: inherit;
+  }
+
+  button {
+    transition:
+      transform 120ms ease,
+      box-shadow 120ms ease,
+      border-color 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+
+  @media (hover: hover) {
+    button:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 32, 47, 0.08);
+    }
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid rgba(15, 142, 168, 0.22);
+    outline-offset: 2px;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--ink-3);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(61, 31, 31, 0.18);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(61, 31, 31, 0.32);
+    background-clip: content-box;
+    border: 2px solid transparent;
   }
 }
+
+@layer components {
+  .clinical-section-header {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .clinical-section-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(17, 138, 163, 0.05), transparent 42%);
+  }
+
+  .clinical-section-header > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .clinical-floating-badge {
+    box-shadow: inset 0 0 0 1px rgba(15, 39, 59, 0.08);
+  }
+
+  .clinical-ticket-bar {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .clinical-ticket-bar::before,
+  .clinical-ticket-bar::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    transform: translateY(-50%);
+  }
+
+  .clinical-ticket-bar::before {
+    left: -10px;
+  }
+
+  .clinical-ticket-bar::after {
+    right: -10px;
+  }
+
+  .deglutech-main {
+    background: transparent;
+  }
+
+  .deglutech-sidebar svg,
+  .deglutech-topbar svg,
+  .clinical-section-header svg {
+    stroke-width: 2;
+  }
+
+  .deglutech-caseload-row:hover {
+    background: #f8fbfd !important;
+    box-shadow: inset 3px 0 0 var(--accent) !important;
+    transform: none !important;
+  }
+
+  .deglutech-caseload-row:focus-visible {
+    position: relative;
+    z-index: 1;
+  }
+
+  .deglutech-caseload-row strong,
+  .deglutech-caseload-row span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .deglutech-patient-drawer {
+    animation: deglutech-drawer-in 260ms cubic-bezier(0.32, 0.72, 0.16, 1);
+  }
+
+  @keyframes deglutech-drawer-in {
+    from {
+      opacity: 0.75;
+      transform: translateX(42px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}
+
+@media (max-width: 1280px) {
+  .deglutech-dashboard-columns {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .deglutech-kpi-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1160px) {
+  .deglutech-caseload-table {
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 1080px) {
+  .deglutech-shell {
+    grid-template-columns: 228px minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 920px) {
+  .deglutech-shell {
+    display: block !important;
+  }
+
+  .deglutech-sidebar {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
+  }
+
+  .deglutech-main {
+    padding: 14px !important;
+  }
+
+  .deglutech-nav-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .deglutech-topbar {
+    height: auto !important;
+    min-height: 72px;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .deglutech-topbar-actions {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .deglutech-workflow-header,
+  .deglutech-clinician-plan-header,
+  .deglutech-exercise-header,
+  .deglutech-prescribed-summary,
+  .deglutech-signoff-panel {
+    grid-template-columns: 1fr !important;
+  }
+
+  .deglutech-section-intro,
+  .deglutech-panel-header {
+    align-items: flex-start !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .deglutech-block-grid,
+  .deglutech-form-grid,
+  .deglutech-platform-grid,
+  .deglutech-exercise-toggle-grid,
+  .deglutech-exercise-layout,
+  .deglutech-regimen-grid,
+  .deglutech-regimen-two-column,
+  .deglutech-infographic-grid,
+  .deglutech-prescription-grid,
+  .deglutech-patient-portal-grid,
+  .deglutech-report-grid,
+  .deglutech-icf-grid,
+  .deglutech-exec-grid,
+  .deglutech-draft-grid,
+  .deglutech-recommendation-grid,
+  .deglutech-analytics-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .deglutech-section-pager {
+    grid-template-columns: 1fr !important;
+  }
+
+  .deglutech-progress-wrap {
+    width: min(100%, 210px) !important;
+  }
+
+  .deglutech-patient-phone {
+    min-height: 0 !important;
+    border-radius: 18px !important;
+  }
+
+  .deglutech-kpi-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .deglutech-report-line {
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+  }
+
+  .deglutech-patient-drawer {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 560px) {
+  html,
+  body {
+    font-size: 15px;
+  }
+
+  .deglutech-nav-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .deglutech-main {
+    padding: 10px !important;
+  }
+
+  .deglutech-workflow-current {
+    grid-template-columns: 1fr !important;
+  }
+
+  .deglutech-workflow-controls,
+  .deglutech-topbar-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .deglutech-topbar-actions > button,
+  .deglutech-workflow-controls > button,
+  .deglutech-section-pager > button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .deglutech-patient-drawer [style*='grid-template-columns'] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+}
+.mobile-section-select { display: none; }
+.workspace-save-status { color: #526775; font-size: 12px; max-width: 180px; }
+.patient-safety { margin: 18px 0; padding: 14px 16px; border-left: 4px solid #b7791f; background: #fff9ee; color: #624318; border-radius: 4px; }
+.patient-safety p { margin: 4px 0 0; line-height: 1.5; }
+@media (max-width: 920px) {
+  .deglutech-sidebar .deglutech-nav-list { display: none !important; }
+  .deglutech-sidebar { padding: 12px 16px !important; }
+  .deglutech-sidebar > div:nth-child(2) { display: none; }
+  .mobile-section-select { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; color: #425466; font-size: 13px; font-weight: 600; }
+  .mobile-section-select select { min-height: 44px; width: 100%; padding: 8px 12px; color: #10202f; background: white; border: 1px solid #cbd5df; border-radius: 6px; }
+}
+@media (max-width: 560px) {
+  .deglutech-topbar-actions { flex-direction: row !important; flex-wrap: wrap; align-items: center !important; }
+  .deglutech-topbar-actions > button { width: auto !important; }
+  .workspace-save-status { flex-basis: 100%; max-width: none; }
+}
+/* Exercise instructions */
+.exercise-guide { margin: 24px 0; border: 1px solid #dce5ea; border-radius: 8px; background: #fff; overflow: hidden; }
+.exercise-guide-heading { display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 18px 20px; color: #162d3a; border-bottom: 1px solid #e7edf0; }
+.exercise-guide-heading span { color: #526775; font-size: 13px; white-space: nowrap; }
+.exercise-guide-progress { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: #f6f9fa; border-bottom: 1px solid #e7edf0; }
+.exercise-guide-tab { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 14px 18px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: #526775; text-align: left; cursor: pointer; }
+.exercise-guide-tab span { flex: 0 0 28px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid #b9cbd1; font-size: 13px; }
+.exercise-guide-tab strong { font-size: 13px; overflow-wrap: anywhere; }
+.exercise-guide-tab.active { color: #075c65; border-bottom-color: #13838a; background: #eaf6f5; }
+.exercise-guide-tab.active span { color: white; background: #087b80; border-color: #087b80; }
+.exercise-guide-content { display: flex; align-items: flex-start; gap: 20px; min-height: 130px; padding: 28px 24px; animation: guide-enter 220ms ease-out; }
+.exercise-guide-number { color: #a6c7c9; font-size: 32px; font-weight: 700; line-height: 1; }
+.exercise-guide-content h4 { margin: 0 0 8px; font-size: 18px; color: #183440; }
+.exercise-guide-content p { margin: 0; color: #415a66; font-size: 16px; line-height: 1.6; }
+.exercise-guide-actions { display: flex; justify-content: space-between; gap: 12px; padding: 14px 20px; border-top: 1px solid #e7edf0; }
+.exercise-guide-actions button { display: inline-flex; align-items: center; gap: 5px; min-height: 40px; padding: 0 14px; border: 1px solid #cbd9de; border-radius: 6px; background: #fff; color: #164650; font-weight: 600; cursor: pointer; }
+.exercise-guide-actions button:disabled { opacity: .45; cursor: default; }
+.exercise-guide button:focus-visible { outline: 3px solid #55aeb4; outline-offset: -3px; }
+@keyframes guide-enter { from { opacity: .5; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 600px) { .exercise-guide-heading { align-items: flex-start; } .exercise-guide-tab { padding: 10px 5px; flex-direction: column; text-align: center; } .exercise-guide-tab strong { font-size: 11px; } .exercise-guide-content { padding: 22px 16px; gap: 14px; } }
+@media (prefers-reduced-motion: reduce) { .exercise-guide-content { animation: none; } }

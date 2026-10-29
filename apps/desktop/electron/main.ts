@@ -3,18 +3,22 @@ import * as path from 'path';
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: 1280,
+    height: 860,
+    minWidth: 390,
+    minHeight: 680,
+    backgroundColor: '#eef5f7',
+    title: 'DegluTech',
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
     },
   });
 
-  // Load from Vite dev server during development
-  if (process.env.NODE_ENV === 'development') {
-    win.loadURL('http://localhost:3000');
+  const devServerUrl = process.env.ELECTRON_START_URL;
+
+  if (!app.isPackaged && devServerUrl) {
+    win.loadURL(devServerUrl);
     win.webContents.openDevTools();
   } else {
     win.loadFile(path.join(__dirname, '../dist/index.html'));
