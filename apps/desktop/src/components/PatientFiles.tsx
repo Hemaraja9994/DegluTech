@@ -85,7 +85,7 @@ export function PatientFiles({ patient, fieldState, setFieldState, onHospitalId,
   const add = async (list: FileList | File[] | null) => {
     if (!list || !list.length) return;
     setError(''); setMessage('');
-    await requestPersistence();
+    void requestPersistence(); // may wait on a browser prompt; never block adding files
     let last: FileMeta | null = null;
     for (const f of Array.from(list)) {
       if (f.size > MAX_FILE_BYTES) { setError(`${f.name} is larger than ${MAX_FILE_BYTES / 1e6} MB. Trim the video or compress the file.`); continue; }

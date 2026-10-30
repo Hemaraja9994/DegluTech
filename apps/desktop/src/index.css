@@ -543,10 +543,10 @@
 .exavatar-bar { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; pointer-events: none; }
 .exavatar-seg { pointer-events: auto; display: inline-flex; gap: 3px; padding: 3px; border-radius: 999px; background: rgba(255,255,255,.92); box-shadow: 0 2px 10px rgba(21,48,42,.12); }
 .exavatar-seg button { min-height: 36px; padding: 0 12px; border-radius: 999px; border: 0; background: transparent; color: #3e5852; font: 700 13px var(--dt-font, inherit); cursor: pointer; }
-.exavatar-seg button[aria-pressed="true"] { background: #1f5c4a; color: #fff; }
+.exavatar-seg button[aria-pressed="true"] { background: #173451; color: #fff; }
 .exavatar-hold { position: absolute; left: 12px; bottom: 12px; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 16px; background: rgba(255,255,255,.95); box-shadow: 0 2px 10px rgba(21,48,42,.12); font-variant-numeric: tabular-nums; }
-.exavatar-hold strong { font-size: 26px; line-height: 1; color: #15302a; }
-.exavatar-hold span { font-size: 12.5px; font-weight: 700; color: #3e5852; }
+.exavatar-hold strong { font-size: 26px; line-height: 1; color: #173451; }
+.exavatar-hold span { font-size: 12.5px; font-weight: 700; color: #475d70; }
 .exavatar-seg button:focus-visible, .exvisual-switch button:focus-visible { outline: 3px solid #1f5c4a; outline-offset: 2px; }
 @media (max-width: 520px) { .exavatar-seg button { padding: 0 9px; font-size: 12px; } }
 

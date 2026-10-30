@@ -160,7 +160,7 @@ export function extractSuggestions(input: string): Suggestion[] {
 
   // ---- swallowing scores and findings
   first(/\bEAT[\s-]?10\b[^0-9\n]{0,30}(\d{1,2})(?:\s*\/\s*40)?\b/i, m => { if (+m[1] <= 40) put('eat10', m[1], m.index, m[0].length); });
-  first(/\bFOIS\b[^0-9\n]{0,25}([1-7])\b/i, m => put('fois', m[1], m.index, m[0].length));
+  first(/\bF[O0][I1l|]S\b[^0-9\n]{0,25}([1-7])\b/i, m => put('fois', m[1], m.index, m[0].length));
   first(/\b(?:PAS|penetration[\s-]*aspiration[\s-]*scale)\b[^0-9\n]{0,30}([1-8])\b/i, m => put('pas', m[1], m.index, m[0].length));
   first(/\bMASA(?:[\s-]*HNC)?\b[^0-9\n]{0,25}(\d{2,3})\b/i, m => { if (+m[1] <= 200) put('masa', m[1], m.index, m[0].length); });
   first(/\bDIGEST\b[^0-9\n]{0,30}(?:grade\s*)?([0-4])\b/i, m => put('digestOverall', m[1], m.index, m[0].length, 'Check this is the overall grade, not the safety or efficiency grade.'));
