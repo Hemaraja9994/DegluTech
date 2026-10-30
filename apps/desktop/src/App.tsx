@@ -520,7 +520,7 @@ export const App: React.FC = () => {
         </>}
 
         <footer style={styles.footer}>
-          Team: Mr. Prasanna Hegde, Ms. Priyanka Nayak, Mr. Hemaraja Nayaka.S, Mr. Sumanth A V, Mr. Joju Joseph
+          Team: Mr. Prasanna Hegde, Mr. Hemaraja Nayaka.S, Mr. Sumanth A V, Mr. Joju Joseph
           <span className="footer-docs"> · <a href="downloads/deglutech-user-manual.pdf" target="_blank" rel="noopener">User manual</a> · <a href="downloads/deglutech-quick-start.pdf" target="_blank" rel="noopener">Quick start</a></span>
         </footer>
       </main>
