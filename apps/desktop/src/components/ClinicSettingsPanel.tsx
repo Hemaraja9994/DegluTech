@@ -7,6 +7,7 @@ import {
 import { buildDemoPatients } from '../demoData';
 import { downloadJson, fileStamp } from './download';
 import { readImage } from './imageUpload';
+import { allFiles, backupToFile, fileToBackup, putFile } from '../fileStore';
 import { APP_VERSION } from './WorkspaceNotice';
 
 type Props = {
@@ -21,7 +22,9 @@ export function ClinicSettingsPanel({ settings, setSettings, store, setStore }: 
   const [draft, setDraft] = useState<Clinician | null>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [pending, setPending] = useState<{ store: PatientStore; settings: ClinicSettings | null; name: string } | null>(null);
+  const [pending, setPending] = useState<{ store: PatientStore; settings: ClinicSettings | null; name: string; files: unknown[] } | null>(null);
+  const [withFiles, setWithFiles] = useState(false);
+  const [working, setWorking] = useState(false);
   const [confirmClinician, setConfirmClinician] = useState<string | null>(null);
   const demoCount = store.patients.filter(p => p.demo).length;
   const signer = signingClinician(settings);
@@ -45,18 +48,38 @@ export function ClinicSettingsPanel({ settings, setSettings, store, setStore }: 
     setSettings({ ...settings, clinicians, signingClinicianId: settings.signingClinicianId === id ? clinicians[0]?.id ?? null : settings.signingClinicianId });
     setConfirmClinician(null); say('Clinician removed.');
   };
-  const exportAll = () => { downloadJson(`deglutech-backup-${fileStamp()}.json`, buildBackup(store, settings, APP_VERSION)); say(`Backup of ${store.patients.length} patient(s) and settings downloaded. It is not encrypted: keep it on a protected drive.`); };
+  const exportAll = async () => {
+    setWorking(true);
+    try {
+      const backup: Record<string, unknown> = { ...buildBackup(store, settings, APP_VERSION) };
+      let count = 0;
+      if (withFiles) {
+        const ids = new Set(store.patients.map(p => p.id));
+        const files = (await allFiles()).filter(f => ids.has(f.patientId));
+        backup.files = await Promise.all(files.map(fileToBackup));
+        count = files.length;
+      }
+      downloadJson(`deglutech-backup-${fileStamp()}.json`, backup);
+      say(`Backup of ${store.patients.length} patient(s)${withFiles ? `, ${count} file(s)` : ''} and settings downloaded. It is not encrypted: keep it on a protected drive.`);
+    } catch (e) { fail(`Backup failed: ${(e as Error).message}`); } finally { setWorking(false); }
+  };
   const chooseBackup = async (file?: File) => {
     if (!file) return;
-    const result = parseBackup(await file.text());
+    const text = await file.text();
+    const result = parseBackup(text);
     if (typeof result === 'string') { fail(result); return; }
-    setPending({ ...result, name: file.name }); setMessage(''); setError('');
+    let files: unknown[] = [];
+    try { const raw = JSON.parse(text) as { files?: unknown }; if (Array.isArray(raw.files)) files = raw.files; } catch { /* already validated */ }
+    setPending({ ...result, name: file.name, files }); setMessage(''); setError('');
   };
-  const applyBackup = (mode: 'merge' | 'replace') => {
+  const applyBackup = async (mode: 'merge' | 'replace') => {
     if (!pending) return;
     setStore(prev => mode === 'replace' ? pending.store : mergeStores(prev, pending.store));
     if (pending.settings && (mode === 'replace' || !settings.instituteName)) setSettings(pending.settings);
-    say(`${pending.store.patients.length} patient(s) ${mode === 'replace' ? 'restored; earlier records on this device were replaced' : 'merged into this device'}.`);
+    const ids = new Set(pending.store.patients.map(p => p.id));
+    let restored = 0;
+    for (const raw of pending.files) { const f = backupToFile(raw); if (f && ids.has(f.patientId)) { try { await putFile(f); restored++; } catch { /* storage full */ } } }
+    say(`${pending.store.patients.length} patient(s)${restored ? ` and ${restored} file(s)` : ''} ${mode === 'replace' ? 'restored; earlier records on this device were replaced' : 'merged into this device'}.`);
     setPending(null);
   };
 
@@ -134,11 +157,13 @@ export function ClinicSettingsPanel({ settings, setSettings, store, setStore }: 
         <h3 id="cs-data">Backup and data</h3>
         <p className="pm-hint">Everything is stored only in this browser. Export a backup at least weekly and before clearing the browser or changing device.</p>
         <div className="pm-actions">
-          <button type="button" className="pm-primary" onClick={exportAll}><Download size={16} /> Export backup</button>
+          <button type="button" className="pm-primary" disabled={working} onClick={exportAll}><Download size={16} /> {working ? 'Preparing backup…' : 'Export backup'}</button>
           <label className="cs-file"><Upload size={16} /> Import backup<input type="file" accept="application/json,.json" onChange={e => { chooseBackup(e.target.files?.[0]); e.target.value = ''; }} /></label>
         </div>
+        <label className="cs-check"><input type="checkbox" checked={withFiles} onChange={e => setWithFiles(e.target.checked)} />
+          <span><strong>Include patient files (reports, photos, videos)</strong><small>Makes the backup much larger.</small></span></label>
         {pending && <div className="pm-confirm" role="group" aria-label="Import backup">
-          <span>{pending.name}: {pending.store.patients.length} patient(s){pending.settings ? ' and clinic settings' : ''}. How should it be imported?</span>
+          <span>{pending.name}: {pending.store.patients.length} patient(s){pending.files.length ? `, ${pending.files.length} file(s)` : ''}{pending.settings ? ' and clinic settings' : ''}. How should it be imported?</span>
           <button type="button" className="pm-primary" onClick={() => applyBackup('merge')}>Merge with this device</button>
           <button type="button" className="pm-danger" onClick={() => applyBackup('replace')}>Replace everything</button>
           <button type="button" onClick={() => setPending(null)}>Cancel</button>
