@@ -9,6 +9,7 @@ import {
   type IcfTableRow,
 } from './reportEngine.ts';
 import { HNC_CLINICAL_SECTIONS } from '../../../packages/core/src/hncClinicalModel.ts';
+import type { Clinician, ClinicSettings } from './clinicStore.ts';
 
 export interface ReportFacility {
   facilityName: string;
@@ -17,7 +18,30 @@ export interface ReportFacility {
   clinicianTitle: string;
   registrationNumber: string;
   contact: string;
+  address?: string;
+  /** PNG/JPEG data URLs from Settings (validated there). */
+  logo?: string;
+  signature?: string;
+  /** Patient identity rows; names are left out when Settings hides them. */
+  identity?: { label: string; value: string }[];
 }
+
+/** Letterhead and sign-off for printouts, from Settings and the chosen clinician. */
+export function facilityFromSettings(settings: ClinicSettings, clinician: Clinician | null, identity: { label: string; value: string }[]): ReportFacility {
+  return {
+    facilityName: settings.instituteName || '[Institute name: add it in Settings]',
+    departmentName: settings.department || 'Speech-Language Pathology',
+    address: settings.address,
+    contact: [settings.phone, settings.email].filter(Boolean).join('  •  '),
+    logo: settings.logo,
+    clinicianName: clinician?.name || '[Clinician name: add in Settings]',
+    clinicianTitle: [clinician?.qualification, clinician?.designation].filter(Boolean).join(', '),
+    registrationNumber: clinician?.registration ? `RCI Reg. No. ${clinician.registration}` : 'RCI Reg. No. ____________',
+    signature: clinician?.signature,
+    identity,
+  };
+}
+const safeImage = (src?: string) => (src && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(src) ? src : '');
 
 export const DEFAULT_FACILITY: ReportFacility = {
   facilityName: 'DegluTech Clinical Workspace',
@@ -81,7 +105,9 @@ export function buildReportHtml(
     completion.reduce((sum, section) => sum + section.percent, 0) / Math.max(1, completion.length)
   );
 
-  const patientId = String(fieldState.studyId || 'Not recorded');
+  const identity = facility.identity && facility.identity.length ? facility.identity : [{ label: 'Study ID', value: String(fieldState.studyId || 'Not recorded') }];
+  const patientId = identity.map((row) => row.value).join(' / ');
+  const logo = safeImage(facility.logo), signature = safeImage(facility.signature);
   const evaluationDate = String(fieldState.evaluationDate || 'Not recorded');
   const findings = HNC_CLINICAL_SECTIONS.filter(section => !['command', 'exercise', 'patient', 'report'].includes(section.id)).map(section => {
     const rows = section.blocks.flatMap(block => block.fields).filter(field => {
@@ -103,7 +129,7 @@ export function buildReportHtml(
   html, body { margin: 0; padding: 0; }
   body {
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-    color: #0f172a;
+    color: #15302a;
     background: #ffffff;
     font-size: 11pt;
     line-height: 1.45;
@@ -118,14 +144,15 @@ export function buildReportHtml(
     grid-template-columns: 64px 1fr auto;
     gap: 14px;
     padding-bottom: 12px;
-    border-bottom: 2px solid #0f172a;
+    border-bottom: 2px solid #15302a;
     align-items: center;
   }
+  .header .logo-img { width: 64px; height: 64px; object-fit: contain; }
   .header .logo {
     width: 64px;
     height: 64px;
     border-radius: 10px;
-    background: linear-gradient(135deg, #0ea5e9, #0f766e);
+    background: linear-gradient(135deg, #2f7a5c, #1f5c4a);
     color: #ffffff;
     display: grid;
     place-items: center;
@@ -137,41 +164,41 @@ export function buildReportHtml(
     margin: 0;
     font-size: 18pt;
     line-height: 1.1;
-    color: #0f172a;
+    color: #15302a;
   }
   .header .subtitle {
     margin: 4px 0 0;
     font-size: 10.5pt;
-    color: #475569;
+    color: #3e5852;
   }
   .header .meta {
     text-align: right;
     font-size: 9pt;
-    color: #475569;
+    color: #3e5852;
     line-height: 1.4;
   }
-  .header .meta strong { color: #0f172a; font-size: 10pt; }
+  .header .meta strong { color: #15302a; font-size: 10pt; }
   .demographics {
     margin-top: 14px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     padding: 12px 14px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: #f5f8f5;
+    border: 1px solid #dce5df;
     border-radius: 8px;
   }
   .demographics .cell { display: grid; gap: 2px; min-width: 0; }
-  .demographics .label { font-size: 8.5pt; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
-  .demographics .value { font-size: 10.5pt; color: #0f172a; font-weight: 600; }
+  .demographics .label { font-size: 8.5pt; color: #4d6660; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+  .demographics .value { font-size: 10.5pt; color: #15302a; font-weight: 600; }
   .section-title {
     margin: 22px 0 10px;
     font-size: 11.5pt;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #0f172a;
+    color: #15302a;
     font-weight: 800;
-    border-left: 4px solid #1d4ed8;
+    border-left: 4px solid #174a3c;
     padding: 4px 0 4px 10px;
   }
   .exec-summary {
@@ -186,7 +213,7 @@ export function buildReportHtml(
   .exec-summary .impression {
     font-size: 13pt;
     font-weight: 800;
-    color: #0f172a;
+    color: #15302a;
     line-height: 1.3;
   }
   .exec-summary .row { display: grid; grid-template-columns: 130px 1fr; gap: 10px; font-size: 10.5pt; }
@@ -197,7 +224,7 @@ export function buildReportHtml(
     padding: 3px 9px;
     border-radius: 999px;
     background: rgba(15,23,42,0.06);
-    color: #0f172a;
+    color: #15302a;
     font-size: 9.5pt;
     font-weight: 700;
     border: 1px solid rgba(15,23,42,0.1);
@@ -207,12 +234,12 @@ export function buildReportHtml(
     width: 100%;
     border-collapse: collapse;
     font-size: 10pt;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #dce5df;
     border-radius: 8px;
     overflow: hidden;
   }
   table.icf th {
-    background: #0f172a;
+    background: #15302a;
     color: #ffffff;
     text-align: left;
     padding: 8px 10px;
@@ -222,10 +249,10 @@ export function buildReportHtml(
   }
   table.icf td {
     padding: 8px 10px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #dce5df;
     vertical-align: top;
   }
-  table.icf tr:nth-child(odd) td { background: #f8fafc; }
+  table.icf tr:nth-child(odd) td { background: #f5f8f5; }
   table.icf .icf-code span {
     font-family: 'Consolas', monospace;
     padding: 3px 7px;
@@ -234,9 +261,9 @@ export function buildReportHtml(
     font-size: 9.5pt;
   }
   table.icf .center { text-align: center; }
-  table.icf .muted { color: #64748b; font-size: 9pt; font-weight: 500; }
+  table.icf .muted { color: #4d6660; font-size: 9pt; font-weight: 500; }
   table.icf .small { font-size: 8.5pt; }
-  table.icf .manifestation { color: #334155; font-size: 9.5pt; max-width: 260px; }
+  table.icf .manifestation { color: #3e5852; font-size: 9.5pt; max-width: 260px; }
   .qualifier-pill {
     display: inline-block;
     min-width: 24px;
@@ -251,62 +278,63 @@ export function buildReportHtml(
   .qualifier-pill.q-2 { background: #ca8a04; }
   .qualifier-pill.q-3 { background: #ea580c; }
   .qualifier-pill.q-4 { background: #dc2626; }
+  .qualifier-pill.q--1 { background: #eef2ef; color: #3e5852; width: auto; padding: 0 8px; font-size: 9pt; }
   .rec-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
   .rec-card {
-    border: 1px solid #e2e8f0;
+    border: 1px solid #dce5df;
     border-radius: 8px;
     padding: 12px 14px;
     background: #ffffff;
     page-break-inside: avoid;
   }
   .rec-card.danger { border-color: #fecaca; background: #fef2f2; }
-  .rec-card.timeline { border-color: #bfdbfe; background: #eff6ff; }
+  .rec-card.timeline { border-color: #c9ddd0; background: #e4eee7; }
   .rec-card h4 {
     margin: 0 0 8px;
     font-size: 10.5pt;
-    color: #0f172a;
+    color: #15302a;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #dce5df;
     padding-bottom: 5px;
   }
   .rec-card.danger h4 { color: #991b1b; border-color: #fecaca; }
-  .rec-card.timeline h4 { color: #1d4ed8; border-color: #bfdbfe; }
+  .rec-card.timeline h4 { color: #174a3c; border-color: #c9ddd0; }
   .rec-card ul { margin: 0; padding-left: 18px; }
-  .rec-card li { margin: 4px 0; font-size: 10pt; line-height: 1.4; color: #334155; }
+  .rec-card li { margin: 4px 0; font-size: 10pt; line-height: 1.4; color: #3e5852; }
   .signoff {
     margin-top: 20px;
     display: grid;
     grid-template-columns: 1.2fr 0.8fr;
     gap: 16px;
-    border-top: 2px solid #0f172a;
+    border-top: 2px solid #15302a;
     padding-top: 14px;
   }
   .signoff .signature-block {
-    border: 1px dashed #cbd5e1;
+    border: 1px dashed #c9d7ce;
     border-radius: 8px;
     padding: 16px;
     min-height: 90px;
-    background: #f8fafc;
-    color: #475569;
+    background: #f5f8f5;
+    color: #3e5852;
     font-size: 9.5pt;
   }
   .signoff .signature-block .line {
-    border-bottom: 1px solid #0f172a;
+    border-bottom: 1px solid #15302a;
     height: 28px;
     margin-bottom: 6px;
   }
-  .signoff .signature-block strong { color: #0f172a; }
+  .signoff .signature-block strong { color: #15302a; }
   .footer {
     margin-top: 18px;
     font-size: 8.5pt;
-    color: #64748b;
+    color: #4d6660;
     text-align: center;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid #dce5df;
     padding-top: 8px;
   }
   .warn-banner {
@@ -327,7 +355,7 @@ export function buildReportHtml(
   .completion-strip .cell {
     height: 8px;
     border-radius: 3px;
-    background: #e2e8f0;
+    background: #dce5df;
   }
   .completion-strip .cell.complete { background: #10b981; }
   .completion-strip .cell.partial { background: #f59e0b; }
@@ -335,7 +363,7 @@ export function buildReportHtml(
   .completion-text {
     margin-top: 6px;
     font-size: 9pt;
-    color: #475569;
+    color: #3e5852;
     display: flex;
     justify-content: space-between;
   }
@@ -348,21 +376,22 @@ export function buildReportHtml(
 <body>
   <div class="page">
     <header class="header">
-      <div class="logo">DT</div>
+      ${logo ? `<img class="logo-img" src="${logo}" alt="" />` : '<div class="logo">SLP</div>'}
       <div>
         <h1>${escapeHtml(facility.facilityName)}</h1>
         <div class="subtitle">${escapeHtml(facility.departmentName)}</div>
-        <div class="subtitle" style="margin-top:6px;font-weight:700;color:#0f172a">Speech-Language Pathology Diagnostic Report — Head &amp; Neck Cancer Rehabilitation</div>
+        ${facility.address || facility.contact ? `<div class="subtitle">${escapeHtml([facility.address, facility.contact].filter(Boolean).join('  •  '))}</div>` : ''}
+        <div class="subtitle" style="margin-top:6px;font-weight:700;color:#15302a">Speech-Language Pathology Diagnostic Report — Head &amp; Neck Cancer Rehabilitation</div>
       </div>
       <div class="meta">
-        <strong>Report ID:</strong> DTR-${escapeHtml(patientId)}-${generatedAt.getTime().toString(36).toUpperCase()}<br />
+        <strong>Report ID:</strong> DTR-${generatedAt.getTime().toString(36).toUpperCase()}<br />
         <strong>Generated:</strong> ${generatedAt.toLocaleString()}<br />
         <strong>Evaluation:</strong> ${escapeHtml(evaluationDate)}
       </div>
     </header>
 
     <section class="demographics">
-      <div class="cell"><span class="label">Study ID</span><span class="value">${escapeHtml(patientId)}</span></div>
+      ${identity.map((row) => `<div class="cell"><span class="label">${escapeHtml(row.label)}</span><span class="value">${escapeHtml(row.value)}</span></div>`).join('')}
       <div class="cell"><span class="label">Age / Sex</span><span class="value">${escapeHtml(String(fieldState.age || 'Not recorded'))} / ${escapeHtml(String(fieldState.gender || 'Not recorded'))}</span></div>
       <div class="cell"><span class="label">Primary Site</span><span class="value">${escapeHtml(String(fieldState.tumorSite || '—'))}</span></div>
       <div class="cell"><span class="label">AJCC TNM</span><span class="value">${escapeHtml(tnm)}</span></div>
@@ -441,13 +470,13 @@ export function buildReportHtml(
     ${findings || '<p>No assessment fields recorded.</p>'}
     <section class="signoff">
       <div>
-        <p style="margin:0 0 6px;font-weight:800;color:#0f172a">Clinician Sign-off</p>
-        <p style="margin:0 0 4px;font-size:10pt;color:#334155">${escapeHtml(facility.clinicianName)}</p>
-        <p style="margin:0 0 4px;font-size:10pt;color:#475569">${escapeHtml(facility.clinicianTitle)}</p>
-        <p style="margin:0 0 4px;font-size:9.5pt;color:#475569">${escapeHtml(facility.registrationNumber)}</p>
-        <p style="margin:0;font-size:9.5pt;color:#475569">${escapeHtml(facility.contact)}</p>
+        <p style="margin:0 0 6px;font-weight:800;color:#15302a">Clinician Sign-off</p>
+        <p style="margin:0 0 4px;font-size:10pt;color:#3e5852">${escapeHtml(facility.clinicianName)}</p>
+        <p style="margin:0 0 4px;font-size:10pt;color:#3e5852">${escapeHtml(facility.clinicianTitle)}</p>
+        <p style="margin:0 0 4px;font-size:9.5pt;color:#3e5852">${escapeHtml(facility.registrationNumber)}</p>
       </div>
       <div class="signature-block">
+        ${signature ? `<img src="${signature}" alt="" style="max-height:60px;max-width:220px;display:block;margin:0 0 4px auto" />` : ''}
         <div class="line"></div>
         <strong>Signature &amp; Date</strong>
         <div>Authorized SLP / Designation</div>
@@ -455,7 +484,7 @@ export function buildReportHtml(
     </section>
 
     <p class="footer">
-      DegluTech 0.2.0-review. Fictitious-data review build. Recorded findings require clinician verification. No electronic signature or EHR submission is performed.
+      Prepared with DegluTech 0.4.0-review. Recorded findings require clinician verification. No electronic signature or EHR submission is performed.
     </p>
   </div>
 </body>

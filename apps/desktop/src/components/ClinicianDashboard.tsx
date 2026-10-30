@@ -23,21 +23,22 @@ import {
   X,
 } from 'lucide-react';
 import {
-  CASELOAD_PATIENTS,
   computeCaseloadKpis,
-  syncActivePatientFromFieldState,
   type PatientCaseloadEntry,
   type RiskLevel,
 } from '../caseloadData';
-import type { FieldState } from '../reportEngine';
 import type { HncSectionId } from '../../../../packages/core/src/hncClinicalModel';
 import { FloatingBadge } from './ui/ClinicalPrimitives';
 
 interface ClinicianDashboardProps {
-  fieldState: FieldState;
+  /** One row per patient saved on this device (built from their charts). */
+  patients: PatientCaseloadEntry[];
+  activeRecordId: string;
   completion: number;
   savedAt: string;
   onJump: (section: HncSectionId) => void;
+  onOpenPatient: (recordId: string, section?: HncSectionId) => void;
+  onAddPatient: () => void;
 }
 
 type SortKey = 'risk' | 'review' | 'adherence' | 'severity' | 'eat10' | 'jaw';
@@ -79,7 +80,7 @@ const todayAtStart = () => {
 
 const daysBetween = (date: string, reference: Date = todayAtStart()) => {
   const target = new Date(date);
-  if (Number.isNaN(target.getTime())) return 0;
+  if (Number.isNaN(target.getTime())) return Number.POSITIVE_INFINITY; // no review date set
   target.setHours(0, 0, 0, 0);
   return Math.round((target.getTime() - reference.getTime()) / 86400000);
 };
@@ -104,12 +105,15 @@ const initialsFor = (name: string) =>
     .join('') || 'PT';
 
 export const ClinicianDashboard: React.FC<ClinicianDashboardProps> = ({
-  fieldState,
+  patients,
+  activeRecordId,
   completion,
   savedAt,
-  onJump,
+  onJump: jumpInChart,
+  onOpenPatient,
+  onAddPatient,
 }) => {
-  const [selectedId, setSelectedId] = useState<string>('HNC-2026-001');
+  const [selectedId, setSelectedId] = useState<string>(() => patients.find((p) => p.recordId === activeRecordId)?.id ?? patients[0]?.id ?? '');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
@@ -117,17 +121,16 @@ export const ClinicianDashboard: React.FC<ClinicianDashboardProps> = ({
   const [sortBy, setSortBy] = useState<SortKey>('risk');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-  const patients = useMemo<PatientCaseloadEntry[]>(() => {
-    return CASELOAD_PATIENTS.map((patient) =>
-      patient.isActive ? syncActivePatientFromFieldState(patient, fieldState) : patient
-    );
-  }, [fieldState]);
-
   const kpis = useMemo(() => computeCaseloadKpis(patients), [patients]);
   const selectedPatient =
     patients.find((patient) => patient.id === selectedId) ??
-    patients.find((patient) => patient.isActive) ??
+    patients.find((patient) => patient.recordId === activeRecordId) ??
     patients[0];
+  // Actions on the selected row open that patient's chart (switching patient when needed).
+  const onJump = (section: HncSectionId) => {
+    if (selectedPatient?.recordId && selectedPatient.recordId !== activeRecordId) onOpenPatient(selectedPatient.recordId, section);
+    else jumpInChart(section);
+  };
 
   const filteredPatients = useMemo(() => {
     const lower = search.trim().toLowerCase();
@@ -138,7 +141,7 @@ export const ClinicianDashboard: React.FC<ClinicianDashboardProps> = ({
         case 'risk':
           return riskWeight[patient.riskLevel];
         case 'review':
-          return new Date(patient.nextReview).getTime();
+          return Number.isNaN(new Date(patient.nextReview).getTime()) ? Number.POSITIVE_INFINITY : new Date(patient.nextReview).getTime();
         case 'adherence':
           return patient.adherence;
         case 'severity':
@@ -203,11 +206,12 @@ export const ClinicianDashboard: React.FC<ClinicianDashboardProps> = ({
         <div style={styles.topbarActions}>
           <span style={styles.topbarBadge}>{completion}% active chart quality</span>
           <span style={styles.topbarMeta}>Saved: {savedAt}</span>
+          <button type="button" style={styles.primaryAction} onClick={onAddPatient}>Add or switch patient</button>
         </div>
       </header>
 
       <section className="deglutech-kpi-strip" style={styles.kpiStrip} aria-label="Caseload key performance indicators">
-        <KpiCell label="Active caseload" value={kpis.total} sub="+ live local chart" icon={<Users size={15} />} />
+        <KpiCell label="Active caseload" value={kpis.total} sub="saved on this device" icon={<Users size={15} />} />
         <KpiCell label="High risk" value={kpis.highRisk} sub={`${Math.round((kpis.highRisk / Math.max(kpis.total, 1)) * 100)}% of panel`} icon={<AlertTriangle size={15} />} tone="high" />
         <KpiCell label="Due within 7d" value={dueOrOverdue} sub={overdue > 0 ? `${overdue} overdue` : 'on schedule'} icon={<CalendarClock size={15} />} tone="moderate" />
         <KpiCell label="Mean adherence" value={`${kpis.adherenceMean}%`} sub="home program" icon={<Activity size={15} />} tone="low" />

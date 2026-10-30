@@ -63,6 +63,8 @@ export interface PatientCaseloadEntry {
   alerts: string[];
   primaryConcerns: string[];
   isActive?: boolean;
+  /** Internal patient record this row belongs to (real patients). */
+  recordId?: string;
 }
 
 export const CASELOAD_PATIENTS: PatientCaseloadEntry[] = [

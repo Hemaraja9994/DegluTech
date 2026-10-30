@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity,
   Apple,
@@ -21,12 +21,13 @@ import {
   ShieldAlert,
   Syringe,
   UserRound,
+  Users,
+  Settings as SettingsIcon,
   type LucideIcon,
 } from 'lucide-react';
 import {
   HNC_CLINICAL_SECTIONS,
   HNC_EXERCISE_LIBRARY,
-  HNC_PATIENT_SNAPSHOT,
   type ClinicalField,
   type ClinicalSection,
   type ExerciseProtocol,
@@ -46,13 +47,19 @@ import { ExerciseCatalogue } from './components/ExerciseCatalogue';
 import { PrescriptionRelease, PatientSessionLog, isReleased, readDoses } from './components/PrescriptionRelease';
 import { ExerciseVisual } from './components/ExerciseVisual';
 import { ClinicalToolSuite } from './components/ClinicalToolSuite';
+import { PatientManager } from './components/PatientManager';
+import { ClinicSettingsPanel } from './components/ClinicSettingsPanel';
+import { ClinicContext } from './components/ClinicContext';
+import {
+  DEFAULT_SETTINGS, EMPTY_STORE, EMPTY_WORKSPACE, LEGACY_WORKSPACE_KEY, PATIENTS_KEY, SETTINGS_KEY,
+  addPatient, cleanSettings, cleanStore, migrateLegacy, patientCode, patientLabel, riskFor, toCaseloadEntry, updateWorkspace,
+  type ClinicSettings, type PatientStore, type Workspace,
+} from './clinicStore';
 import { FloatingBadge, SectionHeader } from './components/ui/ClinicalPrimitives';
 import { T } from './theme';
 
 type FieldState = Record<string, string | string[]>;
 
-const WORKSPACE_STORAGE_KEY = 'deglutech-hnc-clinical-workspace-v1';
-const DEFAULT_PRESCRIBED_EXERCISE_IDS = ['masako', 'effortful-swallow', 'jaw-stretch', 'velar-drills'];
 
 const isExerciseLanguageCode = (value: string): value is ExerciseLanguageCode =>
   Object.prototype.hasOwnProperty.call(exerciseTranslations, value);
@@ -81,100 +88,39 @@ const sectionGroupFor = (sectionId: HncSectionId): string => {
   return 'Plan';
 };
 
-const initialFieldState: FieldState = {
-  patientHash: '5e883e81b37e1273b4b455b5d198ee6a3782b6e1e21b7c3cf374fa04e22e845c',
-  phase: 'Post-CRT',
-  route: 'Combined',
-  aspirationRisk: '3',
-  airwayRisk: '2',
-  nutritionRisk: '3',
-  age: '56',
-  gender: 'Female',
-  language: 'Kannada / English',
-  caregiver: 'Spouse',
-  referredBy: 'Radiation oncology',
-  evaluationDate: new Date().toISOString().slice(0, 10),
-  chiefConcern: 'Coughing with thin liquids, restricted jaw opening, and reduced speech clarity after CRT.',
-  tumorSite: 'Lip/oral cavity',
-  tCategory: 'T2',
-  nCategory: 'N1',
-  mCategory: 'M0',
-  diagnosisDate: '2026-01-15',
-  recurrence: 'Primary',
-  painScore: '4',
-  surgeryType: ['Glossectomy', 'Neck dissection', 'Free flap'],
-  flapType: 'Radial forearm',
-  neckDissection: 'Ipsilateral',
-  rtDose: '60',
-  fractions: '30',
-  chemoAgent: ['Cisplatin'],
-  toxicity: ['Xerostomia', 'Fibrosis', 'Trismus', 'Fatigue'],
-  jawOpening: '30',
-  tongueRom: '2',
-  lipSeal: '1',
-  palatalElevation: '1',
-  cnV: 'Mild',
-  cnVII: 'Mild',
-  'cnIX X': 'Moderate',
-  cnXII: 'Moderate',
-  wetVoice: 'Intermittent',
-  cough: 'Weak',
-  multipleSwallows: 'Frequent',
-  bolusIssue: ['Oral residue', 'Delayed trigger', 'Coughing'],
-  eat10: '25',
-  masa: '168',
-  fois: '5',
-  intelligibility: '75',
-  dysarthria: 'Mixed post-surgical',
-  resonance: 'Normal',
-  mpt: '8',
-  jitter: '1.2',
-  shimmer: '0.6',
-  hnr: '15.5',
-  weight: '49',
-  weightChange: '6',
-  appetite: 'Reduced',
-  hydration: '2',
-  tracheostomy: 'None',
-  secretion: '2',
-  oralCare: 'Caregiver assisted',
-  fees: 'Requested',
-  vfss: 'Completed',
-  pas: '5',
-  residue: ['Vallecular', 'Pyriform'],
-  upload: 'VFSS and discharge summary',
-  summary: 'Delayed pharyngeal trigger, residue after puree, intermittent penetration with thin liquids.',
-  b5105: '3',
-  b310: '1',
-  b320: '2',
-  s320: '3',
-  d550: '3',
-  d560: '2',
-  d330: '2',
-  e310: '1',
-  target: ['Tongue base', 'Jaw opening', 'Speech articulation'],
-  dose: 'Two short home sessions daily plus meal-time strategies.',
-  painLimit: 'Stop if sharp pain, bleeding, breathing discomfort, or persistent coughing occurs.',
-  today: ['Masako', 'Effortful swallow', 'Jaw stretch', 'Speech drills'],
-  symptoms: ['Dry mouth', 'Coughing', 'Fatigue'],
-  confidence: '3',
-  slpDiagnosis: 'Moderate oropharyngeal dysphagia with post-treatment trismus and reduced tongue base drive.',
-  severity: 'Moderate',
-  recommendations: 'Continue supervised swallow strengthening, jaw range program, oral care, and instrumental follow-up.',
-  followUp: 'Review in 2 weeks or earlier if fever, weight loss, aspiration symptoms, or worsening pain occurs.',
-};
+
 
 export const App: React.FC = () => {
   const [activeSectionId, setActiveSectionId] = useState<HncSectionId>('command');
   // The tool suite is a separate view, not a 14th section (the protocol fixes 13 sections).
   const [toolSuiteOpen, setToolSuiteOpen] = useState(false);
-  const [fieldState, setFieldState] = useState<FieldState>(initialFieldState);
-  const [selectedExerciseId, setSelectedExerciseId] = useState('masako');
-  const [patientLanguage, setPatientLanguage] = useState<ExerciseLanguageCode>('en');
-  const [prescribedExerciseIds, setPrescribedExerciseIds] = useState<string[]>(DEFAULT_PRESCRIBED_EXERCISE_IDS);
-  const [savedAt, setSavedAt] = useState<string>('Not saved this session');
+  // Patients and clinic settings live in this browser (see clinicStore.ts). The open chart is the active patient's.
+  const [store, setStore] = useState<PatientStore>(EMPTY_STORE);
+  const [settings, setSettings] = useState<ClinicSettings>(DEFAULT_SETTINGS);
+  const [mainView, setMainView] = useState<'workspace' | 'patients' | 'settings'>('workspace');
   const [storageReady, setStorageReady] = useState(false);
-  const [storedAt, setStoredAt] = useState('Waiting for local draft restore');
+  const [storedAt, setStoredAt] = useState('Opening saved patients');
+  const active = store.patients.find((p) => p.id === store.activeId) ?? null;
+  const ws = active?.workspace ?? EMPTY_WORKSPACE;
+  const fieldState = ws.fieldState;
+  const selectedExerciseId = ws.selectedExerciseId;
+  const patientLanguage: ExerciseLanguageCode = isExerciseLanguageCode(ws.patientLanguage) ? ws.patientLanguage : 'en';
+  const prescribedExerciseIds = ws.prescribedExerciseIds;
+  const savedAt = ws.savedAt;
+  const activeIdRef = useRef(store.activeId);
+  activeIdRef.current = store.activeId;
+  const changeWorkspace = useCallback((change: (w: Workspace) => Workspace) => {
+    const id = activeIdRef.current;
+    if (id) setStore((prev) => updateWorkspace(prev, id, change));
+  }, []);
+  const setFieldState: React.Dispatch<React.SetStateAction<FieldState>> = useCallback((action) => changeWorkspace((w) => {
+    const next = typeof action === 'function' ? action(w.fieldState) : action;
+    return next === w.fieldState ? w : { ...w, fieldState: next };
+  }), [changeWorkspace]);
+  const setSelectedExerciseId = useCallback((id: string) => changeWorkspace((w) => (w.selectedExerciseId === id ? w : { ...w, selectedExerciseId: id })), [changeWorkspace]);
+  const setPatientLanguage = useCallback((language: ExerciseLanguageCode) => changeWorkspace((w) => (w.patientLanguage === language ? w : { ...w, patientLanguage: language })), [changeWorkspace]);
+  const setPrescribedExerciseIds: React.Dispatch<React.SetStateAction<string[]>> = useCallback((action) => changeWorkspace((w) => ({ ...w, prescribedExerciseIds: typeof action === 'function' ? action(w.prescribedExerciseIds) : action })), [changeWorkspace]);
+  const setSavedAt = (value: string) => changeWorkspace((w) => ({ ...w, savedAt: value }));
 
   useEffect(() => {
     if (storageReady && fieldState.releaseLanguage !== patientLanguage) {
@@ -200,59 +146,52 @@ export const App: React.FC = () => {
   }, [fieldState]);
 
   useEffect(() => {
+    let next: PatientStore = EMPTY_STORE;
     try {
-      const stored = window.localStorage.getItem(WORKSPACE_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored) as {
-          fieldState?: FieldState;
-          selectedExerciseId?: string;
-          patientLanguage?: string;
-          prescribedExerciseIds?: string[];
-          savedAt?: string;
-          storedAt?: string;
-        };
-        const knownExerciseIds = new Set(HNC_EXERCISE_LIBRARY.map((exercise) => exercise.id));
-        const restoredPrescription = Array.isArray(parsed.prescribedExerciseIds)
-          ? parsed.prescribedExerciseIds.filter((id) => knownExerciseIds.has(id))
-          : [];
-
-        if (parsed.fieldState && typeof parsed.fieldState === 'object' && !Array.isArray(parsed.fieldState)) setFieldState(Object.fromEntries(Object.entries(parsed.fieldState).filter(([, value]) => typeof value === 'string' || (Array.isArray(value) && value.every(item => typeof item === 'string')))));
-        if (parsed.selectedExerciseId && knownExerciseIds.has(parsed.selectedExerciseId)) setSelectedExerciseId(parsed.selectedExerciseId);
-        if (parsed.patientLanguage && isExerciseLanguageCode(parsed.patientLanguage)) setPatientLanguage(parsed.patientLanguage);
-        if (Array.isArray(parsed.prescribedExerciseIds)) setPrescribedExerciseIds(restoredPrescription);
-        if (parsed.savedAt) setSavedAt(parsed.savedAt);
-        setStoredAt(parsed.storedAt ? `Restored ${new Date(parsed.storedAt).toLocaleString()}` : 'Restored local draft');
-      } else {
-        setStoredAt('New local draft');
+      const raw = window.localStorage.getItem(PATIENTS_KEY);
+      if (raw) next = cleanStore(JSON.parse(raw));
+      else {
+        const legacy = migrateLegacy(window.localStorage.getItem(LEGACY_WORKSPACE_KEY));
+        if (legacy) next = addPatient(EMPTY_STORE, legacy);
       }
+      const rawSettings = window.localStorage.getItem(SETTINGS_KEY);
+      if (rawSettings) setSettings(cleanSettings(JSON.parse(rawSettings)));
+      setStoredAt(next.patients.length ? 'Patients restored on this device' : 'No patients yet');
     } catch {
-      setStoredAt('Local draft unavailable');
-    } finally {
-      setStorageReady(true);
+      setStoredAt('Saved patients could not be read on this device');
     }
+    setStore(next);
+    if (!next.activeId) setMainView('patients');
+    setStorageReady(true);
   }, []);
 
   useEffect(() => {
     if (!storageReady) return;
-
-    const storedAtIso = new Date().toISOString();
     try {
-      window.localStorage.setItem(
-        WORKSPACE_STORAGE_KEY,
-        JSON.stringify({
-          fieldState,
-          selectedExerciseId,
-          patientLanguage,
-          prescribedExerciseIds,
-          savedAt,
-          storedAt: storedAtIso,
-        })
-      );
-      setStoredAt(`Stored locally ${new Date(storedAtIso).toLocaleTimeString()}`);
+      window.localStorage.setItem(PATIENTS_KEY, JSON.stringify(store));
+      setStoredAt(`Saved on this device ${new Date().toLocaleTimeString()}`);
     } catch {
-      setStoredAt('Local storage write failed');
+      setStoredAt('Not saved: this device is out of browser storage. Export a backup from Settings.');
     }
-  }, [fieldState, patientLanguage, prescribedExerciseIds, savedAt, selectedExerciseId, storageReady]);
+  }, [store, storageReady]);
+
+  useEffect(() => {
+    if (!storageReady) return;
+    try { window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { setStoredAt('Settings not saved: browser storage is full or blocked.'); }
+  }, [settings, storageReady]);
+
+  const openPatient = (id: string, section: HncSectionId = 'command') => {
+    setStore((prev) => (prev.patients.some((p) => p.id === id) ? { ...prev, activeId: id } : prev));
+    setMainView('workspace');
+    setToolSuiteOpen(false);
+    setActiveSectionId(section);
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
+  };
+  const showView = (view: 'patients' | 'settings') => {
+    setMainView(view);
+    setToolSuiteOpen(false);
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
+  };
 
   const saveSession = () => {
     setSavedAt(new Date().toLocaleTimeString());
@@ -260,15 +199,29 @@ export const App: React.FC = () => {
 
   const navigateToSection = (sectionId: HncSectionId) => {
     setToolSuiteOpen(false);
+    setMainView('workspace');
     setActiveSectionId(sectionId);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
   };
 
   const openToolSuite = () => {
+    setMainView('workspace');
     setToolSuiteOpen(true);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
   };
+  const view: 'workspace' | 'patients' | 'settings' = !active && mainView === 'workspace' ? 'patients' : mainView;
   const shownId: HncSectionId | 'tools' = toolSuiteOpen ? 'tools' : activeSection.id;
+  const caseload = useMemo(() => {
+    const seen = new Set<string>();
+    return store.patients.map((p) => {
+      let code = patientCode(p);
+      while (seen.has(code)) code = `${code}*`;
+      seen.add(code);
+      return toCaseloadEntry(p, code);
+    });
+  }, [store.patients]);
+  const activeRisk = active ? riskFor(fieldState) : null;
+  const clinic = useMemo(() => ({ settings, active }), [settings, active]);
 
   const togglePrescribedExercise = (exerciseId: string) => {
     setPrescribedExerciseIds((current) => {
@@ -283,6 +236,7 @@ export const App: React.FC = () => {
   };
 
   return (
+    <ClinicContext.Provider value={clinic}>
     <div className="deglutech-shell" style={styles.appShell}>
       <aside className="deglutech-sidebar" style={styles.sidebar}>
         <div style={styles.brandBlock}>
@@ -294,17 +248,24 @@ export const App: React.FC = () => {
         </div>
 
         <div style={styles.patientMini}>
-          <div style={styles.patientName}>{HNC_PATIENT_SNAPSHOT.name}</div>
-          <div style={styles.patientMeta}>{HNC_PATIENT_SNAPSHOT.patientId}</div>
-          <FloatingBadge tone="high" style={{ marginTop: 10 }}>
-            {HNC_PATIENT_SNAPSHOT.riskLevel.toUpperCase()} RISK
-          </FloatingBadge>
+          {active ? <>
+            <div style={styles.patientName}>{patientLabel(active)}{active.demo ? ' (demo)' : ''}</div>
+            <div style={styles.patientMeta}>{[active.hospitalId, active.studyId].filter(Boolean).join(' · ') || 'No ID recorded'}</div>
+            {activeRisk && fieldState.aspirationRisk && <FloatingBadge tone={activeRisk} style={{ marginTop: 10 }}>
+              {activeRisk.toUpperCase()} RISK
+            </FloatingBadge>}
+          </> : <div style={styles.patientName}>No patient open</div>}
+          <button type="button" className="sidebar-switch" onClick={() => showView('patients')}>{active ? 'Switch or add patient' : 'Add or open a patient'}</button>
         </div>
 
         <nav className="deglutech-nav-list" style={styles.navList}>
+          <button type="button" aria-current={view === 'patients' ? 'page' : undefined} onClick={() => showView('patients')}
+            style={{ ...styles.navButton, ...(view === 'patients' ? styles.navButtonActive : {}), borderLeftColor: view === 'patients' ? '#f4b8a6' : 'transparent' }}>
+            <Users size={16} /><span style={styles.navLabel}>Patients</span><span style={styles.navIndex}>{store.patients.length}</span>
+          </button>
           {HNC_CLINICAL_SECTIONS.map((section, index) => {
             const Icon = sectionIcons[section.id];
-            const isActive = !toolSuiteOpen && activeSectionId === section.id;
+            const isActive = view === 'workspace' && !toolSuiteOpen && activeSectionId === section.id;
             const group = sectionGroupFor(section.id);
             const previousGroup = index > 0 ? sectionGroupFor(HNC_CLINICAL_SECTIONS[index - 1].id) : undefined;
             return (
@@ -327,9 +288,9 @@ export const App: React.FC = () => {
                 {section.id === 'instrumental' && (
                   <button
                     type="button"
-                    aria-current={toolSuiteOpen ? 'page' : undefined}
+                    aria-current={view === 'workspace' && toolSuiteOpen ? 'page' : undefined}
                     onClick={openToolSuite}
-                    style={{ ...styles.navButton, ...(toolSuiteOpen ? styles.navButtonActive : {}), borderLeftColor: toolSuiteOpen ? '#1f5c4a' : 'transparent' }}
+                    style={{ ...styles.navButton, ...(view === 'workspace' && toolSuiteOpen ? styles.navButtonActive : {}), borderLeftColor: view === 'workspace' && toolSuiteOpen ? '#1f5c4a' : 'transparent' }}
                   >
                     <ClipboardList size={16} />
                     <span style={styles.navLabel}>Clinical tool suite</span>
@@ -339,29 +300,36 @@ export const App: React.FC = () => {
               </React.Fragment>
             );
           })}
+          <div style={styles.navGroup}>Clinic</div>
+          <button type="button" aria-current={view === 'settings' ? 'page' : undefined} onClick={() => showView('settings')}
+            style={{ ...styles.navButton, ...(view === 'settings' ? styles.navButtonActive : {}), borderLeftColor: view === 'settings' ? '#f4b8a6' : 'transparent' }}>
+            <SettingsIcon size={16} /><span style={styles.navLabel}>Settings</span><span style={styles.navIndex} />
+          </button>
         </nav>
       </aside>
 
       <main className="deglutech-main" style={styles.main}>
-        <div className="demo-notice">Demonstration workspace. The caseload and initial chart contain example data.</div>
+        {view === 'workspace' && active?.demo && <div className="demo-notice">Demo patient: example data for teaching. Remove demo patients in Settings.</div>}
         <label className="mobile-section-select">
           <span>Clinical section</span>
-          <select value={toolSuiteOpen ? '__tools' : activeSectionId} onChange={(event) => { if (event.target.value === '__tools') openToolSuite(); else navigateToSection(event.target.value as HncSectionId); }}>
+          <select value={view !== 'workspace' ? `__${view}` : toolSuiteOpen ? '__tools' : activeSectionId} onChange={(event) => { const v = event.target.value; if (v === '__tools') openToolSuite(); else if (v === '__patients' || v === '__settings') showView(v === '__patients' ? 'patients' : 'settings'); else navigateToSection(v as HncSectionId); }}>
+            <option value="__patients">Patients ({store.patients.length})</option>
             {HNC_CLINICAL_SECTIONS.map((section) => <React.Fragment key={section.id}><option value={section.id}>{section.order}. {section.label}</option>{section.id === 'instrumental' && <option value="__tools">Clinical tool suite</option>}</React.Fragment>)}
+            <option value="__settings">Settings</option>
           </select>
         </label>
         <header className="deglutech-topbar" style={styles.topbar}>
           <div>
-            <p style={styles.overline}>Head and neck cancer clinical workspace</p>
-            <h2 style={styles.pageTitle}>{toolSuiteOpen ? 'Clinical tool suite' : activeSection.label}</h2>
+            <p style={styles.overline}>{view === 'workspace' && active ? `${patientLabel(active)}${active.studyId && active.name ? ` · ${active.studyId}` : ''}` : 'Head and neck cancer clinical workspace'}</p>
+            <h2 style={styles.pageTitle}>{view === 'patients' ? 'Patients' : view === 'settings' ? 'Settings' : toolSuiteOpen ? 'Clinical tool suite' : activeSection.label}</h2>
           </div>
           <div className="deglutech-topbar-actions" style={styles.topbarActions}>
-            <div className="deglutech-progress-wrap" style={styles.progressWrap}>
+            {view === 'workspace' && <div className="deglutech-progress-wrap" style={styles.progressWrap}>
               <span style={styles.progressText}>{completion}% complete</span>
               <div style={styles.progressTrack}>
                 <div style={{ ...styles.progressFill, width: `${completion}%` }} />
               </div>
-            </div>
+            </div>}
             <span className="workspace-save-status" role="status">{storedAt}</span>
             <button type="button" onClick={saveSession} style={styles.iconButton} aria-label="Save session">
               <Save size={18} />
@@ -372,11 +340,16 @@ export const App: React.FC = () => {
           </div>
         </header>
 
-        <WorkspaceNotice backup={{ fieldState, prescribedExerciseIds, selectedExerciseId, patientLanguage }} onClear={() => {
-          window.localStorage.removeItem(WORKSPACE_STORAGE_KEY);
-          setFieldState({}); setPrescribedExerciseIds([]); setSelectedExerciseId('masako'); setPatientLanguage('en'); setSavedAt('Not saved this session');
-        }} />
+        <WorkspaceNotice />
 
+        {view === 'patients' && (
+          <PatientManager store={store} setStore={setStore} onOpen={openPatient} onSettings={() => showView('settings')} />
+        )}
+        {view === 'settings' && (
+          <ClinicSettingsPanel settings={settings} setSettings={setSettings} store={store} setStore={setStore} />
+        )}
+
+        {view === 'workspace' && active && <>
         {shownId !== 'command' && shownId !== 'tools' && (
           <SectionNavigator
             activeSection={activeSection}
@@ -409,9 +382,12 @@ export const App: React.FC = () => {
           </section>
           <ClinicianDashboard
             completion={completion}
-            fieldState={fieldState}
+            patients={caseload}
+            activeRecordId={active.id}
             savedAt={savedAt}
             onJump={navigateToSection}
+            onOpenPatient={openPatient}
+            onAddPatient={() => showView('patients')}
           />
           </>
         )}
@@ -455,7 +431,7 @@ export const App: React.FC = () => {
             fieldState={fieldState}
             update={patch => setFieldState(prev => ({ ...prev, ...patch }))}
             onOpenSection={navigateToSection}
-            patientFallbackId={HNC_PATIENT_SNAPSHOT.patientId}
+            patientFallbackId={patientCode(active)}
           />
         )}
 
@@ -477,12 +453,14 @@ export const App: React.FC = () => {
             onJump={navigateToSection}
           />
         )}
+        </>}
 
         <footer style={styles.footer}>
           Team: Mr. Prasanna Hegde, Ms. Priyanka Nayak, Mr. Hemaraja Nayaka.S, Mr. Sumanth A V, Mr. Joju Joseph
         </footer>
       </main>
     </div>
+    </ClinicContext.Provider>
   );
 };
 

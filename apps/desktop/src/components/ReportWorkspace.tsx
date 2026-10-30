@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -26,7 +26,9 @@ import {
   type ReportDraft,
   type SeverityTier,
 } from '../reportEngine';
-import { exportDiagnosticReport } from '../reportPdf';
+import { exportDiagnosticReport, facilityFromSettings } from '../reportPdf';
+import { useClinic } from './ClinicContext';
+import { printIdentity, signingClinician } from '../clinicStore';
 
 interface ReportWorkspaceProps {
   fieldState: FieldState;
@@ -46,6 +48,10 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   completion,
   onJump,
 }) => {
+  const { settings, active } = useClinic();
+  const [signerId, setSignerId] = useState<string | null>(null);
+  const signer = signingClinician(settings, signerId ?? settings.signingClinicianId);
+  const identity = printIdentity(active, settings);
   const sections = useMemo(() => computeSectionCompletion(fieldState), [fieldState]);
   const draft: ReportDraft = useMemo(() => generateSmartDefaults(fieldState), [fieldState]);
   const summary = useMemo(() => buildExecutiveSummary(fieldState, draft), [fieldState, draft]);
@@ -72,7 +78,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   };
 
   const handleExportPdf = () => {
-    const opened = exportDiagnosticReport(fieldState);
+    const opened = exportDiagnosticReport(fieldState, facilityFromSettings(settings, signer, identity));
     if (!opened) {
       window.alert('Pop-up blocked. Please allow pop-ups for DegluTech to export the diagnostic report.');
     }
@@ -144,7 +150,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
           <ExecCell label="Diet route" value={summary.dietRoute} />
           <ExecCell label="Texture / route plan" value={summary.textureGuidance} wide />
           <ExecCell label="Primary concerns" value={summary.primaryConcerns.join(' • ')} wide />
-          <ExecCell label="Study ID" value={String(fieldState.studyId || 'Not recorded')} />
+          {identity.map((row) => <ExecCell key={row.label} label={row.label} value={row.value} />)}
           <ExecCell label="TNM" value={`${fieldState.tCategory ?? '—'} ${fieldState.nCategory ?? '—'} ${fieldState.mCategory ?? '—'}`} />
         </div>
       </section>
@@ -240,10 +246,15 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
           </p>
         </div>
         <div style={styles.signoffBox}>
-          <Heart size={20} color="#a8402b" />
+          {signer?.signature ? <img src={signer.signature} alt={`Signature of ${signer.name}`} style={{ maxHeight: 48, maxWidth: 160 }} /> : <Heart size={20} color="#a8402b" />}
           <div>
-            <strong style={{ color: '#15302a' }}>[Clinician Name]</strong>
-            <div style={styles.signoffMeta}>M.Sc. (SLP) · RCI / ISHA No. ________</div>
+            {settings.clinicians.length > 1 && <label style={styles.signoffMeta}>Signing clinician{' '}
+              <select value={signer?.id ?? ''} onChange={(e) => setSignerId(e.target.value)}>
+                {settings.clinicians.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select></label>}
+            <strong style={{ color: '#15302a' }}>{signer?.name ?? '[Clinician name: add in Settings]'}</strong>
+            <div style={styles.signoffMeta}>{[signer?.qualification, signer?.designation].filter(Boolean).join(', ') || 'Qualification not set'} · {signer?.registration ? `RCI Reg. No. ${signer.registration}` : 'RCI Reg. No. ________'}</div>
+            <div style={styles.signoffMeta}>{settings.instituteName || 'Institute name not set in Settings'}</div>
             <div style={styles.signoffMeta}>Sign the exported document using your approved clinical workflow. No electronic signature or EHR submission is performed here.</div>
           </div>
         </div>

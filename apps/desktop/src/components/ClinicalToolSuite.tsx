@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { Search, ChevronLeft, X } from 'lucide-react';
 import type { FieldState } from '../reportEngine';
 import type { HncSectionId } from '../../../../packages/core/src/hncClinicalModel';
+import { useClinic } from './ClinicContext';
+import { printIdentity, signingClinician } from '../clinicStore';
 import {
   TOOLS, TOOL_CATEGORIES, TONE, EAT10_ITEMS, eat10Band, eat10Score, readEat10Items, readEat10Sessions, saveEat10Session,
   isoToday, shortDate, longDate, patientLine, eat10EmrNote, handoutProgress, lastResultFor, type CategoryId, type Eat10Response, type Tool,
@@ -47,7 +49,10 @@ export function ClinicalToolSuite({ fieldState, update, onOpenSection, patientFa
   const todaySaved = sessions.find(s => s.date === today);
   const saved = !!todaySaved && JSON.stringify(todaySaved.items) === JSON.stringify(resp);
   const history = sessions.filter(s => s.date !== today).slice(-5);
-  const patient = patientLine(fieldState, patientFallbackId);
+  const { settings, active } = useClinic();
+  const ids = printIdentity(active, settings).map((r) => `${r.label} ${r.value}`).join(' · ');
+  const basePatient = patientLine(fieldState, patientFallbackId);
+  const patient = ids ? { ...basePatient, id: ids } : basePatient;
   const followUp = String(fieldState.followUp || '');
   const setResp = (next: Eat10Response[]) => update({ eat10Items: JSON.stringify(next) });
 
@@ -224,7 +229,9 @@ export function ClinicalToolSuite({ fieldState, update, onOpenSection, patientFa
     </div>;
   };
 
-  const emrText = useMemo(() => eat10EmrNote({ dateLabel: longDate(today), patient, resp, history, followUp }), [today, patient.id, patient.ageSex, patient.dx, JSON.stringify(resp), JSON.stringify(history), followUp]);
+  const signerForNote = signingClinician(settings);
+  const signLine = signerForNote ? `SLP: ${[signerForNote.name, signerForNote.qualification, signerForNote.registration && `RCI ${signerForNote.registration}`].filter(Boolean).join(', ')}${settings.instituteName ? ` | ${settings.instituteName}` : ''}` : '';
+  const emrText = useMemo(() => eat10EmrNote({ dateLabel: longDate(today), patient, resp, history, followUp }) + (signLine ? `\n${signLine}` : ''), [today, patient.id, patient.ageSex, patient.dx, JSON.stringify(resp), JSON.stringify(history), followUp, signLine]);
 
   return <div className="ts-root" style={{ fontFamily: SANS, color: INK, background: '#eef2ef', borderRadius: 14 }}>
     <div style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(18px,3vw,32px) clamp(14px,3vw,28px) 48px', display: 'flex', flexDirection: 'column', gap: 28 }}>
@@ -244,6 +251,9 @@ type OverlayProps = {
 };
 function OutputOverlay({ overlay, setOverlay, onClose, emrText, onToast, total, band, resp, history, patient, today, followUp }: OverlayProps) {
   const sheet = useRef<HTMLDivElement>(null);
+  const { settings } = useClinic();
+  const signer = signingClinician(settings);
+  const contact = [settings.instituteName, settings.phone].filter(Boolean).join(', ');
   useEffect(() => {
     document.body.classList.add('ts-print');
     sheet.current?.focus();
@@ -271,7 +281,7 @@ function OutputOverlay({ overlay, setOverlay, onClose, emrText, onToast, total, 
       </div>
       {overlay === 'report' && <div style={{ padding: 'clamp(20px,4vw,40px)', display: 'flex', flexDirection: 'column', gap: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', borderBottom: `2px solid ${INK}`, paddingBottom: 14 }}>
-          <div><div style={{ ...eyebrow, fontSize: 11 }}>DegluTech · Speech-language pathology</div><h2 style={{ margin: '4px 0 0', fontSize: 22, fontWeight: 700 }}>EAT-10 screening report</h2></div>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>{settings.logo && <img src={settings.logo} alt="" style={{ height: 44, width: 'auto' }} />}<div><div style={{ ...eyebrow, fontSize: 11 }}>{[settings.instituteName, settings.department || 'Speech-language pathology'].filter(Boolean).join(' · ')}</div><h2 style={{ margin: '4px 0 0', fontSize: 22, fontWeight: 700 }}>EAT-10 screening report</h2></div></div>
           <div style={{ fontSize: 12.5, color: INK2, textAlign: 'right', lineHeight: 1.5 }}>{patient.id}{patient.ageSex ? ` · ${patient.ageSex}` : ''}<br />{patient.dx}<br />Session {longDate(today)}</div>
         </div>
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -286,7 +296,7 @@ function OutputOverlay({ overlay, setOverlay, onClose, emrText, onToast, total, 
         <div><div style={{ fontSize: 12, fontWeight: 700, color: INK2, marginBottom: 6 }}>Score history</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{chips.map((c, k) => <div key={k} style={{ border: '1px solid rgba(21,48,42,.12)', borderRadius: 8, padding: '6px 10px', fontSize: 12, lineHeight: 1.3 }}><div style={{ color: INK2 }}>{c.label} · {c.date}</div><div style={{ font: `600 15px ${MONO}` }}>{c.value}</div></div>)}</div></div>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', paddingTop: 24, fontSize: 12.5, color: INK2 }}>
-          <div style={{ borderTop: `1px solid ${INK}`, paddingTop: 6, minWidth: 220 }}>Speech-language pathologist</div><div style={{ borderTop: `1px solid ${INK}`, paddingTop: 6, minWidth: 160 }}>Date</div></div>
+          <div style={{ minWidth: 220 }}>{signer?.signature && <img src={signer.signature} alt="" style={{ maxHeight: 48, display: 'block' }} />}<div style={{ borderTop: `1px solid ${INK}`, paddingTop: 6 }}>{signer ? <><strong style={{ color: INK }}>{signer.name}</strong><br />{[signer.qualification, signer.registration && `RCI ${signer.registration}`].filter(Boolean).join(' · ')}</> : 'Speech-language pathologist'}</div></div><div style={{ borderTop: `1px solid ${INK}`, paddingTop: 6, minWidth: 160 }}>Date</div></div>
       </div>}
       {overlay === 'emr' && <div style={{ padding: 'clamp(20px,4vw,32px)', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ fontSize: 13.5, color: INK2 }}>Structured note for pasting into the hospital EMR. Plain text, no formatting.</div>
@@ -297,7 +307,7 @@ function OutputOverlay({ overlay, setOverlay, onClose, emrText, onToast, total, 
         <p style={{ margin: 0, padding: '16px 18px', borderRadius: 12, background: band.bg, color: band.fg, fontWeight: 600 }}>{band.patient}</p>
         <div><h3 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 700 }}>What this means</h3><p style={{ margin: 0 }}>You answered 10 questions about eating and swallowing. A lower number means fewer problems. A score of 3 or more tells us swallowing is harder than usual. We use this number to see whether your exercises are helping over time.</p></div>
         <div><h3 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 700 }}>Your progress</h3><p style={{ margin: 0 }}>{handoutProgress(history, total)}</p></div>
-        <div style={{ padding: '14px 16px', borderRadius: 10, background: '#fff9ee', border: '1px solid #f0dcb2', color: '#624318' }}><strong>Contact your clinic</strong><p style={{ margin: '4px 0 0' }}>{followUp.trim() || 'Ask your therapist when your next review is due, and contact the clinic sooner if swallowing gets harder.'}</p></div>
+        <div style={{ padding: '14px 16px', borderRadius: 10, background: '#fff9ee', border: '1px solid #f0dcb2', color: '#624318' }}><strong>Contact your clinic{contact ? `: ${contact}` : ''}</strong><p style={{ margin: '4px 0 0' }}>{followUp.trim() || 'Ask your therapist when your next review is due, and contact the clinic sooner if swallowing gets harder.'}</p></div>
       </div>}
     </div>
   </div>, document.body);
