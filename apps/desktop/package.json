@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "corepack pnpm run build:web && corepack pnpm run build:electron",
-    "build:web": "tsc --noEmit && vite build",
+    "build:web": "node scripts/copy-reader-assets.mjs && tsc --noEmit && vite build",
     "build:electron": "tsc -p tsconfig.electron.json",
     "lint": "tsc --noEmit",
     "deploy": "corepack pnpm dlx wrangler@latest pages deploy dist --project-name=deglutech --branch=main",
@@ -20,11 +20,16 @@
     "@laryngoos/core": "workspace:*",
     "@laryngoos/db": "workspace:*",
     "lucide-react": "^0.468.0",
+    "pdfjs-dist": "4.10.38",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "tesseract.js": "5.1.1",
     "three": "^0.186.1"
   },
   "devDependencies": {
+    "@tesseract.js-data/eng": "1.0.0",
+    "@tesseract.js-data/hin": "1.0.0",
+    "@tesseract.js-data/kan": "1.0.0",
     "@types/node": "^20.12.12",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",

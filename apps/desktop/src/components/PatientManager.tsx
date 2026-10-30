@@ -6,6 +6,7 @@ import {
 } from '../clinicStore';
 import type { HncSectionId } from '../../../../packages/core/src/hncClinicalModel';
 import { downloadJson, fileStamp } from './download';
+import { deletePatientFiles } from '../fileStore';
 import { APP_VERSION } from './WorkspaceNotice';
 
 type Props = {
@@ -60,8 +61,9 @@ export function PatientManager({ store, setStore, onOpen, onSettings }: Props) {
   };
   const remove = (p: PatientRecord) => {
     setStore(prev => removePatient(prev, p.id));
+    deletePatientFiles(p.id).catch(() => undefined);
     setConfirmDelete(null);
-    setStatus(`${patientLabel(p)} and all their records were deleted from this device.`);
+    setStatus(`${patientLabel(p)} and all their records and files were deleted from this device.`);
   };
   const exportOne = (p: PatientRecord) => {
     downloadJson(`deglutech-patient-${(p.studyId || p.hospitalId || 'record').replace(/[^\w-]+/g, '_')}-${fileStamp()}.json`, buildBackup(store, null, APP_VERSION, p.id));
@@ -118,7 +120,7 @@ export function PatientManager({ store, setStore, onOpen, onSettings }: Props) {
           </div>
           {confirmDelete === p.id
             ? <div className="pm-confirm" role="group" aria-label="Confirm delete">
-                <span>Delete {patientLabel(p)} and all their records from this device? This cannot be undone.</span>
+                <span>Delete {patientLabel(p)} and all their records and files from this device? This cannot be undone.</span>
                 <button type="button" className="pm-danger" onClick={() => remove(p)}>Delete permanently</button>
                 <button type="button" onClick={() => setConfirmDelete(null)}>Keep patient</button>
               </div>

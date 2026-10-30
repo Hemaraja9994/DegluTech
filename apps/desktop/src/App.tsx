@@ -29,6 +29,7 @@ import {
   UserRound,
   Users,
   Settings as SettingsIcon,
+  Paperclip,
   type LucideIcon,
 } from 'lucide-react';
 import {
@@ -54,8 +55,9 @@ import { PrescriptionRelease, PatientSessionLog, isReleased, readDoses } from '.
 import { ExerciseVisual } from './components/ExerciseVisual';
 import { ClinicalToolSuite } from './components/ClinicalToolSuite';
 import { PatientManager } from './components/PatientManager';
+import { PatientFiles } from './components/PatientFiles';
 import { ClinicSettingsPanel } from './components/ClinicSettingsPanel';
-import { ClinicContext } from './components/ClinicContext';
+import { ClinicContext, useClinic } from './components/ClinicContext';
 import {
   DEFAULT_SETTINGS, EMPTY_STORE, EMPTY_WORKSPACE, LEGACY_WORKSPACE_KEY, PATIENTS_KEY, SETTINGS_KEY,
   addPatient, cleanSettings, cleanStore, migrateLegacy, patientCode, patientLabel, riskFor, toCaseloadEntry, updateWorkspace,
@@ -119,7 +121,7 @@ export const App: React.FC = () => {
   // Patients and clinic settings live in this browser (see clinicStore.ts). The open chart is the active patient's.
   const [store, setStore] = useState<PatientStore>(EMPTY_STORE);
   const [settings, setSettings] = useState<ClinicSettings>(DEFAULT_SETTINGS);
-  const [mainView, setMainView] = useState<'workspace' | 'patients' | 'settings'>('workspace');
+  const [mainView, setMainView] = useState<'workspace' | 'patients' | 'settings' | 'files'>('workspace');
   const [storageReady, setStorageReady] = useState(false);
   const [storedAt, setStoredAt] = useState('Opening saved patients');
   const active = store.patients.find((p) => p.id === store.activeId) ?? null;
@@ -215,7 +217,7 @@ export const App: React.FC = () => {
     setActiveSectionId(section);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
   };
-  const showView = (view: 'patients' | 'settings') => {
+  const showView = (view: 'patients' | 'settings' | 'files') => {
     setMainView(view);
     setToolSuiteOpen(false);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
@@ -237,7 +239,7 @@ export const App: React.FC = () => {
     setToolSuiteOpen(true);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
   };
-  const view: 'workspace' | 'patients' | 'settings' = !active && mainView === 'workspace' ? 'patients' : mainView;
+  const view: 'workspace' | 'patients' | 'settings' | 'files' = !active && (mainView === 'workspace' || mainView === 'files') ? 'patients' : mainView;
   const shownId: HncSectionId | 'tools' = toolSuiteOpen ? 'tools' : activeSection.id;
   const caseload = useMemo(() => {
     const seen = new Set<string>();
@@ -249,7 +251,11 @@ export const App: React.FC = () => {
     });
   }, [store.patients]);
   const activeRisk = active ? riskFor(fieldState) : null;
-  const clinic = useMemo(() => ({ settings, active }), [settings, active]);
+  const setHospitalId = useCallback((hospitalId: string) => {
+    const id = activeIdRef.current; if (!id) return;
+    setStore((prev) => ({ ...prev, patients: prev.patients.map((p) => (p.id === id ? { ...p, hospitalId, updatedAt: new Date().toISOString() } : p)) }));
+  }, []);
+  const clinic = useMemo(() => ({ settings, active, setHospitalId }), [settings, active, setHospitalId]);
 
   const togglePrescribedExercise = (exerciseId: string) => {
     setPrescribedExerciseIds((current) => {
@@ -291,6 +297,10 @@ export const App: React.FC = () => {
             style={{ ...styles.navButton, ...(view === 'patients' ? styles.navButtonActive : {}), borderLeftColor: view === 'patients' ? '#f4b8a6' : 'transparent' }}>
             <Users size={16} /><span style={styles.navLabel}>Patients</span><span style={styles.navIndex}>{store.patients.length}</span>
           </button>
+          {active && <button type="button" aria-current={view === 'files' ? 'page' : undefined} onClick={() => showView('files')}
+            style={{ ...styles.navButton, ...(view === 'files' ? styles.navButtonActive : {}), borderLeftColor: view === 'files' ? '#f4b8a6' : 'transparent' }}>
+            <Paperclip size={16} /><span style={styles.navLabel}>Files and reports</span><span style={styles.navIndex} />
+          </button>}
           {['Triage', 'Intake', 'Assessment', 'Synthesis', 'Plan'].map(group => {
             const members = HNC_CLINICAL_SECTIONS.filter(section => sectionGroupFor(section.id) === group);
             const expanded = expandedGroups.includes(group);
@@ -331,8 +341,9 @@ export const App: React.FC = () => {
         {view === 'workspace' && active?.demo && <div className="demo-notice">Demo patient: example data for teaching. Remove demo patients in Settings.</div>}
         <label className="mobile-section-select">
           <span>Clinical section</span>
-          <select value={view !== 'workspace' ? `__${view}` : toolSuiteOpen ? '__tools' : activeSectionId} onChange={(event) => { const v = event.target.value; if (v === '__tools') openToolSuite(); else if (v === '__patients' || v === '__settings') showView(v === '__patients' ? 'patients' : 'settings'); else navigateToSection(v as HncSectionId); }}>
+          <select value={view !== 'workspace' ? `__${view}` : toolSuiteOpen ? '__tools' : activeSectionId} onChange={(event) => { const v = event.target.value; if (v === '__tools') openToolSuite(); else if (v === '__patients' || v === '__settings' || v === '__files') showView(v.slice(2) as 'patients' | 'settings' | 'files'); else navigateToSection(v as HncSectionId); }}>
             <option value="__patients">Patients ({store.patients.length})</option>
+            {active && <option value="__files">Files and reports</option>}
             {HNC_CLINICAL_SECTIONS.map((section) => <React.Fragment key={section.id}><option value={section.id}>{section.order}. {section.label}</option>{section.id === 'instrumental' && <option value="__tools">Clinical tool suite</option>}</React.Fragment>)}
             <option value="__settings">Settings</option>
           </select>
@@ -383,6 +394,12 @@ export const App: React.FC = () => {
 
         {view === 'patients' && (
           <PatientManager store={store} setStore={setStore} onOpen={openPatient} onSettings={() => showView('settings')} />
+        )}
+        {view === 'files' && active && (
+          <section className="pf-page" aria-label="Files and reports">
+            <p className="pm-hint">Add discharge summaries, oncology and radiotherapy notes, VFSS/FEES reports, Praat voice reports, photos of case sheets, images and swallow videos for {patientLabel(active)}. DegluTech reads typed text and photos on this device and suggests values for the chart; you choose what is added.</p>
+            <PatientFiles patient={active} fieldState={fieldState} setFieldState={setFieldState} onHospitalId={setHospitalId} />
+          </section>
         )}
         {view === 'settings' && (
           <ClinicSettingsPanel settings={settings} setSettings={setSettings} store={store} setStore={setStore} />
@@ -644,6 +661,13 @@ function SectionPager({
   );
 }
 
+/** "Fill this section from a report" panel, using the open patient from context. */
+function SectionFiles({ sectionId, fieldState, setFieldState }: { sectionId: HncSectionId; fieldState: FieldState; setFieldState: React.Dispatch<React.SetStateAction<FieldState>> }) {
+  const { active, setHospitalId } = useClinic();
+  if (!active || sectionId === 'command') return null;
+  return <PatientFiles patient={active} fieldState={fieldState} setFieldState={setFieldState} onHospitalId={setHospitalId ?? (() => undefined)} focusSection={sectionId} />;
+}
+
 function SectionWorkspace({ section, fieldState, setFieldState }: {
   section: ClinicalSection;
   fieldState: FieldState;
@@ -665,6 +689,7 @@ function SectionWorkspace({ section, fieldState, setFieldState }: {
         document.getElementById(`block-${section.id}-${index}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }}><span>{String(index + 1).padStart(2, '0')}</span>{block.title}</button>)}
     </nav>
+    <SectionFiles sectionId={section.id} fieldState={fieldState} setFieldState={setFieldState} />
     <div className="deglutech-block-grid" style={styles.blockGrid}>
       <ClinicalMeasures section={section.id} values={fieldState} />
       {section.blocks.map((block, index) => {

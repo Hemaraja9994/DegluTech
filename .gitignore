@@ -5,3 +5,7 @@ dist-electron/
 .turbo/
 .wrangler/
 *.log
+
+# copied at build time by apps/desktop/scripts/copy-reader-assets.mjs
+apps/desktop/public/ocr/
+apps/desktop/public/pdfjs/
