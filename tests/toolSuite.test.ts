@@ -67,10 +67,11 @@ test('EMR note carries total, interpretation, items, trend and plan', () => {
   const history = readEat10Sessions(saveEat10Session({ phase: 'Prehab' }, full(1), '2026-08-01'));
   const note = eat10EmrNote({ dateLabel: '29 Oct 2026', patient, resp, history, followUp: 'Review in 2 weeks' });
   assert.match(note, /EAT-10 total: 18\/40 \(provisional, 1 item\(s\) unanswered\)/);
-  assert.match(note, /Interpretation: Abnormal · aspiration risk\./);
+  assert.match(note, /A: Abnormal · aspiration risk\./);
+  assert.match(note, /^S: /m); assert.match(note, /^O: /m);
   assert.match(note, /10=-/);
   assert.match(note, /Trend: Prehab 10 > Today 18/);
-  assert.match(note, /Plan: Review in 2 weeks/);
+  assert.match(note, /P: Review in 2 weeks/);
   assert.equal(patientLine({}, 'X').dx, 'Diagnosis not recorded');
 });
 

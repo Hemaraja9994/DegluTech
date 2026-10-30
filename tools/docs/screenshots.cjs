@@ -70,6 +70,10 @@ const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, '');
   await shot('desktop-section-inline-files'); await el('el-inline', '.pf-inline');
   await step('release', async () => { await go('Exercise Prescription'); }); await el('el-release', '.dt-release-panel'); await el('el-regimen', '.dt-regimen-panel');
   await step('drawer2', async () => { await go('Clinician Dashboard'); }); await el('el-kpi', '.deglutech-kpi-strip'); await el('el-caseload', '.deglutech-caseload-table');
+  await step('help page', async () => { await p.getByRole('button', { name: /Downloads & help/ }).first().click(); await p.locator('.hp').waitFor(); await p.evaluate(() => scrollTo(0, 0)); });
+  await shot('desktop-help');
+  await el('el-help-install', '.hp-install'); await el('el-help-qr', '.hp-qr'); await el('el-help-docs', '#hp-docs >> xpath=..');
+  await step('copy emr', async () => { await go('Summary and Report'); });
   // ---- phone
   const ph = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const state = await ctx.storageState(); await ph.addInitScript(s => { if (!sessionStorage.__seeded) { for (const [k, v] of s) localStorage.setItem(k, v); sessionStorage.__seeded = 1; } }, state.origins.find(o => o.origin.includes('4174'))?.localStorage.map(x => [x.name, x.value]) ?? []);
@@ -80,6 +84,7 @@ const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, '');
   await q.goto(URL); await q.waitForTimeout(900);
   await pshot('phone-home');
   await step('phone patients', async () => { await q.locator('.mobile-section-select select').selectOption('__patients'); await q.waitForTimeout(500); }); await pshot('phone-patients');
+  await step('phone help', async () => { await q.locator('.mobile-section-select select').selectOption('__help'); await q.waitForTimeout(500); }); await pshot('phone-help');
   for (const s of [ '2. Demographics and Referral', '6. Swallowing Assessment', 'Clinical tool suite', '11. Exercise Prescription', '12. Patient Portal', '13. Summary and Report', 'Files and reports', 'Settings']) { await step('phone ' + s, async () => { await pgo(s); }); await pshot('phone-' + slug(s.replace(/^\d+\.\s*/, '').replace(/\s*\(\d+\)/, ''))); }
   await step('phone swallow scroll', async () => { await pgo('6. Swallowing Assessment'); await q.locator('.dt-form-panel').first().scrollIntoViewIfNeeded(); });
   await pshot('phone-section-form');

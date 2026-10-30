@@ -182,12 +182,12 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '20px',
   },
   title: {
-    fontSize: '22px',
+    fontSize: '24px',
     color: '#2f7a5c',
     margin: '0 0 6px 0',
   },
   pathwayText: {
-    fontSize: '14px',
+    fontSize: '16px',
     color: '#8fa79d',
   },
   timestampBadge: {
@@ -195,7 +195,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#8fd3b0',
     padding: '6px 12px',
     borderRadius: '6px',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 'bold',
   },
   layout: {
@@ -219,7 +219,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #3e5852',
   },
   sectionTitle: {
-    fontSize: '16px',
+    fontSize: '18px',
     color: '#8fd3b0',
     margin: '0 0 14px 0',
     borderBottom: '1px solid #3e5852',
@@ -234,7 +234,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '10px',
   },
   riskItem: {
-    fontSize: '13px',
+    fontSize: '15px',
     color: '#b4472f',
     lineHeight: '1.4',
   },
@@ -247,12 +247,12 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '10px',
   },
   directiveItem: {
-    fontSize: '13px',
+    fontSize: '15px',
     color: '#c9822b',
     lineHeight: '1.4',
   },
   emptyItem: {
-    fontSize: '13px',
+    fontSize: '15px',
     color: '#4d6660',
   },
   form: {
@@ -266,7 +266,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #3e5852',
     borderRadius: '6px',
     padding: '8px 12px',
-    fontSize: '13px',
+    fontSize: '15px',
     outline: 'none',
   },
   textarea: {
@@ -275,7 +275,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #3e5852',
     borderRadius: '6px',
     padding: '8px 12px',
-    fontSize: '13px',
+    fontSize: '15px',
     height: '60px',
     outline: 'none',
     resize: 'none',
@@ -287,7 +287,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '6px',
     padding: '10px',
     fontWeight: 'bold',
-    fontSize: '13px',
+    fontSize: '15px',
     cursor: 'pointer',
   },
   exerciseList: {
@@ -311,13 +311,13 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '12px',
   },
   exerciseCategory: {
-    fontSize: '10px',
+    fontSize: '13px',
     color: '#818cf8',
     fontWeight: 'bold',
     letterSpacing: '1px',
   },
   exerciseName: {
-    fontSize: '16px',
+    fontSize: '18px',
     color: '#f5f8f5',
     margin: '2px 0 0 0',
   },
@@ -327,12 +327,12 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #b4472f',
     borderRadius: '4px',
     padding: '4px 8px',
-    fontSize: '11px',
+    fontSize: '13px',
     cursor: 'pointer',
     fontWeight: 'bold',
   },
   exerciseBody: {
-    fontSize: '13px',
+    fontSize: '15px',
     lineHeight: '1.5',
     color: '#c9d7ce',
   },
@@ -345,7 +345,7 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: '#15302a',
     padding: '8px 12px',
     borderRadius: '6px',
-    fontSize: '12px',
+    fontSize: '14px',
     marginTop: '12px',
     color: '#8fa79d',
   },

@@ -80,6 +80,8 @@ async function render(browser, name, out) {
   await page.pdf({ path: out, preferCSSPageSize: true, printBackground: true, outline: true, tagged: true })
   await page.close()
   console.log(`${path.basename(out)}: ${pages} pages`)
+  // Cover thumbnail for the Downloads & help page.
+  execFileSync('pdftoppm', ['-jpeg', '-jpegopt', 'quality=82', '-r', '40', '-f', '1', '-l', '1', '-singlefile', out, out.replace(/\.pdf$/, '-cover')])
 }
 
 ;(async () => {

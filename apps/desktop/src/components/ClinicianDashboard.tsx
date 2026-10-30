@@ -1371,7 +1371,7 @@ const styles: Record<string, React.CSSProperties> = {
   overline: {
     margin: 0,
     color: '#5b6d7c',
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: 900,
     textTransform: 'uppercase',
     letterSpacing: 0,
@@ -1379,7 +1379,7 @@ const styles: Record<string, React.CSSProperties> = {
   dashboardTitle: {
     margin: '2px 0 0',
     color: '#173451',
-    fontSize: 18,
+    fontSize: 20,
     lineHeight: 1.15,
     fontWeight: 850,
   },
@@ -1396,13 +1396,13 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#174a3c',
     borderRadius: 999,
     padding: '5px 9px',
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 850,
     whiteSpace: 'nowrap',
   },
   topbarMeta: {
     color: '#5b6d7c',
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 700,
   },
   kpiStrip: {
@@ -1426,7 +1426,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 7,
     color: '#5b6d7c',
-    fontSize: 10.5,
+    fontSize: 13,
     fontWeight: 850,
     textTransform: 'uppercase',
     letterSpacing: 0,
@@ -1447,7 +1447,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   kpiSub: {
     color: '#5b6d7c',
-    fontSize: 11,
+    fontSize: 13,
     lineHeight: 1.25,
   },
   dashboardColumns: {
@@ -1479,12 +1479,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   queueTitle: {
     color: '#173451',
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: 850,
   },
   queueCount: {
     color: '#5b6d7c',
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 650,
   },
   filterGroup: {
@@ -1503,7 +1503,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#475d70',
     borderRadius: 6,
     padding: '0 8px',
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 750,
     cursor: 'pointer',
   },
@@ -1514,7 +1514,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#173451',
     borderRadius: 6,
     padding: '0 8px',
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 850,
     cursor: 'pointer',
     boxShadow: '0 1px 3px rgba(15, 23, 42, 0.08)',
@@ -1526,7 +1526,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#ffffff',
     color: '#173451',
     padding: '0 10px',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 700,
   },
   searchWrap: {
@@ -1550,7 +1550,7 @@ const styles: Record<string, React.CSSProperties> = {
     outline: 0,
     background: 'transparent',
     color: '#173451',
-    fontSize: 12,
+    fontSize: 14,
   },
   tableWrap: {
     overflowX: 'auto',
@@ -1565,7 +1565,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '0 12px',
     borderBottom: '1px solid #dce5df',
     color: '#5b6d7c',
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: 900,
     textTransform: 'uppercase',
     letterSpacing: 0,
@@ -1618,7 +1618,7 @@ const styles: Record<string, React.CSSProperties> = {
     height: 28,
     borderRadius: 7,
     color: '#ffffff',
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: 900,
     display: 'grid',
     placeItems: 'center',
@@ -1628,19 +1628,19 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid',
     minWidth: 0,
     gap: 1,
-    fontSize: 12,
+    fontSize: 14,
   },
   diagnosisCell: {
     display: 'grid',
     minWidth: 0,
     gap: 1,
-    fontSize: 11.5,
+    fontSize: 13.5,
     color: '#475d70',
   },
   reviewCell: {
     display: 'grid',
     gap: 1,
-    fontSize: 11,
+    fontSize: 13,
     color: '#475d70',
   },
   riskPill: {
@@ -1651,7 +1651,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: 'fit-content',
     borderRadius: 6,
     padding: '4px 7px',
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: 900,
     letterSpacing: 0,
   },
@@ -1664,7 +1664,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   scoreCell: {
     textAlign: 'right',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 900,
     fontVariantNumeric: 'tabular-nums',
   },
@@ -1674,7 +1674,7 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'flex-end',
     gap: 6,
     width: '100%',
-    fontSize: 11,
+    fontSize: 13,
     fontVariantNumeric: 'tabular-nums',
   },
   adherenceTrack: {
@@ -1701,12 +1701,12 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 4,
     borderRadius: 6,
     padding: '3px 6px',
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: 900,
   },
   mutedText: {
     color: '#8fa79d',
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 700,
   },
   rowActions: {
@@ -1736,7 +1736,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    fontSize: 13,
+    fontSize: 15,
   },
   sideRail: {
     display: 'grid',
@@ -1759,14 +1759,14 @@ const styles: Record<string, React.CSSProperties> = {
   railTitle: {
     margin: 0,
     color: '#173451',
-    fontSize: 13,
+    fontSize: 15,
     lineHeight: 1.2,
     fontWeight: 850,
   },
   railSub: {
     margin: '3px 0 0',
     color: '#5b6d7c',
-    fontSize: 11,
+    fontSize: 13,
     lineHeight: 1.35,
   },
   riskPanelBody: {
@@ -1785,7 +1785,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 7,
     alignItems: 'center',
     color: '#475d70',
-    fontSize: 11,
+    fontSize: 13,
     textTransform: 'capitalize',
   },
   legendSwatch: {
@@ -1814,7 +1814,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     color: '#5b6d7c',
-    fontSize: 11,
+    fontSize: 13,
   },
   insightList: {
     display: 'grid',
@@ -1842,7 +1842,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid',
     gap: 2,
     minWidth: 0,
-    fontSize: 11.5,
+    fontSize: 13.5,
     color: '#475d70',
   },
   activeCard: {
@@ -1862,7 +1862,7 @@ const styles: Record<string, React.CSSProperties> = {
   activeName: {
     margin: '3px 0 0',
     color: '#173451',
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 1.2,
     fontWeight: 850,
   },
@@ -1884,7 +1884,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid',
     gap: 2,
     color: '#5b6d7c',
-    fontSize: 10.5,
+    fontSize: 13,
     fontWeight: 750,
   },
   primaryAction: {
@@ -1899,7 +1899,7 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     gap: 6,
     cursor: 'pointer',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 850,
   },
   secondaryAction: {
@@ -1914,7 +1914,7 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     gap: 6,
     cursor: 'pointer',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 800,
   },
   drawerShell: {
@@ -1959,7 +1959,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid',
     placeItems: 'center',
     fontWeight: 900,
-    fontSize: 13,
+    fontSize: 15,
   },
   drawerIdentity: {
     minWidth: 0,
@@ -1974,20 +1974,20 @@ const styles: Record<string, React.CSSProperties> = {
   },
   drawerTitle: {
     margin: 0,
-    fontSize: 18,
+    fontSize: 20,
     lineHeight: 1.2,
     color: '#173451',
   },
   drawerId: {
     color: '#5b6d7c',
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 800,
     fontVariantNumeric: 'tabular-nums',
   },
   drawerSubtitle: {
     margin: 0,
     color: '#475d70',
-    fontSize: 12,
+    fontSize: 14,
     lineHeight: 1.35,
   },
   drawerActions: {
@@ -2023,7 +2023,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 6,
     cursor: 'pointer',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 800,
   },
   drawerTabActive: {
@@ -2037,7 +2037,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 6,
     cursor: 'pointer',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 900,
   },
   drawerBody: {
@@ -2082,7 +2082,7 @@ const styles: Record<string, React.CSSProperties> = {
   drawerCardTitle: {
     margin: 0,
     color: '#173451',
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: 900,
     textTransform: 'uppercase',
     letterSpacing: 0,
@@ -2103,7 +2103,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#7f1d1d',
     borderRadius: 8,
     padding: '8px 10px',
-    fontSize: 12,
+    fontSize: 14,
   },
   ackButton: {
     minHeight: 26,
@@ -2115,7 +2115,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 4,
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 850,
     cursor: 'pointer',
   },
@@ -2125,7 +2125,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#1f5c43',
     borderRadius: 8,
     padding: '10px 12px',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 750,
   },
   scoreTile: {
@@ -2140,7 +2140,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     color: '#5b6d7c',
-    fontSize: 10.5,
+    fontSize: 13,
     fontWeight: 900,
     textTransform: 'uppercase',
     letterSpacing: 0,
@@ -2157,7 +2157,7 @@ const styles: Record<string, React.CSSProperties> = {
   scoreTileNote: {
     margin: 0,
     color: '#5b6d7c',
-    fontSize: 11,
+    fontSize: 13,
     lineHeight: 1.25,
   },
   heatGrid: {
@@ -2170,7 +2170,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 8,
     alignItems: 'center',
     color: '#475d70',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 750,
   },
   heatCells: {
@@ -2215,7 +2215,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 8,
     padding: '8px 9px',
     color: '#475d70',
-    fontSize: 11,
+    fontSize: 13,
     display: 'grid',
     gap: 2,
   },
@@ -2230,7 +2230,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#174a3c',
     borderRadius: 999,
     padding: '5px 9px',
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 850,
   },
   icfDimensionList: {
@@ -2243,7 +2243,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 8,
     alignItems: 'center',
     color: '#475d70',
-    fontSize: 12,
+    fontSize: 14,
   },
   icfCode: {
     color: '#174a3c',
@@ -2251,7 +2251,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 5,
     padding: '3px 6px',
     fontFamily: 'Consolas, monospace',
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 900,
   },
   icfBars: {
@@ -2281,7 +2281,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 5,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 900,
     fontVariantNumeric: 'tabular-nums',
   },
@@ -2299,12 +2299,12 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 10,
     alignItems: 'center',
     color: '#475d70',
-    fontSize: 12,
+    fontSize: 14,
   },
   cardText: {
     margin: 0,
     color: '#475d70',
-    fontSize: 12,
+    fontSize: 14,
     lineHeight: 1.5,
   },
 };

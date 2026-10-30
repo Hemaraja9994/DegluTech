@@ -14,12 +14,12 @@ body { background: #f7f8f8; }
 .hero-command kbd { border-color: #cddcdb; color: #506d70; background: #fff; }
 .hero-content { padding: 40px 34px; min-height: 255px; gap: 50px; }
 .hero-copy { max-width: 690px; }
-.hero-breadcrumb { color: #527479; font-size: 10px; }
+.hero-breadcrumb { color: #527479; font-size: 13px; }
 .hero-breadcrumb::before { content: ''; display: inline-block; width: 22px; height: 8px; margin-right: 8px; background: linear-gradient(90deg,#ffd5a8,#f27e4c); clip-path: polygon(0 0,85% 0,100% 50%,85% 100%,0 100%); }
 .hero-breadcrumb > span { color: #96a7a8; }
 .hero-copy h2 { color: #272a2b; font-size: clamp(29px,3.15vw,44px); font-weight: 850; max-width: 650px; letter-spacing: -.04em; line-height: 1.12; }
 .hero-copy h2 > span { color: #c4522d; }
-.hero-description { color: #526163; font-size: 13px; max-width: 580px; }
+.hero-description { color: #526163; font-size: 15px; max-width: 580px; }
 .hero-context > span { color: #365c61; }
 .hero-context .hero-local { color: #286b65; }
 .hero-local > span, .save-dot { background: #337b69; }
@@ -29,9 +29,9 @@ body { background: #f7f8f8; }
 .hero-progress-card::after { inset: 11px 25px; background: #fff; border: 8px solid #b6dddd; }
 .hero-progress-ring { width: 82px; height: 82px; flex: 0 0 82px; padding: 5px; box-shadow: none; }
 .hero-progress-ring > span { background: #fff; color: #173d43; font-size: 28px; padding-top: 18px; }
-.hero-progress-card strong { color: #263f43; font-size: 12px; }
+.hero-progress-card strong { color: #263f43; font-size: 14px; }
 .hero-progress-card p { color: #486165; margin: 4px 0; }
-.hero-progress-card > div > small { color: #63777a; font-size: 9px; }
+.hero-progress-card > div > small { color: #63777a; font-size: 13px; }
 .hero-toolbar { background: #f7f9f9; border-top: 1px solid #e2eae9; padding: 13px 30px; }
 .hero-save-status { color: #526c70; }
 .save-dot-error { background: #b43e26; }
@@ -42,12 +42,12 @@ body { background: #f7f8f8; }
 .deglutech-sidebar { background: #fff !important; border-right: 1px solid #dce6e5 !important; }
 .deglutech-sidebar > div:first-child { border-color: #dfebea !important; background: linear-gradient(120deg,#fff9f4,#fff 65%); position: relative; }
 .deglutech-sidebar > div:first-child::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 3px; background: linear-gradient(90deg,#f27e4c,#ffe0ba 45%,#55b0b4); border-radius: 4px; }
-.deglutech-sidebar h1 { color: #173d43 !important; font-size: 18px !important; }
+.deglutech-sidebar h1 { color: #173d43 !important; font-size: 20px !important; }
 .deglutech-sidebar > div:first-child p { color: #56747a !important; }
 .deglutech-sidebar > div:nth-child(2) { border: 1px solid #cde2df !important; background: #edf6f4 !important; border-radius: 16px !important; margin-top: 18px !important; }
 .deglutech-sidebar > div:nth-child(2) > div:first-child { color: #21464c !important; }
 .deglutech-sidebar > div:nth-child(2) > div:nth-child(2) { color: #5b7477 !important; }
-.sidebar-switch { border-color: #a9c8c4; background: #fff; color: #285b61; font-size: 11px; }
+.sidebar-switch { border-color: #a9c8c4; background: #fff; color: #285b61; font-size: 13px; }
 .sidebar-switch:hover { background: #e1efec; }
 .nav-accordion { border-color: #e2eae9; }
 .nav-accordion-trigger { color: #2a4d53; }
@@ -80,7 +80,7 @@ body { background: #f7f8f8; }
   .hero-progress-card::before { inset: 0 2px; border-radius: 42px; }
   .hero-progress-card::after { inset: 12px 14px; border-radius: 34px; }
   .hero-progress-ring { flex-basis: 70px; width: 70px; height: 70px; }
-  .hero-progress-ring > span { padding-top: 14px; font-size: 24px; }
+  .hero-progress-ring > span { padding-top: 14px; font-size: 26px; }
   .hero-masthead { padding: 16px 20px; }
   .hero-toolbar { padding: 15px 20px; }
   .workspace-hero::before { right: -80px; top: -200px; }
@@ -89,32 +89,32 @@ body { background: #f7f8f8; }
 /* Typography contract: self-hosted Carlito, genuine regular/bold weights. */
 @font-face { font-family: 'Carlito'; src: url('/fonts/Carlito-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Carlito'; src: url('/fonts/Carlito-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
-:root { --sans: 'Carlito', 'Calibri', 'Segoe UI', sans-serif; --dt-font: var(--sans); --serif: var(--sans); --mono: ui-monospace, 'Consolas', monospace; --type-display: clamp(32px,3.4vw,46px); --type-title: 26px; --type-section: 21px; --type-card: 17px; --type-body: 16px; --type-small: 14px; --type-label: 12px; }
+:root { --sans: 'Carlito', 'Calibri', 'Segoe UI', sans-serif; --dt-font: var(--sans); --serif: var(--sans); --mono: ui-monospace, 'Consolas', monospace; --type-display: clamp(32px,3.4vw,46px); --type-title: 26px; --type-section: 23px; --type-card: 19px; --type-body: 18px; --type-small: 16px; --type-label: 14px; }
 body,button,input,select,textarea { font-family: var(--sans); font-synthesis: none; }
 #root,#root [style*="font-family"] { font-family: var(--sans) !important; }
 #root [style*="font-weight: 8"],#root [style*="font-weight: 9"] { font-weight:700 !important; }
 h1,h2,h3,h4,h5,h6,strong,b { font-weight:700; }
 .hero-copy h2 { font-size:var(--type-display); font-weight:700; line-height:1.1; letter-spacing:-.02em; }
-.hero-description { font-size:17px; line-height:1.5; font-weight:400; }
-.hero-context > span { font-size:13px; font-weight:400; }
-.hero-breadcrumb,.hero-product { font-size:12px; font-weight:700; letter-spacing:.07em; }
-.hero-product > span { font-size:11px; }
-.hero-command { font-size:14px; }
+.hero-description { font-size:19px; line-height:1.5; font-weight:400; }
+.hero-context > span { font-size:15px; font-weight:400; }
+.hero-breadcrumb,.hero-product { font-size:14px; font-weight:700; letter-spacing:.07em; }
+.hero-product > span { font-size:13px; }
+.hero-command { font-size:16px; }
 .hero-command kbd { font-family:var(--mono); }
-.hero-toolbar-actions button { font-size:14px; font-weight:700; min-height:42px; }
-.hero-save-status { font-size:12px; }
-.hero-progress-card strong { font-size:15px; font-weight:700; }
-.hero-progress-card p { font-size:13px; }
-.hero-progress-card > div > small { font-size:11px; }
+.hero-toolbar-actions button { font-size:16px; font-weight:700; min-height:42px; }
+.hero-save-status { font-size:14px; }
+.hero-progress-card strong { font-size:17px; font-weight:700; }
+.hero-progress-card p { font-size:15px; }
+.hero-progress-card > div > small { font-size:13px; }
 .hero-progress-ring > span { font-weight:700; font-size:30px; letter-spacing:-.02em; }
-.deglutech-sidebar h1 { font-size:22px !important; font-weight:700 !important; }
-.deglutech-sidebar > div:first-child p { font-size:12px !important; font-weight:400 !important; }
-.deglutech-sidebar > div:nth-child(2) > div:first-child { font-size:16px !important; font-weight:700 !important; line-height:1.35; }
-.deglutech-sidebar > div:nth-child(2) > div:nth-child(2) { font-size:13px !important; }
-.sidebar-switch { font-size:14px; font-weight:700; }
-.nav-accordion-trigger { font-size:15px; font-weight:700; }
-.nav-accordion-trigger small { font-size:12px; font-weight:400; }
-.deglutech-nav-list button:not(.nav-accordion-trigger) > span { font-size:14px !important; }
+.deglutech-sidebar h1 { font-size:24px !important; font-weight:700 !important; }
+.deglutech-sidebar > div:first-child p { font-size:14px !important; font-weight:400 !important; }
+.deglutech-sidebar > div:nth-child(2) > div:first-child { font-size:18px !important; font-weight:700 !important; line-height:1.35; }
+.deglutech-sidebar > div:nth-child(2) > div:nth-child(2) { font-size:15px !important; }
+.sidebar-switch { font-size:16px; font-weight:700; }
+.nav-accordion-trigger { font-size:17px; font-weight:700; }
+.nav-accordion-trigger small { font-size:14px; font-weight:400; }
+.deglutech-nav-list button:not(.nav-accordion-trigger) > span { font-size:16px !important; }
 .deglutech-nav-list button:not(.nav-accordion-trigger) { min-height:40px !important; }
 .deglutech-nav-list button svg[aria-label='All fields filled'] { color:#2b7b64 !important; }
 .clinical-section-header h3 { font-size:var(--type-title) !important; font-weight:700 !important; line-height:1.2 !important; letter-spacing:-.015em; }
@@ -129,17 +129,17 @@ h1,h2,h3,h4,h5,h6,strong,b { font-weight:700; }
 .report-workspace th { font-size:var(--type-label) !important; font-weight:700 !important; letter-spacing:.04em; }
 .report-workspace input,.report-workspace textarea,.report-workspace select { font-size:var(--type-body) !important; line-height:1.5; font-weight:400 !important; }
 .report-workspace button { font-weight:700 !important; }
-.readiness-card strong { font-size:17px; font-weight:700; }
-.readiness-label { font-size:13px; font-weight:400; }
-.readiness-card [style*="font-variant-numeric"] { font-size:15px !important; font-weight:700 !important; }
+.readiness-card strong { font-size:19px; font-weight:700; }
+.readiness-label { font-size:15px; font-weight:400; }
+.readiness-card [style*="font-variant-numeric"] { font-size:17px !important; font-weight:700 !important; }
 .overview-heading h3 { font-size:28px; font-weight:700; }
-.overview-heading p { font-size:16px; }
-.overview-actions strong { font-size:17px; font-weight:700; }
-.overview-actions small { font-size:14px; line-height:1.4; }
-.command-results strong { font-size:16px; font-weight:700; }
-.command-results small { font-size:13px; }
+.overview-heading p { font-size:18px; }
+.overview-actions strong { font-size:19px; font-weight:700; }
+.overview-actions small { font-size:16px; line-height:1.4; }
+.command-results strong { font-size:18px; font-weight:700; }
+.command-results small { font-size:15px; }
 .command-dialog-heading h2 { font-weight:700; }
-@media(max-width:680px) { .hero-copy h2 { font-size:34px; } .hero-description { font-size:16px; } .hero-progress-card { min-height:200px; width:220px; } .report-workspace .clinical-section-header h3 { font-size:24px !important; } }
+@media(max-width:680px) { .hero-copy h2 { font-size:34px; } .hero-description { font-size:18px; } .hero-progress-card { min-height:200px; width:220px; } .report-workspace .clinical-section-header h3 { font-size:26px !important; } }
 .nav-complete-icon { color: #28775f !important; }
 /* Final selected direction: navy + orange, based on the training-layout reference. */
 :root { --brand-coral: #f46b20; --brand-orange-ink: #b74612; --brand-aqua: #224b70; --brand-dark: #173451; --accent: #204a6b; --accent-soft: #edf2f7; --ink-1: #173451; }

@@ -1,17 +1,28 @@
 {
+  "id": "/",
   "name": "DegluTech Clinical Workspace",
   "short_name": "DegluTech",
-  "description": "Clinical workspace for speech-language pathology head and neck cancer rehabilitation.",
-  "start_url": ".",
+  "description": "Clinical workspace for speech-language pathology in head and neck cancer rehabilitation: charting, swallowing and voice assessment, exercise prescription and reports. Records stay on the device.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
   "background_color": "#f3f6f9",
   "theme_color": "#173451",
+  "categories": ["medical", "health", "education", "productivity"],
   "icons": [
-    {
-      "src": "/deglutech-logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "deglutech-logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "screenshots": [
+    { "src": "icons/screenshot-wide.jpg", "sizes": "1440x900", "type": "image/jpeg", "form_factor": "wide", "label": "Clinician dashboard" },
+    { "src": "icons/screenshot-phone.jpg", "sizes": "390x844", "type": "image/jpeg", "form_factor": "narrow", "label": "Swallowing assessment on a phone" }
+  ],
+  "shortcuts": [
+    { "name": "Patients", "url": "./?view=patients", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Downloads & help", "url": "./?view=help", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }

@@ -173,12 +173,12 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "'Outfit', 'Inter', sans-serif",
   },
   title: {
-    fontSize: '18px',
+    fontSize: '20px',
     margin: '0 0 4px 0',
     color: '#2f7a5c',
   },
   subtitle: {
-    fontSize: '13px',
+    fontSize: '15px',
     color: '#8fa79d',
     margin: '0 0 16px 0',
     lineHeight: '1.4',
@@ -197,12 +197,12 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '10px',
   },
   dropText: {
-    fontSize: '15px',
+    fontSize: '17px',
     color: '#dce5df',
     marginBottom: '6px',
   },
   supportText: {
-    fontSize: '12px',
+    fontSize: '14px',
     color: '#4d6660',
   },
   logContainer: {
@@ -211,7 +211,7 @@ const styles: Record<string, React.CSSProperties> = {
     paddingTop: '16px',
   },
   logTitle: {
-    fontSize: '14px',
+    fontSize: '16px',
     color: '#8fd3b0',
     margin: '0 0 12px 0',
   },
@@ -233,18 +233,18 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '8px',
   },
   fileName: {
-    fontSize: '14px',
+    fontSize: '16px',
     fontWeight: 'bold',
     color: '#f5f8f5',
   },
   statusBadge: {
-    fontSize: '10px',
+    fontSize: '13px',
     padding: '3px 8px',
     borderRadius: '4px',
     fontWeight: 'bold',
   },
   cardDetails: {
-    fontSize: '12px',
+    fontSize: '14px',
     color: '#8fa79d',
     display: 'flex',
     flexDirection: 'column',
@@ -255,7 +255,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#fb7185',
   },
   isolationText: {
-    fontSize: '11px',
+    fontSize: '13px',
     color: '#2f7a5c',
     marginTop: '4px',
   },

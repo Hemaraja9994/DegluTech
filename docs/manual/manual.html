@@ -82,7 +82,8 @@
   <tr><td rowspan="3">Plan</td><td>11. Exercise Prescription</td><td>3D and drawn exercise demonstrations, dose, release to the patient</td><td>9</td></tr>
   <tr><td>12. Patient Portal</td><td>The released home programme as the patient sees it, session log</td><td>9</td></tr>
   <tr><td>13. Summary and Report</td><td>Readiness check, clinical impression, sign-off, report export</td><td>10</td></tr>
-  <tr><td>Clinic</td><td>Settings</td><td>Institute letterhead, clinicians, print privacy, backup, demo patients</td><td>3</td></tr>
+  <tr><td rowspan="2">Clinic</td><td>Settings</td><td>Institute letterhead, clinicians, print privacy, backup, demo patients</td><td>3</td></tr>
+  <tr><td>Downloads &amp; help</td><td>Install on phones, tablets and computers; offline use; the manuals</td><td>11</td></tr>
 </table>
 
 <h2 id="s-principles">1.3 Design principles</h2>
@@ -101,14 +102,14 @@
 <ul>
   <li><b>Browser:</b> a current version of Chrome or Edge on Windows, macOS, Linux or Android is recommended. Safari and Firefox also run DegluTech. The 3D exercise demonstrations need WebGL; when it is unavailable the drawn illustration is shown instead.</li>
   <li><b>Hardware:</b> a laptop or desktop is best for charting and report review. A phone or tablet is well suited to demonstrating exercises and showing the patient view.</li>
-  <li><b>Network:</b> an internet connection is needed to open the site. Records are then kept on the device and documents are read on the device; the first time a photograph is read, the text-recognition files (about 10 MB per language) are downloaded once.</li>
+  <li><b>Network:</b> a connection is needed for the first visit. DegluTech then keeps a copy of itself on the device and opens without a connection (Chapter 11). The text-recognition files for reading photographs (a few MB per language) are saved the first time a photograph is read online.</li>
   <li><b>Pop-ups:</b> allow pop-ups for the site; the diagnostic report opens in a new window.</li>
 </ul>
 <h2 id="s-open">2.2 Opening the workspace</h2>
 <ol class="steps">
   <li>Open <b>https://deglutech.pages.dev</b> in the browser.</li>
   <li>On first use the <b>Patients</b> page is empty ({{fig:f-empty}}). Go to <b>Settings</b> first to enter your institute and clinicians (Chapter 3), then add patients (Chapter 4).</li>
-  <li>To use the workspace like an app, choose <i>Install</i> or <i>Add to Home screen</i> from the browser menu where the browser offers it. It then opens in its own window with the DegluTech icon. It still needs a connection to start.</li>
+  <li>To use the workspace like an app, with its own window and icon and without a connection, install it from <b>Downloads &amp; help</b> (Chapter 11).</li>
 </ol>
 <figure id="f-empty"><img src="{{SHOTS}}/desktop-patients-empty.png" alt=""><figcaption>A new installation: the Patients page with no records. Demo patients for teaching can be loaded from Settings.</figcaption></figure>
 
@@ -160,7 +161,7 @@
 <h2 id="s-demo">3.5 Demo patients for teaching</h2>
 <p><b>Load demo patients</b> adds eight fictitious charts (IDs <code>DEMO-01</code> to <code>DEMO-08</code>) covering different sites, care phases and risk levels. They are marked <i>Demo</i> and a banner reminds users that they are teaching data. <b>Remove demo patients</b> deletes all of them and leaves real records untouched.</p>
 <h2 id="s-manuals">3.6 User manual and quick start</h2>
-<p>The <b>User manual and quick start</b> card in Settings, and the links at the foot of every page, open this manual and the two-page quick start as PDF files.</p>
+<p>The <b>User manual and quick start</b> card in Settings, the <b>Downloads &amp; help</b> page (Chapter 11) and the links at the foot of every page open this manual and the two-page quick start as PDF files.</p>
 
 <!-- ============================================================ -->
 <h1 id="ch-patients"><span class="num">Chapter 4</span><span class="ctitle">Patients</span></h1>
@@ -271,8 +272,13 @@
 <figure id="f-eat"><img src="{{SHOTS}}/desktop-eat10.png" alt=""><figcaption>The EAT-10 being completed. Each response is a large button; the total and its interpretation update as items are answered.</figcaption></figure>
 <p><b>Interpretation shown on screen.</b> A total of 3 or more is abnormal (Belafsky et al., 2008). A total above 15 is associated with a higher likelihood of aspiration on instrumental examination (Cheney et al., 2015), which should prompt consideration of VFSS or FEES. The EAT-10 is a symptom screen; it does not replace an instrumental study.</p>
 <h2 id="s-outputs">7.2 Report, EMR note and handout</h2>
-<p>Under the score, three buttons open output sheets ({{fig:f-eatout}}). <b>Report / PDF</b> is a one-page EAT-10 report on the letterhead with item scores and history; <b>Print / PDF</b> prints it or saves it as PDF. <b>EMR note</b> is a short text note copied to the clipboard for pasting into the hospital record. <b>Patient handout</b> is a plain-language explanation for the patient. <span class="kbd">Esc</span> closes the sheet.</p>
-<figure class="pair" id="f-eatout"><div><img src="{{SHOTS}}/desktop-eat10-report.png" alt=""></div><div><img src="{{SHOTS}}/desktop-eat10-handout.png" alt=""></div><figcaption>EAT-10 output sheets: the report (left) and the patient handout (right).</figcaption></figure>
+<p>Under the score, three buttons open the output sheet ({{fig:f-eatout}}). The <b>Report</b> and <b>Patient handout</b> tabs show the printed page itself, so what you see is what prints. <b>Print / PDF</b> sends that page to the printer; choose <i>Save as PDF</i> to keep a file. <span class="kbd">Esc</span> closes the sheet.</p>
+<ul>
+  <li><b>Report</b>: a one-page EAT-10 screening report on the letterhead with the identification block, the total and its interpretation, the ten item scores, the score history when earlier sessions exist, the cut-offs with their sources, the plan and the clinician's signature block.</li>
+  <li><b>EMR note</b>: a plain-text note in SOAP order (Subjective, Objective, Assessment, Plan) with the date, patient identifiers, diagnosis line, total, item scores and trend, interpretation, plan, references and the clinician's name and RCI number. <b>Copy note</b> places it on the clipboard for pasting into the hospital record.</li>
+  <li><b>Patient handout</b>: a plain-language page for the patient or family in larger type: today's result, what it means, progress, next steps and when to contact the clinic.</li>
+</ul>
+<figure id="f-eatout"><img src="{{SHOTS}}/desktop-eat10-report.png" alt=""><figcaption>The EAT-10 output sheet showing the printed report. The Report, EMR note and Patient handout tabs are at the top.</figcaption></figure>
 
 <!-- ============================================================ -->
 <h1 id="ch-files"><span class="num">Chapter 8</span><span class="ctitle">Files and reports</span></h1>
@@ -356,6 +362,8 @@
 <p>Any later change to the exercises, dose, language, clearance, healing findings or stop plan withdraws the release until it is confirmed again.</p>
 <h2 id="s-portal">9.3 Patient portal and session log</h2>
 <p>Section 12 shows the released programme as the patient sees it, in the chosen language, with a <b>Done</b> button per exercise that counts the day's sessions against the prescribed number. Each exercise carries the regimen set in Section 11 ({{fig:f-portal}}). It also records today's exercises, a symptom check-in and the patient's confidence. <b>Export session log</b> downloads the logged days as a CSV file with study ID, exercise, sessions prescribed and logged, dose and release time. The log covers only the days logged on this device; it is not a complete adherence record and is not synchronised between devices.</p>
+<h3>Home programme handout</h3>
+<p>Once the programme is released, <b>Print home programme handout</b> appears under <b>Confirm review and release</b>. It prints, in larger type, each released exercise in the patient's chosen language (with its English name), the three steps, the number of sessions per day, the clinician's dose and instructions, the safety rule and a tick row for the week, followed by the individual stop and contact plan and the clinic's telephone number. Translations other than English are marked as drafts reviewed by the therapist.</p>
 <figure class="half" id="f-portal"><img src="{{SHOTS}}/el-regimen.png" alt=""><figcaption>The standard regimen panel for a selected exercise: frequency, sets and repetitions, hold time, rest period and session length, with the adherence target.</figcaption></figure>
 
 <!-- ============================================================ -->
@@ -368,20 +376,60 @@
 <h2 id="s-signoff">10.3 Sign-off</h2>
 <p>The <b>Clinician sign-off</b> panel shows the signature, name, qualification, designation, RCI registration number and institute of the signing clinician ({{fig:f-sign}}). When more than one clinician is set up, choose the signer from the list. DegluTech performs no electronic signature or EHR submission: sign the exported document according to your institution's procedure.</p>
 <figure id="f-sign"><img src="{{SHOTS}}/el-signoff.png" alt=""><figcaption>The sign-off panel with the clinician's signature and registration details taken from Settings.</figcaption></figure>
-<h2 id="s-export">10.4 Exporting and printing</h2>
-<p>The three report actions differ in visual weight so that the main one stands out ({{fig:f-act}}):</p>
+<h2 id="s-export">10.4 Exporting, printing and the EMR note</h2>
+<p>The report actions differ in visual weight so that the main one stands out ({{fig:f-act}}):</p>
 <ul>
-  <li><b>Export diagnostic report</b> (orange) opens the formatted report in a new window and the browser's print dialog. Choose <i>Save as PDF</i> or a printer. The report carries the letterhead, patient identity (or study ID only, if names are hidden), AJCC TNM, care phase, the executive summary, ICF table, recommendations and sign-off ({{fig:f-exp}}).</li>
+  <li><b>Export diagnostic report</b> (orange) opens the formatted report in a new window and the print dialog. Choose <i>Save as PDF</i> or a printer. The window also has <b>Print / Save as PDF</b> and <b>Close</b> buttons. If pop-ups are blocked, the report is printed directly instead.</li>
   <li><b>Preserve recorded entries</b> stores the impression fields with the chart.</li>
+  <li><b>Copy EMR note</b> copies a plain-text evaluation note in SOAP order for the hospital record (10.5).</li>
   <li><b>Print current view</b> prints the page as shown.</li>
 </ul>
-<figure id="f-act"><img src="{{SHOTS}}/el-report-actions.png" alt=""><figcaption>The report summary card with the primary action, Export diagnostic report, and two outlined secondary actions.</figcaption></figure>
-<figure id="f-exp"><img src="{{SHOTS}}/desktop-report-export.png" alt=""><figcaption>The exported diagnostic report for a demo patient on a sample letterhead.</figcaption></figure>
-<p>If nothing opens, the browser blocked the pop-up; allow pop-ups for deglutech.pages.dev and try again.</p>
+<figure id="f-act"><img src="{{SHOTS}}/el-report-actions.png" alt=""><figcaption>The report summary card with the primary action, Export diagnostic report, and outlined secondary actions.</figcaption></figure>
+<h3>Format of the diagnostic report</h3>
+<p>The report follows the usual structure of a speech-language pathology evaluation report ({{fig:f-exp}}). It is set in Carlito 11 pt (metrically identical to Calibri) on A4, with navy headings and thin rules only, so it prints clearly on black-and-white printers. In Chrome and Edge every page after the first carries the institute name and the patient identifiers at the top, and <i>Page x of y</i> at the foot.</p>
+<table class="num" id="t-report"><caption>Parts of the diagnostic report.</caption>
+<tr><th>Part</th><th>Content</th></tr>
+<tr><td>Letterhead and title</td><td>Logo, institute, department, address and contact; <i>Speech-Language Pathology Evaluation Report</i>; report number and date</td></tr>
+<tr><td>Identification</td><td>Name and hospital ID (or study ID only when names are hidden), age and sex, evaluation date, referral source, language, caregiver, care phase, feeding route</td></tr>
+<tr><td>1. Reason for referral and history</td><td>Presenting concern; patient priorities and goals</td></tr>
+<tr><td>2. Oncological and treatment history</td><td>Site, AJCC TNM, diagnosis date, disease status, surgery and reconstruction, radiotherapy, systemic therapy, toxicity, CTCAE grade, pain; healing and exercise clearance</td></tr>
+<tr><td>3. Assessment findings</td><td>3.1 oral mechanism and cranial nerves; 3.2 clinical swallowing; 3.3 instrumental assessment; 3.4 voice and speech; 3.5 nutrition and airway. Scores appear in <i>Measure | Result | Reference</i> tables with the published cut-off and its source; domains not assessed say so</td></tr>
+<tr><td>4. Functional profile (WHO-ICF)</td><td>Code, category, qualifier and descriptor, with participation narrative</td></tr>
+<tr><td>5. Clinical impression</td><td>SLP diagnosis in a framed box; clinician-rated severity and risks</td></tr>
+<tr><td>6. Recommendations</td><td>Recommendations; diet, posture and bolus plan; home exercise programme with doses and release status; safety and stop plan</td></tr>
+<tr><td>7. Follow-up plan</td><td>Review interval and conditions for earlier review</td></tr>
+<tr><td>References and sign-off</td><td>Sources of every cut-off; a note that values are clinician-entered; signature, name, qualification, designation, RCI number and date line</td></tr>
+</table>
+<p>Only recorded values are printed; an empty field prints as <i>Not recorded</i> and nothing is estimated. Two values are calculated and labelled as such: the mean of the three jaw-opening trials and the body mass index.</p>
+<figure id="f-exp"><img src="{{SHOTS}}/desktop-report-export.png" alt=""><figcaption>The first page of the diagnostic report for a demo patient on a sample letterhead, in its print window.</figcaption></figure>
+<h2 id="s-emr">10.5 EMR note</h2>
+<p><b>Copy EMR note</b> places on the clipboard a short plain-text note: the date, patient identifiers (respecting the print-privacy setting), the diagnosis line, then <b>S</b> (presenting concern), <b>O</b> (jaw opening, EAT-10, FOIS, MASA-HNC, clinical signs, instrumental results, voice and nutrition values that are recorded), <b>A</b> (SLP diagnosis, severity, aspiration risk) and <b>P</b> (recommendations, diet plan, follow-up), followed by the clinician's name and RCI number. Paste it into the hospital record and review it there before saving.</p>
+<p>If nothing opens when exporting, the browser blocked the pop-up and DegluTech printed directly; to see the report window, allow pop-ups for deglutech.pages.dev.</p>
 
 <!-- ============================================================ -->
-<h1 id="ch-practice"><span class="num">Chapter 11</span><span class="ctitle">Good practice and limitations</span></h1>
-<h2 id="s-good">11.1 Good practice</h2>
+<h1 id="ch-install"><span class="num">Chapter 11</span><span class="ctitle">Downloads, installing and offline use</span></h1>
+<p>The <b>Downloads &amp; help</b> page, at the foot of the sidebar (or in the <b>Clinical section</b> list on a phone), installs DegluTech on the device, shows a QR code for opening it on a phone, and offers the manuals ({{fig:f-help}}).</p>
+<figure id="f-help"><img src="{{SHOTS}}/desktop-help.png" alt=""><figcaption>Downloads &amp; help: install on this device with steps for each kind of device, and the QR code for phones.</figcaption></figure>
+<h2 id="s-install">11.1 Installing on a phone, tablet or computer</h2>
+<p>Installing adds DegluTech to the home screen, Start menu, Launchpad or Dock. It then opens in its own window, without the browser's address bar, and works offline. Nothing is downloaded from an app store and updates arrive automatically. Where the browser supports it (Chrome and Edge on Android, Windows, macOS and Linux), an <b>Install DegluTech</b> button appears on the page; otherwise the steps for the device are shown. The tab for the device you are using is marked <i>this device</i>.</p>
+<table class="num" id="t-install"><caption>How to install DegluTech on each kind of device.</caption>
+<tr><th>Device</th><th>Browser</th><th>Steps</th></tr>
+<tr><td>Android phone or tablet</td><td>Chrome, Edge or Samsung Internet</td><td>Tap <b>Install DegluTech</b>, or open the ⋮ menu and choose <i>Install app</i> (<i>Add to Home screen</i> on some phones); confirm.</td></tr>
+<tr><td>iPhone or iPad</td><td>Safari</td><td>Tap Share (square with an arrow), then <i>Add to Home Screen</i>, then <i>Add</i>.</td></tr>
+<tr><td>Windows computer</td><td>Edge or Chrome</td><td>Click <b>Install DegluTech</b> or the install icon in the address bar (Edge: … menu → <i>Apps</i> → <i>Install this site as an app</i>). Pin it to the taskbar from its icon.</td></tr>
+<tr><td>Mac computer</td><td>Chrome or Edge; Safari on macOS Sonoma or later</td><td>Chrome or Edge: <b>Install DegluTech</b> or the address-bar install icon. Safari: <i>File</i> → <i>Add to Dock</i>.</td></tr>
+</table>
+<div class="callout"><b>iPhone and iPad keep separate records</b>On iPhone and iPad the home-screen app has its own storage, separate from Safari. If patients were entered in Safari first, export a backup there (Settings → Backup and data) and import it in the installed app. On Android, Windows and Mac the installed app and the browser share the same records.</div>
+<p>Firefox on computers cannot install web apps; open the page in Chrome or Edge. The QR code on the page opens deglutech.pages.dev on a phone's camera ({{fig:f-helpphone}}).</p>
+<figure class="pair" id="f-helpphone"><div><img src="{{SHOTS}}/phone-help.png" alt=""></div><div><img src="{{SHOTS}}/el-help-qr.png" alt="" style="max-height:80mm"></div><figcaption>Downloads &amp; help on a phone (left) and the QR code card (right).</figcaption></figure>
+<h2 id="s-offline">11.2 Offline use and updates</h2>
+<p>After the first visit, DegluTech keeps a copy of the application, its fonts and the 3D exercise models on the device and opens without a connection. Charts, files and settings are always on the device, so all charting, scoring, prescribing and printing works offline. Two things need a connection the first time they are used: the text-recognition files for reading photographs in each language, and the manuals; both are then kept for offline use. When a new version is published it is fetched the next time DegluTech is opened online; <b>Check for updates</b> on the page looks for it immediately and reloads.</p>
+<h2 id="s-docs">11.3 Manuals</h2>
+<p>The <b>Manuals</b> card shows this user manual and the two-page quick start with their covers ({{fig:f-docs}}). <b>Open</b> shows the PDF in a new tab; <b>Download PDF</b> saves it. Print the quick start for the clinic desk.</p>
+<figure id="f-docs"><img src="{{SHOTS}}/el-help-docs.png" alt=""><figcaption>The Manuals card on Downloads &amp; help.</figcaption></figure>
+
+<h1 id="ch-practice"><span class="num">Chapter 12</span><span class="ctitle">Good practice and limitations</span></h1>
+<h2 id="s-good">12.1 Good practice</h2>
 <ul>
   <li>Set up Settings before the first patient so that every report carries the correct letterhead and signer.</li>
   <li>Use study IDs consistently for research participants and hide names on printouts.</li>
@@ -389,11 +437,13 @@
   <li>Attach source documents to the chart so that the origin of each value can be checked later.</li>
   <li>Record instrument versions, languages, assessors and recording conditions in the fields provided; these determine whether repeated measures can be compared.</li>
   <li>Review the readiness grid before exporting a report, and treat green tiles as <i>recorded</i>, not as <i>verified</i>.</li>
+  <li>Read the exported report and the EMR note in full before signing or pasting them; they contain exactly what was entered.</li>
 </ul>
-<h2 id="s-limits">11.2 Known limitations</h2>
+<h2 id="s-limits">12.2 Known limitations</h2>
 <ul>
   <li>This is a review build. It has not been validated as a medical device and is intended for clinical documentation support, teaching and research under supervision.</li>
   <li>Records are not synchronised between devices or users. Hand over cases with patient export and import.</li>
+  <li>Running headers and page numbers on printed reports appear in Chrome and Edge; other browsers print the same report without them.</li>
   <li>Document reading recognises the common phrasing of typed English reports; unusual layouts, tables, abbreviations and handwriting may be missed or misread. Kannada and Hindi recognition reads the script, but the value rules match English labels.</li>
   <li>MDADI, VHI-10 and the Xerostomia Questionnaire are not administered on screen.</li>
   <li>The 3D anatomy is schematic and the exercise demonstrations await clinician verification; patient-language instructions are draft translations awaiting native-speaker SLP review.</li>
@@ -401,7 +451,7 @@
 </ul>
 
 <!-- ============================================================ -->
-<h1 id="ch-trouble"><span class="num">Chapter 12</span><span class="ctitle">Troubleshooting</span></h1>
+<h1 id="ch-trouble"><span class="num">Chapter 13</span><span class="ctitle">Troubleshooting</span></h1>
 <table class="num" id="t-trouble"><caption>Common problems and their remedies.</caption>
 <tr><th>Problem</th><th>Remedy</th></tr>
 <tr><td>Patients have disappeared</td><td>Check that you are in the same browser, browser profile and device, and not in a private window. If site data was cleared, import the latest backup in Settings.</td></tr>
@@ -411,6 +461,10 @@
 <tr><td>A value was read wrongly</td><td>Untick it before adding, or correct the field in its section afterwards. Use <b>Show text read from file</b> to see what was recognised.</td></tr>
 <tr><td>A file cannot be added</td><td>Files over 60 MB are refused; trim videos or compress scans. Check the storage line on the Files page.</td></tr>
 <tr><td><b>Confirm review and release</b> is greyed out</td><td>Read the status line above it; it names the missing condition (Table on release conditions, Chapter 9.2).</td></tr>
+<tr><td>There is no <b>Install DegluTech</b> button</td><td>The browser does not offer one-click installation (Safari, Firefox) or DegluTech is already installed. Follow the steps for the device on Downloads &amp; help, or open the installed app from its icon.</td></tr>
+<tr><td>Patients are missing in the iPhone or iPad app</td><td>The home-screen app has separate storage from Safari. Export a backup in Safari and import it in the app (Chapter 11.1).</td></tr>
+<tr><td>A change is not showing after an update</td><td>Open Downloads &amp; help and click <b>Check for updates</b>, or close and reopen DegluTech while online.</td></tr>
+<tr><td>Page numbers do not appear on the printed report</td><td>Running headers and page numbers are printed by Chrome and Edge. Use one of them, and keep <i>Headers and footers</i> switched off in the print dialog.</td></tr>
 <tr><td>A study ID is refused</td><td>Another patient on this device already uses it (letter case is ignored).</td></tr>
 </table>
 
@@ -447,6 +501,7 @@
 <h1 id="ch-refs"><span class="num">&nbsp;</span><span class="ctitle">References</span></h1>
 <ul class="small">
   <li>Amin MB, Edge SB, Greene FL, et al., eds. <i>AJCC Cancer Staging Manual</i>. 8th ed. Springer; 2017.</li>
+  <li>Arffa RE, Krishna P, Gartner-Schmidt J, Rosen CA. Normative values for the Voice Handicap Index-10. <i>J Voice</i>. 2012;26(4):462–465.</li>
   <li>Belafsky PC, Mouadeb DA, Rees CJ, et al. Validity and reliability of the Eating Assessment Tool (EAT-10). <i>Ann Otol Rhinol Laryngol</i>. 2008;117(12):919–924.</li>
   <li>Chen AY, Frankowski R, Bishop-Leone J, et al. The development and validation of a dysphagia-specific quality-of-life questionnaire for patients with head and neck cancer: the M. D. Anderson Dysphagia Inventory. <i>Arch Otolaryngol Head Neck Surg</i>. 2001;127(7):870–876.</li>
   <li>Cheney DM, Siddiqui MT, Litts JK, Kuhn MA, Belafsky PC. The ability of the 10-item Eating Assessment Tool (EAT-10) to predict aspiration risk in persons with dysphagia. <i>Ann Otol Rhinol Laryngol</i>. 2015;124(5):351–354.</li>

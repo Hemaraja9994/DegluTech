@@ -41,7 +41,7 @@ export const FloatingBadge: React.FC<FloatingBadgeProps> = ({
         background: palette.bg,
         color: palette.fg,
         padding: '5px 10px',
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: 800,
         lineHeight: 1.1,
         whiteSpace: 'nowrap',
@@ -111,7 +111,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
             style={{
               margin: '0 0 4px',
               color: '#4d6660',
-              fontSize: 11,
+              fontSize: 13,
               fontWeight: 900,
               textTransform: 'uppercase',
               letterSpacing: 0,
@@ -120,11 +120,11 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
             {eyebrow}
           </p>
         )}
-        <h3 style={{ margin: 0, color: '#15302a', fontSize: 22, lineHeight: 1.2, fontWeight: 850 }}>
+        <h3 style={{ margin: 0, color: '#15302a', fontSize: 24, lineHeight: 1.2, fontWeight: 850 }}>
           {title}
         </h3>
         {description && (
-          <p style={{ margin: '7px 0 0', color: '#3e5852', fontSize: 14, lineHeight: 1.5, maxWidth: 860 }}>
+          <p style={{ margin: '7px 0 0', color: '#3e5852', fontSize: 16, lineHeight: 1.5, maxWidth: 860 }}>
             {description}
           </p>
         )}
@@ -160,7 +160,7 @@ export const HeaderSeparator: React.FC<HeaderSeparatorProps> = ({ label, icon })
         borderRadius: 999,
         background: '#ffffff',
         padding: '5px 11px',
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: 800,
       }}
     >

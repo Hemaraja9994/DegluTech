@@ -13,6 +13,7 @@ import {
   Sparkles,
   Stethoscope,
   TimerReset,
+  ClipboardCopy,
 } from 'lucide-react';
 import type { HncSectionId } from '../../../../packages/core/src/hncClinicalModel';
 import { FloatingBadge, HeaderSeparator, SectionHeader } from './ui/ClinicalPrimitives';
@@ -27,7 +28,7 @@ import {
   type ReportDraft,
   type SeverityTier,
 } from '../reportEngine';
-import { exportDiagnosticReport, facilityFromSettings } from '../reportPdf';
+import { buildEvaluationEmrNote, exportDiagnosticReport, facilityFromSettings } from '../reportPdf';
 import { useClinic } from './ClinicContext';
 import { printIdentity, signingClinician } from '../clinicStore';
 
@@ -78,6 +79,12 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
     }));
   };
 
+  const [emrStatus, setEmrStatus] = useState('');
+  const copyEmr = () => {
+    const note = buildEvaluationEmrNote(fieldState, facilityFromSettings(settings, signer, identity));
+    void navigator.clipboard?.writeText(note).then(() => setEmrStatus('EMR note copied. Paste it into the hospital record and review before saving.'), () => setEmrStatus('Copy was blocked by the browser. Allow clipboard access and try again.'));
+  };
+
   const handleExportPdf = () => {
     const opened = exportDiagnosticReport(fieldState, facilityFromSettings(settings, signer, identity));
     if (!opened) {
@@ -108,12 +115,16 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
           <button id="export-diagnostic-report" type="button" style={styles.iconPillPrimary} onClick={handleExportPdf}>
             <FileDown size={16} /> Export diagnostic report
           </button>
+          <button type="button" style={styles.iconPillGhost} onClick={copyEmr}>
+            <ClipboardCopy size={16} /> Copy EMR note
+          </button>
           <button type="button" style={styles.iconPillGhost} onClick={() => window.print()}>
             <Printer size={16} /> Print current view
           </button>
           </div>
         )}
       />
+      {emrStatus && <p role="status" className="pm-status">{emrStatus}</p>}
 
       <ValidationPanel
         sections={sections}
@@ -567,14 +578,14 @@ const styles: Record<string, any> = {
   },
   introTitle: {
     margin: '4px 0 6px',
-    fontSize: '20px',
+    fontSize: '22px',
     lineHeight: 1.3,
     color: '#15302a',
   },
   introText: {
     margin: 0,
     color: '#3e5852',
-    fontSize: '13px',
+    fontSize: '15px',
     lineHeight: 1.5,
   },
   introActions: {
@@ -587,7 +598,7 @@ const styles: Record<string, any> = {
     margin: 0,
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
-    fontSize: '11px',
+    fontSize: '13px',
     color: '#4d6660',
     fontWeight: 800,
   },
@@ -603,7 +614,7 @@ const styles: Record<string, any> = {
     gap: '8px',
     cursor: 'pointer',
     fontWeight: 700,
-    fontSize: '13px',
+    fontSize: '15px',
   },
   iconPillSecondary: {
     minHeight: '40px',
@@ -617,7 +628,7 @@ const styles: Record<string, any> = {
     gap: '8px',
     cursor: 'pointer',
     fontWeight: 700,
-    fontSize: '13px',
+    fontSize: '15px',
   },
   iconPillGhost: {
     minHeight: '40px',
@@ -631,7 +642,7 @@ const styles: Record<string, any> = {
     gap: '8px',
     cursor: 'pointer',
     fontWeight: 700,
-    fontSize: '13px',
+    fontSize: '15px',
   },
   validationPanel: {
     background: 'rgba(255, 255, 255, 0.92)',
@@ -661,13 +672,13 @@ const styles: Record<string, any> = {
   },
   panelTitle: {
     margin: '4px 0 0',
-    fontSize: '17px',
+    fontSize: '19px',
     color: '#15302a',
   },
   panelSubtitle: {
     margin: '6px 0 0',
     color: '#4d6660',
-    fontSize: '12.5px',
+    fontSize: '14.5px',
     lineHeight: 1.5,
     maxWidth: '780px',
   },
@@ -678,7 +689,7 @@ const styles: Record<string, any> = {
     padding: '6px 10px',
     borderRadius: '999px',
     fontWeight: 800,
-    fontSize: '12px',
+    fontSize: '14px',
     background: ready ? '#ddefe5' : '#fbf1ec',
     color: ready ? '#1f5c43' : '#8e3420',
     border: `1px solid ${ready ? '#2f7a5c' : '#a8402b'}`,
@@ -708,7 +719,7 @@ const styles: Record<string, any> = {
     background: '#15302a',
     color: '#ffffff',
     fontWeight: 800,
-    fontSize: '12px',
+    fontSize: '14px',
     display: 'grid',
     placeItems: 'center',
   },
@@ -716,12 +727,12 @@ const styles: Record<string, any> = {
     display: 'grid',
     gap: '2px',
     minWidth: 0,
-    fontSize: '13px',
+    fontSize: '15px',
     fontWeight: 700,
     lineHeight: 1.2,
   },
   sectionChipPercent: {
-    fontSize: '13px',
+    fontSize: '15px',
     fontWeight: 800,
     fontVariantNumeric: 'tabular-nums',
     color: 'inherit',
@@ -743,13 +754,13 @@ const styles: Record<string, any> = {
   },
   warnText: {
     margin: '4px 0 0',
-    fontSize: '12.5px',
+    fontSize: '14.5px',
     color: '#78350f',
     lineHeight: 1.5,
   },
   warnSub: {
     margin: '6px 0 0',
-    fontSize: '12px',
+    fontSize: '14px',
     color: '#7a4e00',
   },
   okBanner: {
@@ -761,7 +772,7 @@ const styles: Record<string, any> = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    fontSize: '12.5px',
+    fontSize: '14.5px',
   },
   execSummary: {
     border: '2px solid',
@@ -780,7 +791,7 @@ const styles: Record<string, any> = {
   },
   execTitle: {
     margin: '4px 0 0',
-    fontSize: '20px',
+    fontSize: '22px',
     lineHeight: 1.3,
   },
   aspirationBadge: {
@@ -791,7 +802,7 @@ const styles: Record<string, any> = {
     padding: '6px 12px',
     borderRadius: '999px',
     fontWeight: 800,
-    fontSize: '12px',
+    fontSize: '14px',
   },
   execGrid: {
     display: 'grid',
@@ -816,14 +827,14 @@ const styles: Record<string, any> = {
     gridColumn: '1 / -1',
   },
   execCellLabel: {
-    fontSize: '10.5px',
+    fontSize: '13px',
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
     color: '#3e5852',
     fontWeight: 700,
   },
   execCellValue: {
-    fontSize: '13px',
+    fontSize: '15px',
     color: '#15302a',
     lineHeight: 1.4,
   },
@@ -835,14 +846,14 @@ const styles: Record<string, any> = {
   icfTable: {
     width: '100%',
     borderCollapse: 'collapse',
-    fontSize: '13px',
+    fontSize: '15px',
   },
   icfTh: {
     background: '#102235',
     color: '#ffffff',
     padding: '10px 12px',
     textAlign: 'left',
-    fontSize: '11px',
+    fontSize: '13px',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
   },
@@ -857,21 +868,21 @@ const styles: Record<string, any> = {
     padding: '4px 8px',
     borderRadius: '6px',
     fontWeight: 800,
-    fontSize: '12px',
+    fontSize: '14px',
   },
   icfName: {
     display: 'block',
     color: '#15302a',
-    fontSize: '13px',
+    fontSize: '15px',
   },
   icfMuted: {
     color: '#4d6660',
-    fontSize: '11.5px',
+    fontSize: '13.5px',
     fontWeight: 500,
   },
   icfMutedSmall: {
     color: '#4d6660',
-    fontSize: '11px',
+    fontSize: '13px',
     marginTop: '4px',
   },
   qualifierPill: {
@@ -881,7 +892,7 @@ const styles: Record<string, any> = {
     borderRadius: '6px',
     color: '#ffffff',
     fontWeight: 900,
-    fontSize: '13px',
+    fontSize: '15px',
   },
   draftGrid: {
     display: 'grid',
@@ -902,7 +913,7 @@ const styles: Record<string, any> = {
     alignItems: 'center',
   },
   draftLabel: {
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 800,
     color: '#15302a',
     textTransform: 'uppercase',
@@ -911,7 +922,7 @@ const styles: Record<string, any> = {
   sourceBadgeAuto: {
     background: '#dbeafe',
     color: '#174a3c',
-    fontSize: '10px',
+    fontSize: '13px',
     padding: '3px 7px',
     borderRadius: '999px',
     fontWeight: 900,
@@ -920,7 +931,7 @@ const styles: Record<string, any> = {
   sourceBadgeClin: {
     background: '#ddefe5',
     color: '#1f5c43',
-    fontSize: '10px',
+    fontSize: '13px',
     padding: '3px 7px',
     borderRadius: '999px',
     fontWeight: 900,
@@ -933,7 +944,7 @@ const styles: Record<string, any> = {
     borderRadius: '12px',
     padding: '8px 10px',
     fontFamily: 'inherit',
-    fontSize: '13px',
+    fontSize: '15px',
     lineHeight: 1.5,
     color: '#15302a',
     resize: 'vertical',
@@ -945,7 +956,7 @@ const styles: Record<string, any> = {
     borderRadius: '12px',
     padding: '8px 10px',
     fontFamily: 'inherit',
-    fontSize: '13px',
+    fontSize: '15px',
     color: '#15302a',
     background: '#ffffff',
     minHeight: '40px',
@@ -961,7 +972,7 @@ const styles: Record<string, any> = {
   },
   suggestionText: {
     flex: 1,
-    fontSize: '12px',
+    fontSize: '14px',
     color: '#174a3c',
     lineHeight: 1.4,
   },
@@ -969,7 +980,7 @@ const styles: Record<string, any> = {
     border: '1px solid #1f5c4a',
     background: '#1f5c4a',
     color: '#ffffff',
-    fontSize: '11px',
+    fontSize: '13px',
     fontWeight: 800,
     padding: '4px 10px',
     borderRadius: '10px',
@@ -996,7 +1007,7 @@ const styles: Record<string, any> = {
   },
   recCardTitle: {
     margin: 0,
-    fontSize: '13px',
+    fontSize: '15px',
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
     fontWeight: 900,
@@ -1009,7 +1020,7 @@ const styles: Record<string, any> = {
   },
   recListItem: {
     color: '#3e5852',
-    fontSize: '12.5px',
+    fontSize: '14.5px',
     lineHeight: 1.5,
   },
   signoffPanel: {
@@ -1035,7 +1046,7 @@ const styles: Record<string, any> = {
   },
   signoffMeta: {
     color: '#475d70',
-    fontSize: '14px',
+    fontSize: '16px',
     lineHeight: 1.45,
     marginTop: '4px',
   },
@@ -1052,12 +1063,12 @@ const styles: Record<string, any> = {
   },
   errorTitle: {
     margin: '0 0 6px',
-    fontSize: '16px',
+    fontSize: '18px',
     color: '#7f1d1d',
   },
   errorText: {
     margin: '0 0 8px',
-    fontSize: '13px',
+    fontSize: '15px',
     color: '#8e3420',
     lineHeight: 1.5,
   },

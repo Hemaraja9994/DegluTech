@@ -87,7 +87,12 @@ test('print report escapes entered text, includes new measures and does not inve
   assert.ok(html.includes('&lt;script&gt;'));
   assert.ok(!html.includes('<script>alert'));
   assert.ok(!html.includes('<img src=x'));
-  assert.ok(html.includes('>17<')); assert.ok(html.includes('>65<'));
-  assert.ok(html.includes('Recorded Findings Appendix'));
-  assert.ok(buildReportHtml({}).includes('No assessment fields recorded.'));
+  assert.ok(html.includes('>65<'));
+  assert.ok(html.includes('3. Assessment findings') && html.includes('7. Follow-up plan'));
+  assert.ok(html.includes('Mean 30.0 mm (calculated)'));
+  assert.ok(html.includes('17 / 40') && html.includes('&gt; 11 above normal limits'));
+  assert.ok(!html.includes('years'), 'no invented age');
+  const empty = buildReportHtml({});
+  assert.ok(empty.includes('No assessment fields recorded.'));
+  assert.ok(empty.includes('Not recorded') && !/#(dc2626|10b981|ea580c)/.test(empty), 'black-and-white safe: no traffic-light colours');
 });

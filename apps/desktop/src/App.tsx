@@ -29,6 +29,7 @@ import {
   UserRound,
   Users,
   Settings as SettingsIcon,
+  LifeBuoy,
   Paperclip,
   type LucideIcon,
 } from 'lucide-react';
@@ -55,6 +56,7 @@ import { PrescriptionRelease, PatientSessionLog, isReleased, readDoses } from '.
 import { ExerciseVisual } from './components/ExerciseVisual';
 import { ClinicalToolSuite } from './components/ClinicalToolSuite';
 import { PatientManager } from './components/PatientManager';
+import { HelpPage } from './components/HelpPage';
 import { PatientFiles } from './components/PatientFiles';
 import { ClinicSettingsPanel } from './components/ClinicSettingsPanel';
 import { ClinicContext, useClinic } from './components/ClinicContext';
@@ -121,7 +123,7 @@ export const App: React.FC = () => {
   // Patients and clinic settings live in this browser (see clinicStore.ts). The open chart is the active patient's.
   const [store, setStore] = useState<PatientStore>(EMPTY_STORE);
   const [settings, setSettings] = useState<ClinicSettings>(DEFAULT_SETTINGS);
-  const [mainView, setMainView] = useState<'workspace' | 'patients' | 'settings' | 'files'>('workspace');
+  const [mainView, setMainView] = useState<'workspace' | 'patients' | 'settings' | 'files' | 'help'>(() => { try { const v = new URLSearchParams(window.location.search).get('view'); return v === 'patients' || v === 'help' || v === 'settings' ? v : 'workspace'; } catch { return 'workspace'; } });
   const [storageReady, setStorageReady] = useState(false);
   const [storedAt, setStoredAt] = useState('Opening saved patients');
   const active = store.patients.find((p) => p.id === store.activeId) ?? null;
@@ -217,7 +219,7 @@ export const App: React.FC = () => {
     setActiveSectionId(section);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
   };
-  const showView = (view: 'patients' | 'settings' | 'files') => {
+  const showView = (view: 'patients' | 'settings' | 'files' | 'help') => {
     setMainView(view);
     setToolSuiteOpen(false);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
@@ -239,7 +241,7 @@ export const App: React.FC = () => {
     setToolSuiteOpen(true);
     window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
   };
-  const view: 'workspace' | 'patients' | 'settings' | 'files' = !active && (mainView === 'workspace' || mainView === 'files') ? 'patients' : mainView;
+  const view: 'workspace' | 'patients' | 'settings' | 'files' | 'help' = !active && (mainView === 'workspace' || mainView === 'files') ? 'patients' : mainView;
   const shownId: HncSectionId | 'tools' = toolSuiteOpen ? 'tools' : activeSection.id;
   const caseload = useMemo(() => {
     const seen = new Set<string>();
@@ -334,6 +336,10 @@ export const App: React.FC = () => {
             style={{ ...styles.navButton, ...(view === 'settings' ? styles.navButtonActive : {}), borderLeftColor: view === 'settings' ? '#f4b8a6' : 'transparent' }}>
             <SettingsIcon size={16} /><span style={styles.navLabel}>Settings</span><span style={styles.navIndex} />
           </button>
+          <button type="button" aria-current={view === 'help' ? 'page' : undefined} onClick={() => showView('help')}
+            style={{ ...styles.navButton, ...(view === 'help' ? styles.navButtonActive : {}), borderLeftColor: view === 'help' ? '#f4b8a6' : 'transparent' }}>
+            <LifeBuoy size={16} /><span style={styles.navLabel}>Downloads &amp; help</span><span style={styles.navIndex} />
+          </button>
         </nav>
       </aside>
 
@@ -341,11 +347,12 @@ export const App: React.FC = () => {
         {view === 'workspace' && active?.demo && <div className="demo-notice">Demo patient: example data for teaching. Remove demo patients in Settings.</div>}
         <label className="mobile-section-select">
           <span>Clinical section</span>
-          <select value={view !== 'workspace' ? `__${view}` : toolSuiteOpen ? '__tools' : activeSectionId} onChange={(event) => { const v = event.target.value; if (v === '__tools') openToolSuite(); else if (v === '__patients' || v === '__settings' || v === '__files') showView(v.slice(2) as 'patients' | 'settings' | 'files'); else navigateToSection(v as HncSectionId); }}>
+          <select value={view !== 'workspace' ? `__${view}` : toolSuiteOpen ? '__tools' : activeSectionId} onChange={(event) => { const v = event.target.value; if (v === '__tools') openToolSuite(); else if (v === '__patients' || v === '__settings' || v === '__files' || v === '__help') showView(v.slice(2) as 'patients' | 'settings' | 'files' | 'help'); else navigateToSection(v as HncSectionId); }}>
             <option value="__patients">Patients ({store.patients.length})</option>
             {active && <option value="__files">Files and reports</option>}
             {HNC_CLINICAL_SECTIONS.map((section) => <React.Fragment key={section.id}><option value={section.id}>{section.order}. {section.label}</option>{section.id === 'instrumental' && <option value="__tools">Clinical tool suite</option>}</React.Fragment>)}
             <option value="__settings">Settings</option>
+            <option value="__help">Downloads &amp; help</option>
           </select>
         </label>
         <header className="workspace-hero">
@@ -356,8 +363,8 @@ export const App: React.FC = () => {
           <div className="hero-content">
             <div className="hero-copy">
               <p className="hero-breadcrumb">HEAD & NECK REHABILITATION <span>/</span> {view === 'workspace' ? toolSuiteOpen ? 'CLINICAL TOOLS' : sectionGroupFor(activeSectionId).toUpperCase() : 'CLINIC'}</p>
-              <h2><ThemeHeading text={view === 'patients' ? 'Care starts with connection.' : view === 'files' ? 'Every report, in one place.' : view === 'settings' ? 'Your practice. Your workspace.' : toolSuiteOpen ? 'Precision at the point of care.' : activeSectionId === 'command' ? 'A clearer view of care.' : activeSectionId === 'report' ? 'From clinical insight to care.' : activeSection.label} /></h2>
-              <p className="hero-description">{view === 'patients' ? 'Open a patient chart and bring every stage of rehabilitation together.' : view === 'files' ? 'Attach discharge summaries, swallow study reports and photos, then review the values DegluTech finds before they enter the chart.' : view === 'settings' ? 'Manage your clinic identity, clinician profiles and device backups.' : toolSuiteOpen ? 'Clinical assessment tools, recorded findings and longitudinal measures in one place.' : activeSectionId === 'report' ? 'Review the complete picture. Document your judgement. Prepare the next step.' : activeSectionId === 'command' ? 'Assessment, rehabilitation and meaningful progress. One connected clinical workflow.' : activeSection.purpose}</p>
+              <h2><ThemeHeading text={view === 'patients' ? 'Care starts with connection.' : view === 'help' ? 'Install, learn and get going.' : view === 'files' ? 'Every report, in one place.' : view === 'settings' ? 'Your practice. Your workspace.' : toolSuiteOpen ? 'Precision at the point of care.' : activeSectionId === 'command' ? 'A clearer view of care.' : activeSectionId === 'report' ? 'From clinical insight to care.' : activeSection.label} /></h2>
+              <p className="hero-description">{view === 'patients' ? 'Open a patient chart and bring every stage of rehabilitation together.' : view === 'help' ? 'Install DegluTech on a phone, tablet or computer and keep the clinician manuals at hand.' : view === 'files' ? 'Attach discharge summaries, swallow study reports and photos, then review the values DegluTech finds before they enter the chart.' : view === 'settings' ? 'Manage your clinic identity, clinician profiles and device backups.' : toolSuiteOpen ? 'Clinical assessment tools, recorded findings and longitudinal measures in one place.' : activeSectionId === 'report' ? 'Review the complete picture. Document your judgement. Prepare the next step.' : activeSectionId === 'command' ? 'Assessment, rehabilitation and meaningful progress. One connected clinical workflow.' : activeSection.purpose}</p>
               <div className="hero-context">
                 <span><UserRound size={15} />{active ? patientLabel(active) : 'No patient selected'}</span>
                 {view === 'workspace' && <span><ClipboardCheck size={15} />{toolSuiteOpen ? 'Clinical tool suite' : `Section ${activeSectionIndex + 1} / 13 · ${activeSection.shortLabel}`}</span>}
@@ -395,6 +402,7 @@ export const App: React.FC = () => {
         {view === 'patients' && (
           <PatientManager store={store} setStore={setStore} onOpen={openPatient} onSettings={() => showView('settings')} />
         )}
+        {view === 'help' && <HelpPage onSettings={() => showView('settings')} />}
         {view === 'files' && active && (
           <section className="pf-page" aria-label="Files and reports">
             <p className="pm-hint">Add discharge summaries, oncology and radiotherapy notes, VFSS/FEES reports, Praat voice reports, photos of case sheets, images and swallow videos for {patientLabel(active)}. DegluTech reads typed text and photos on this device and suggests values for the chart; you choose what is added.</p>
@@ -829,7 +837,7 @@ function FieldControl({
         step={field.step ?? (field.kind === 'metric' ? 'any' : undefined)}
         aria-invalid={invalid || undefined}
       />
-      {invalid && <span role="alert" style={{ color: '#a12622', fontSize: 12 }}>Enter a value from {range.min} to {range.max}.</span>}
+      {invalid && <span role="alert" style={{ color: '#a12622', fontSize: 14 }}>Enter a value from {range.min} to {range.max}.</span>}
       {field.unit && <span className="dt-field-helper" style={styles.fieldHelper}>Unit: {field.unit}</span>}
       {field.helper && <span className="dt-field-helper" style={styles.fieldHelper}>{field.helper}</span>}
     </label>
@@ -1321,7 +1329,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   brandTitle: {
     margin: 0,
-    fontSize: '15px',
+    fontSize: '17px',
     lineHeight: 1.1,
     fontWeight: 850,
     letterSpacing: 0,
@@ -1330,7 +1338,7 @@ const styles: Record<string, React.CSSProperties> = {
   brandSub: {
     margin: '2px 0 0',
     color: '#a9c0b6',
-    fontSize: '10.5px',
+    fontSize: '13px',
     fontWeight: 700,
   },
   patientMini: {
@@ -1343,12 +1351,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   patientName: {
     fontWeight: 800,
-    fontSize: '14px',
+    fontSize: '16px',
     color: '#ffffff',
   },
   patientMeta: {
     color: '#bfd1c8',
-    fontSize: '12px',
+    fontSize: '14px',
     marginTop: '2px',
   },
   riskPill: {
@@ -1358,7 +1366,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '999px',
     background: '#fbe4dd',
     color: '#b91c1c',
-    fontSize: '11px',
+    fontSize: '13px',
     fontWeight: 800,
   },
   navList: {
@@ -1369,7 +1377,7 @@ const styles: Record<string, React.CSSProperties> = {
   navGroup: {
     margin: '10px 6px 3px',
     color: '#a3bab0',
-    fontSize: '10px',
+    fontSize: '13px',
     fontWeight: 900,
     textTransform: 'uppercase',
     letterSpacing: 0,
@@ -1400,11 +1408,11 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-    fontSize: '12px',
+    fontSize: '14px',
   },
   navIndex: {
     color: '#8fa79d',
-    fontSize: '11px',
+    fontSize: '13px',
     textAlign: 'right',
   },
   main: {
@@ -1427,13 +1435,13 @@ const styles: Record<string, React.CSSProperties> = {
     margin: '0 0 4px',
     textTransform: 'uppercase',
     letterSpacing: '0',
-    fontSize: '11px',
+    fontSize: '13px',
     color: T.ink3,
     fontWeight: 800,
   },
   pageTitle: {
     margin: 0,
-    fontSize: '18px',
+    fontSize: '20px',
     lineHeight: 1.1,
     fontWeight: 850,
   },
@@ -1475,13 +1483,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   workflowCurrentTitle: {
     margin: 0,
-    fontSize: '18px',
+    fontSize: '20px',
     lineHeight: 1.2,
   },
   workflowCurrentText: {
     margin: '5px 0 0',
     color: T.ink2,
-    fontSize: '13px',
+    fontSize: '15px',
     lineHeight: 1.45,
     maxWidth: '760px',
   },
@@ -1533,7 +1541,7 @@ const styles: Record<string, React.CSSProperties> = {
   workflowButtonText: {
     display: 'grid',
     gap: '2px',
-    fontSize: '11px',
+    fontSize: '13px',
     fontWeight: 800,
     lineHeight: 1.15,
   },
@@ -1542,7 +1550,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '7px',
     color: T.ink2,
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 900,
     textTransform: 'uppercase',
   },
@@ -1577,11 +1585,11 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '999px',
     display: 'grid',
     placeItems: 'center',
-    fontSize: '11px',
+    fontSize: '13px',
     fontWeight: 900,
   },
   workflowStepLabel: {
-    fontSize: '11px',
+    fontSize: '13px',
     lineHeight: 1.2,
     fontWeight: 800,
   },
@@ -1637,7 +1645,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '150px',
   },
   progressText: {
-    fontSize: '12px',
+    fontSize: '14px',
     color: '#475d70',
     textAlign: 'right',
   },
@@ -1681,7 +1689,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   heroTitle: {
     margin: 0,
-    fontSize: '24px',
+    fontSize: '26px',
     lineHeight: 1.2,
     maxWidth: '760px',
   },
@@ -1701,7 +1709,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#174a3c',
     borderRadius: '999px',
     padding: '6px 10px',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 700,
   },
   statusPanel: {
@@ -1718,12 +1726,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   statusLabel: {
     color: '#475d70',
-    fontSize: '13px',
+    fontSize: '15px',
     fontWeight: 700,
   },
   savedLine: {
     color: '#5b6d7c',
-    fontSize: '12px',
+    fontSize: '14px',
     marginTop: '10px',
   },
   metricGrid: {
@@ -1747,12 +1755,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   metricLabel: {
     color: '#5b6d7c',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 700,
   },
   metricValue: {
     color: '#173451',
-    fontSize: '24px',
+    fontSize: '26px',
     fontWeight: 900,
     marginTop: '4px',
   },
@@ -1771,7 +1779,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   panelTitle: {
     margin: 0,
-    fontSize: '18px',
+    fontSize: '20px',
     lineHeight: 1.25,
     fontWeight: 850,
     color: T.ink1,
@@ -1785,7 +1793,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '10px',
     color: '#475d70',
-    fontSize: '14px',
+    fontSize: '16px',
   },
   alertMark: {
     width: '8px',
@@ -1848,7 +1856,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid',
     gap: '6px',
     color: '#475d70',
-    fontSize: '13px',
+    fontSize: '15px',
     lineHeight: 1.35,
   },
   platformFooter: {
@@ -1858,7 +1866,7 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     gap: '10px',
     color: '#5b6d7c',
-    fontSize: '11px',
+    fontSize: '13px',
     fontWeight: 800,
   },
   sectionIntro: {
@@ -1874,7 +1882,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   introTitle: {
     margin: 0,
-    fontSize: '21px',
+    fontSize: '23px',
     lineHeight: 1.25,
     maxWidth: '860px',
   },
@@ -1884,7 +1892,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#204a6b',
     padding: '7px 11px',
     fontWeight: 800,
-    fontSize: '12px',
+    fontSize: '14px',
     whiteSpace: 'nowrap',
   },
   blockGrid: {
@@ -1900,7 +1908,7 @@ const styles: Record<string, React.CSSProperties> = {
   blockDescription: {
     margin: '5px 0 0',
     color: '#5b6d7c',
-    fontSize: '13px',
+    fontSize: '15px',
     lineHeight: 1.45,
   },
   formGrid: {
@@ -1919,7 +1927,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   fieldLabel: {
     color: '#475d70',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 800,
   },
   input: {
@@ -1929,7 +1937,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #dce5df',
     borderRadius: '12px',
     padding: '8px 10px',
-    fontSize: '14px',
+    fontSize: '16px',
     color: '#173451',
     background: '#f9fbf9',
   },
@@ -1940,7 +1948,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #dce5df',
     borderRadius: '12px',
     padding: '9px 10px',
-    fontSize: '14px',
+    fontSize: '16px',
     color: '#173451',
     background: '#f9fbf9',
     resize: 'vertical',
@@ -1948,7 +1956,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   fieldHelper: {
     color: '#5b6d7c',
-    fontSize: '11px',
+    fontSize: '13px',
   },
   chipGroup: {
     display: 'flex',
@@ -1963,7 +1971,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '7px 10px',
     cursor: 'pointer',
     fontWeight: 700,
-    fontSize: '12px',
+    fontSize: '14px',
   },
   choiceChipActive: {
     border: '1px solid #1f5c4a',
@@ -1973,7 +1981,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '7px 10px',
     cursor: 'pointer',
     fontWeight: 800,
-    fontSize: '12px',
+    fontSize: '14px',
   },
   scaleRow: {
     display: 'grid',
@@ -2008,7 +2016,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #dce5df',
     borderRadius: '999px',
     padding: '7px 10px',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 700,
   },
   clinicianPlanPanel: {
@@ -2029,7 +2037,7 @@ const styles: Record<string, React.CSSProperties> = {
   clinicianPlanTitle: {
     margin: 0,
     color: '#173451',
-    fontSize: '19px',
+    fontSize: '21px',
     lineHeight: 1.25,
   },
   storageStatusCard: {
@@ -2042,14 +2050,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   storageLabel: {
     color: '#174a3c',
-    fontSize: '11px',
+    fontSize: '13px',
     fontWeight: 900,
     textTransform: 'uppercase',
   },
   storageText: {
     margin: 0,
     color: '#475d70',
-    fontSize: '12px',
+    fontSize: '14px',
     lineHeight: 1.35,
   },
   prescribedSummary: {
@@ -2079,7 +2087,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '999px',
     padding: '7px 10px',
     cursor: 'pointer',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 800,
   },
   queueChipActive: {
@@ -2089,7 +2097,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '999px',
     padding: '7px 10px',
     cursor: 'pointer',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 900,
   },
   exerciseToggleGrid: {
@@ -2128,7 +2136,7 @@ const styles: Record<string, React.CSSProperties> = {
   exerciseToggleText: {
     display: 'grid',
     gap: '3px',
-    fontSize: '12px',
+    fontSize: '14px',
     color: '#475d70',
   },
   patientVisiblePill: {
@@ -2137,7 +2145,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#123b30',
     borderRadius: '999px',
     padding: '4px 8px',
-    fontSize: '11px',
+    fontSize: '13px',
     fontWeight: 900,
     width: 'fit-content',
   },
@@ -2147,7 +2155,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#5b6d7c',
     borderRadius: '999px',
     padding: '4px 8px',
-    fontSize: '11px',
+    fontSize: '13px',
     fontWeight: 800,
     width: 'fit-content',
   },
@@ -2188,11 +2196,11 @@ const styles: Record<string, React.CSSProperties> = {
   exerciseName: {
     fontWeight: 800,
     color: '#173451',
-    fontSize: '13px',
+    fontSize: '15px',
   },
   exerciseMeta: {
     color: '#5b6d7c',
-    fontSize: '11px',
+    fontSize: '13px',
     textTransform: 'capitalize',
   },
   exerciseHeaderBlock: {
@@ -2210,7 +2218,7 @@ const styles: Record<string, React.CSSProperties> = {
   languageNote: {
     margin: '8px 0 0',
     color: '#174a3c',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 800,
   },
   regimenPanel: {
@@ -2231,7 +2239,7 @@ const styles: Record<string, React.CSSProperties> = {
   regimenTitle: {
     margin: 0,
     color: '#173451',
-    fontSize: '16px',
+    fontSize: '18px',
     lineHeight: 1.25,
   },
   adherenceBadge: {
@@ -2240,7 +2248,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#123b30',
     borderRadius: '999px',
     padding: '7px 10px',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 900,
     whiteSpace: 'nowrap',
   },
@@ -2288,7 +2296,7 @@ const styles: Record<string, React.CSSProperties> = {
   protocolBasis: {
     margin: 0,
     color: '#475d70',
-    fontSize: '12px',
+    fontSize: '14px',
     lineHeight: 1.45,
   },
   dosageBox: {
@@ -2301,7 +2309,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '6px',
   },
   dosageLabel: {
-    fontSize: '11px',
+    fontSize: '13px',
     textTransform: 'uppercase',
     fontWeight: 900,
   },
@@ -2336,7 +2344,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   stepLabel: {
     color: '#204a6b',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 900,
   },
   patientFigure: {
@@ -2409,13 +2417,13 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '5px 9px',
     display: 'inline-flex',
     justifySelf: 'start',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 900,
   },
   stepInstruction: {
     margin: 0,
     color: '#475d70',
-    fontSize: '13px',
+    fontSize: '15px',
     lineHeight: 1.35,
   },
   prescriptionGrid: {
@@ -2432,13 +2440,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   smallTitle: {
     margin: '0 0 7px',
-    fontSize: '13px',
+    fontSize: '15px',
     color: '#173451',
   },
   smallText: {
     margin: 0,
     color: '#475d70',
-    fontSize: '13px',
+    fontSize: '15px',
     lineHeight: 1.45,
   },
   primaryButton: {
@@ -2475,7 +2483,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   phoneTitle: {
     margin: 0,
-    fontSize: '24px',
+    fontSize: '26px',
   },
   phoneSub: {
     color: '#5b6d7c',
@@ -2503,7 +2511,7 @@ const styles: Record<string, React.CSSProperties> = {
   phoneTaskDose: {
     display: 'block',
     color: '#5b6d7c',
-    fontSize: '11px',
+    fontSize: '13px',
     fontWeight: 700,
     lineHeight: 1.35,
     marginTop: '4px',
@@ -2558,7 +2566,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#edf2f7',
     borderRadius: '6px',
     padding: '3px 6px',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 900,
   },
   icfTrack: {
@@ -2572,7 +2580,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#2f7a5c',
   },
   icfValue: {
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 900,
     color: '#475d70',
   },
@@ -2592,7 +2600,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginTop: '22px',
     padding: '16px 8px 4px',
     color: T.ink2,
-    fontSize: '13px',
+    fontSize: '15px',
     fontWeight: 700,
     textAlign: 'center',
     borderTop: '1px solid #dce5df',

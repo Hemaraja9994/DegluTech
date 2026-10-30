@@ -1,15 +1,14 @@
-import {
-  buildExecutiveSummary,
-  buildIcfTable,
-  buildStructuredRecommendations,
-  checkSeverityIcfCorrelation,
-  computeSectionCompletion,
-  generateSmartDefaults,
-  type FieldState,
-  type IcfTableRow,
-} from './reportEngine.ts';
-import { HNC_CLINICAL_SECTIONS } from '../../../packages/core/src/hncClinicalModel.ts';
+/**
+ * Speech-language pathology evaluation report for head and neck cancer, in a standard clinical layout:
+ * identification → referral and history → oncology and treatment → assessment findings by domain
+ * (with reference cut-offs) → WHO-ICF profile → impression → recommendations and plan → sign-off.
+ * Every value is clinician-entered; nothing is inferred. Calculated values (mean jaw opening, BMI) are labelled.
+ */
+import { HNC_CLINICAL_SECTIONS, HNC_EXERCISE_LIBRARY } from '../../../packages/core/src/hncClinicalModel.ts';
+import { buildIcfTable, type FieldState } from './reportEngine.ts';
+import { isReleased, readDoses } from './prescriptionRules.ts';
 import type { Clinician, ClinicSettings } from './clinicStore.ts';
+import { esc, idText, openPrintWindow, renderPrintDocument, rowsTable, type Letterhead, type Signer } from './printDoc.ts';
 
 export interface ReportFacility {
   facilityName: string;
@@ -30,9 +29,9 @@ export interface ReportFacility {
 export function facilityFromSettings(settings: ClinicSettings, clinician: Clinician | null, identity: { label: string; value: string }[]): ReportFacility {
   return {
     facilityName: settings.instituteName || '[Institute name: add it in Settings]',
-    departmentName: settings.department || 'Speech-Language Pathology',
+    departmentName: settings.department || 'Department of Speech-Language Pathology',
     address: settings.address,
-    contact: [settings.phone, settings.email].filter(Boolean).join('  •  '),
+    contact: [settings.phone, settings.email].filter(Boolean).join('  ·  '),
     logo: settings.logo,
     clinicianName: clinician?.name || '[Clinician name: add in Settings]',
     clinicianTitle: [clinician?.qualification, clinician?.designation].filter(Boolean).join(', '),
@@ -41,484 +40,240 @@ export function facilityFromSettings(settings: ClinicSettings, clinician: Clinic
     identity,
   };
 }
-const safeImage = (src?: string) => (src && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(src) ? src : '');
 
 export const DEFAULT_FACILITY: ReportFacility = {
-  facilityName: 'DegluTech Clinical Workspace',
-  departmentName: 'Speech-Language Pathology / Head & Neck Oncology Rehabilitation',
+  facilityName: '[Institute name: add it in Settings]',
+  departmentName: 'Department of Speech-Language Pathology',
   clinicianName: '[Clinician name]',
-  clinicianTitle: 'M.Sc. (SLP), Clinical Speech-Language Pathologist',
-  registrationNumber: 'RCI / ISHA Registration No. [____________]',
-  contact: '[clinic.email@hospital.org]  •  [+91-XXX-XXX-XXXX]',
+  clinicianTitle: '',
+  registrationNumber: 'RCI Reg. No. ____________',
+  contact: '',
 };
 
-const escapeHtml = (input: string): string =>
-  input
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+export const APP_LABEL = 'DegluTech 0.4.0-review';
 
-const renderIcfRows = (rows: IcfTableRow[]): string =>
-  rows
-    .map(
-      (row) => `
-      <tr>
-        <td class="icf-code"><span style="background:${row.domainAccent}1a;color:${row.domainAccent}">${row.code}</span></td>
-        <td>
-          <strong>${escapeHtml(row.name)}</strong>
-          <div class="muted">${escapeHtml(row.domain)}</div>
-        </td>
-        <td class="center">
-          <div class="qualifier-pill q-${row.qualifier}">${row.qualifier < 0 ? 'Not recorded' : row.qualifier}</div>
-          <div class="muted small">${escapeHtml(row.severityLabel)}</div>
-        </td>
-        <td class="manifestation">${escapeHtml(row.manifestation)}</td>
-      </tr>`
-    )
-    .join('');
-
-const renderList = (items: string[]): string =>
-  items.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
-
-const aspirationToneColor: Record<'green' | 'amber' | 'red', { bg: string; fg: string; border: string }> = {
-  green: { bg: '#ecfdf5', fg: '#065f46', border: '#10b981' },
-  amber: { bg: '#fffbeb', fg: '#92400e', border: '#f59e0b' },
-  red: { bg: '#fef2f2', fg: '#991b1b', border: '#dc2626' },
+// ---------- value helpers ----------
+const raw = (s: FieldState, id: string) => { const v = s[id]; return Array.isArray(v) ? v.join(', ') : typeof v === 'string' ? v.trim() : ''; };
+const has = (s: FieldState, id: string) => raw(s, id).length > 0;
+const num = (s: FieldState, id: string) => { const n = Number(raw(s, id)); return has(s, id) && Number.isFinite(n) ? n : null; };
+export const fmtDate = (iso: string) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return iso;
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 };
+const withUnit = (s: FieldState, id: string, unit: string) => (has(s, id) ? `${raw(s, id)}${unit ? ` ${unit}` : ''}` : '');
+const NR = '<span class="nr">Not recorded</span>';
+const cell = (v: string) => (v ? esc(v) : NR);
 
-export function buildReportHtml(
-  fieldState: FieldState,
-  facility: ReportFacility = DEFAULT_FACILITY
-): string {
-  const draft = generateSmartDefaults(fieldState);
-  const summary = buildExecutiveSummary(fieldState, draft);
-  const icfRows = buildIcfTable(fieldState);
-  const recs = buildStructuredRecommendations(fieldState);
-  const correlation = checkSeverityIcfCorrelation(fieldState);
-  const completion = computeSectionCompletion(fieldState);
-  const generatedAt = new Date();
-  const tone = aspirationToneColor[summary.aspirationRiskTone];
+const FOIS = ['', 'Nothing by mouth', 'Tube dependent with minimal attempts of food or liquid', 'Tube dependent with consistent oral intake of food or liquid',
+  'Total oral intake of a single consistency', 'Total oral intake of multiple consistencies requiring special preparation or compensations',
+  'Total oral intake of multiple consistencies without special preparation, with specific food limitations', 'Total oral intake with no restrictions'];
+const pasBand = (n: number) => (n <= 1 ? 'no airway entry' : n <= 5 ? 'penetration' : n === 8 ? 'aspiration, no response (silent)' : 'aspiration');
 
-  const overallComplete = Math.round(
-    completion.reduce((sum, section) => sum + section.percent, 0) / Math.max(1, completion.length)
-  );
+type MeasureRow = { label: string; value: string; ref?: string };
+const measures = (rows: MeasureRow[]) => {
+  const shown = rows.filter(r => r.value);
+  if (!shown.length) return '';
+  return `<table class="grid"><thead><tr><th>Measure</th><th class="num">Result</th><th>Reference / interpretation</th></tr></thead><tbody>${
+    shown.map(r => `<tr><td class="k">${esc(r.label)}</td><td class="num"><b>${esc(r.value)}</b></td><td class="ref">${esc(r.ref ?? '')}</td></tr>`).join('')}</tbody></table>`;
+};
+/** Label/value rows for recorded fields only (narrative and categorical findings). */
+const findings = (s: FieldState, ids: [string, string][]) => {
+  const rows = ids.filter(([id]) => has(s, id));
+  return rows.length ? `<table class="grid"><tbody>${rows.map(([id, label]) => `<tr><td class="k">${esc(label)}</td><td>${esc(raw(s, id))}</td></tr>`).join('')}</tbody></table>` : '';
+};
+const para = (s: FieldState, id: string, label?: string) => (has(s, id) ? `<p>${label ? `<b>${esc(label)}:</b> ` : ''}${esc(raw(s, id)).replace(/\n/g, '<br>')}</p>` : '');
+const notAssessed = '<p class="nr">Not assessed at this evaluation.</p>';
+const sectionBlock = (title: string, html: string) => `<h3>${esc(title)}</h3>${html.trim() ? html : notAssessed}`;
 
-  const identity = facility.identity && facility.identity.length ? facility.identity : [{ label: 'Study ID', value: String(fieldState.studyId || 'Not recorded') }];
-  const patientId = identity.map((row) => row.value).join(' / ');
-  const logo = safeImage(facility.logo), signature = safeImage(facility.signature);
-  const evaluationDate = String(fieldState.evaluationDate || 'Not recorded');
-  const findings = HNC_CLINICAL_SECTIONS.filter(section => !['command', 'exercise', 'patient', 'report'].includes(section.id)).map(section => {
-    const rows = section.blocks.flatMap(block => block.fields).filter(field => {
-      const value = fieldState[field.id];
-      return Array.isArray(value) ? value.length > 0 : typeof value === 'string' && value.trim().length > 0;
-    }).map(field => `<tr><td style="padding:6px;border-bottom:1px solid #ddd">${escapeHtml(field.label)}</td><td style="padding:6px;border-bottom:1px solid #ddd;white-space:pre-wrap;overflow-wrap:anywhere">${escapeHtml(Array.isArray(fieldState[field.id]) ? (fieldState[field.id] as string[]).join(', ') : String(fieldState[field.id]))}</td></tr>`).join('');
-    return rows ? `<h3 class="section-title">${escapeHtml(section.label)}</h3><table style="width:100%;border-collapse:collapse">${rows}</table>` : '';
-  }).join('');
-  const tnm = `${fieldState.tCategory || '—'} ${fieldState.nCategory || '—'} ${fieldState.mCategory || '—'}`;
+export function buildReportHtml(fieldState: FieldState, facility: ReportFacility = DEFAULT_FACILITY, opts: { toolbar?: boolean; generatedAt?: Date } = {}): string {
+  const s = fieldState;
+  const generatedAt = opts.generatedAt ?? new Date();
+  const identity = facility.identity && facility.identity.length ? facility.identity : [{ label: 'Study ID', value: raw(s, 'studyId') || 'Not recorded' }];
+  const runningId = idText(identity);
+  const reportNo = `DTR-${generatedAt.getTime().toString(36).toUpperCase()}`;
 
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>DegluTech Review Report — ${escapeHtml(patientId)}</title>
-<style>
-  @page { size: A4; margin: 14mm 14mm 18mm 14mm; }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-    color: #15302a;
-    background: #ffffff;
-    font-size: 11pt;
-    line-height: 1.45;
-  }
-  .page {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 18px 0 28px;
-  }
-  .header {
-    display: grid;
-    grid-template-columns: 64px 1fr auto;
-    gap: 14px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #15302a;
-    align-items: center;
-  }
-  .header .logo-img { width: 64px; height: 64px; object-fit: contain; }
-  .header .logo {
-    width: 64px;
-    height: 64px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #2f7a5c, #1f5c4a);
-    color: #ffffff;
-    display: grid;
-    place-items: center;
-    font-weight: 800;
-    font-size: 20pt;
-    letter-spacing: 0.04em;
-  }
-  .header h1 {
-    margin: 0;
-    font-size: 18pt;
-    line-height: 1.1;
-    color: #15302a;
-  }
-  .header .subtitle {
-    margin: 4px 0 0;
-    font-size: 10.5pt;
-    color: #3e5852;
-  }
-  .header .meta {
-    text-align: right;
-    font-size: 9pt;
-    color: #3e5852;
-    line-height: 1.4;
-  }
-  .header .meta strong { color: #15302a; font-size: 10pt; }
-  .demographics {
-    margin-top: 14px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    padding: 12px 14px;
-    background: #f5f8f5;
-    border: 1px solid #dce5df;
-    border-radius: 8px;
-  }
-  .demographics .cell { display: grid; gap: 2px; min-width: 0; }
-  .demographics .label { font-size: 8.5pt; color: #4d6660; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
-  .demographics .value { font-size: 10.5pt; color: #15302a; font-weight: 600; }
-  .section-title {
-    margin: 22px 0 10px;
-    font-size: 11.5pt;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #15302a;
-    font-weight: 800;
-    border-left: 4px solid #174a3c;
-    padding: 4px 0 4px 10px;
-  }
-  .exec-summary {
-    border: 2px solid ${tone.border};
-    background: ${tone.bg};
-    color: ${tone.fg};
-    border-radius: 10px;
-    padding: 14px 16px;
-    display: grid;
-    gap: 8px;
-  }
-  .exec-summary .impression {
-    font-size: 13pt;
-    font-weight: 800;
-    color: #15302a;
-    line-height: 1.3;
-  }
-  .exec-summary .row { display: grid; grid-template-columns: 130px 1fr; gap: 10px; font-size: 10.5pt; }
-  .exec-summary .row .key { font-weight: 700; color: ${tone.fg}; }
-  .exec-summary .badges { display: flex; gap: 6px; flex-wrap: wrap; }
-  .exec-summary .badge {
-    display: inline-flex;
-    padding: 3px 9px;
-    border-radius: 999px;
-    background: rgba(15,23,42,0.06);
-    color: #15302a;
-    font-size: 9.5pt;
-    font-weight: 700;
-    border: 1px solid rgba(15,23,42,0.1);
-  }
-  .exec-summary .badge.risk { background: ${tone.border}; color: #ffffff; border-color: ${tone.border}; }
-  table.icf {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 10pt;
-    border: 1px solid #dce5df;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  table.icf th {
-    background: #15302a;
-    color: #ffffff;
-    text-align: left;
-    padding: 8px 10px;
-    font-size: 9.5pt;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  table.icf td {
-    padding: 8px 10px;
-    border-top: 1px solid #dce5df;
-    vertical-align: top;
-  }
-  table.icf tr:nth-child(odd) td { background: #f5f8f5; }
-  table.icf .icf-code span {
-    font-family: 'Consolas', monospace;
-    padding: 3px 7px;
-    border-radius: 6px;
-    font-weight: 800;
-    font-size: 9.5pt;
-  }
-  table.icf .center { text-align: center; }
-  table.icf .muted { color: #4d6660; font-size: 9pt; font-weight: 500; }
-  table.icf .small { font-size: 8.5pt; }
-  table.icf .manifestation { color: #3e5852; font-size: 9.5pt; max-width: 260px; }
-  .qualifier-pill {
-    display: inline-block;
-    min-width: 24px;
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-weight: 900;
-    font-size: 10pt;
-    color: #ffffff;
-  }
-  .qualifier-pill.q-0 { background: #10b981; }
-  .qualifier-pill.q-1 { background: #65a30d; }
-  .qualifier-pill.q-2 { background: #ca8a04; }
-  .qualifier-pill.q-3 { background: #ea580c; }
-  .qualifier-pill.q-4 { background: #dc2626; }
-  .qualifier-pill.q--1 { background: #eef2ef; color: #3e5852; width: auto; padding: 0 8px; font-size: 9pt; }
-  .rec-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .rec-card {
-    border: 1px solid #dce5df;
-    border-radius: 8px;
-    padding: 12px 14px;
-    background: #ffffff;
-    page-break-inside: avoid;
-  }
-  .rec-card.danger { border-color: #fecaca; background: #fef2f2; }
-  .rec-card.timeline { border-color: #c9ddd0; background: #e4eee7; }
-  .rec-card h4 {
-    margin: 0 0 8px;
-    font-size: 10.5pt;
-    color: #15302a;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid #dce5df;
-    padding-bottom: 5px;
-  }
-  .rec-card.danger h4 { color: #991b1b; border-color: #fecaca; }
-  .rec-card.timeline h4 { color: #174a3c; border-color: #c9ddd0; }
-  .rec-card ul { margin: 0; padding-left: 18px; }
-  .rec-card li { margin: 4px 0; font-size: 10pt; line-height: 1.4; color: #3e5852; }
-  .signoff {
-    margin-top: 20px;
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 16px;
-    border-top: 2px solid #15302a;
-    padding-top: 14px;
-  }
-  .signoff .signature-block {
-    border: 1px dashed #c9d7ce;
-    border-radius: 8px;
-    padding: 16px;
-    min-height: 90px;
-    background: #f5f8f5;
-    color: #3e5852;
-    font-size: 9.5pt;
-  }
-  .signoff .signature-block .line {
-    border-bottom: 1px solid #15302a;
-    height: 28px;
-    margin-bottom: 6px;
-  }
-  .signoff .signature-block strong { color: #15302a; }
-  .footer {
-    margin-top: 18px;
-    font-size: 8.5pt;
-    color: #4d6660;
-    text-align: center;
-    border-top: 1px solid #dce5df;
-    padding-top: 8px;
-  }
-  .warn-banner {
-    margin-top: 12px;
-    background: #fffbeb;
-    border: 1px solid #f59e0b;
-    color: #92400e;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 10pt;
-  }
-  .completion-strip {
-    margin-top: 10px;
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 4px;
-  }
-  .completion-strip .cell {
-    height: 8px;
-    border-radius: 3px;
-    background: #dce5df;
-  }
-  .completion-strip .cell.complete { background: #10b981; }
-  .completion-strip .cell.partial { background: #f59e0b; }
-  .completion-strip .cell.empty { background: #ef4444; }
-  .completion-text {
-    margin-top: 6px;
-    font-size: 9pt;
-    color: #3e5852;
-    display: flex;
-    justify-content: space-between;
-  }
-  @media print {
-    .no-print { display: none !important; }
-    .rec-card, .exec-summary, .signoff, table.icf { page-break-inside: avoid; }
-  }
-</style>
-</head>
-<body>
-  <div class="page">
-    <header class="header">
-      ${logo ? `<img class="logo-img" src="${logo}" alt="" />` : '<div class="logo">SLP</div>'}
-      <div>
-        <h1>${escapeHtml(facility.facilityName)}</h1>
-        <div class="subtitle">${escapeHtml(facility.departmentName)}</div>
-        ${facility.address || facility.contact ? `<div class="subtitle">${escapeHtml([facility.address, facility.contact].filter(Boolean).join('  •  '))}</div>` : ''}
-        <div class="subtitle" style="margin-top:6px;font-weight:700;color:#15302a">Speech-Language Pathology Diagnostic Report — Head &amp; Neck Cancer Rehabilitation</div>
-      </div>
-      <div class="meta">
-        <strong>Report ID:</strong> DTR-${generatedAt.getTime().toString(36).toUpperCase()}<br />
-        <strong>Generated:</strong> ${generatedAt.toLocaleString()}<br />
-        <strong>Evaluation:</strong> ${escapeHtml(evaluationDate)}
-      </div>
-    </header>
+  // ---- identification
+  const idPairs: [string, string][] = [
+    ...identity.map(r => [r.label, r.value] as [string, string]),
+    ['Age / Sex', [raw(s, 'age') && `${raw(s, 'age')} years`, raw(s, 'gender')].filter(Boolean).join(' / ')],
+    ['Evaluation date', fmtDate(raw(s, 'evaluationDate') || raw(s, 'encounterDate'))],
+    ['Referred by', raw(s, 'referredBy')],
+    ['Preferred language', raw(s, 'language')],
+    ['Caregiver', raw(s, 'caregiver')],
+    ['Care phase', raw(s, 'phase')],
+    ['Feeding route', raw(s, 'route')],
+  ];
+  if (idPairs.length % 2) idPairs.push(['', '']);
+  const idTable = `<table class="id"><tbody>${Array.from({ length: idPairs.length / 2 }, (_, i) => {
+    const [a, b] = [idPairs[2 * i], idPairs[2 * i + 1]];
+    const td = ([k, v]: [string, string]) => k ? `<td class="k">${esc(k)}</td><td class="v">${v ? esc(v) : NR}</td>` : '<td></td><td></td>';
+    return `<tr>${td(a)}${td(b)}</tr>`;
+  }).join('')}</tbody></table>`;
 
-    <section class="demographics">
-      ${identity.map((row) => `<div class="cell"><span class="label">${escapeHtml(row.label)}</span><span class="value">${escapeHtml(row.value)}</span></div>`).join('')}
-      <div class="cell"><span class="label">Age / Sex</span><span class="value">${escapeHtml(String(fieldState.age || 'Not recorded'))} / ${escapeHtml(String(fieldState.gender || 'Not recorded'))}</span></div>
-      <div class="cell"><span class="label">Primary Site</span><span class="value">${escapeHtml(String(fieldState.tumorSite || '—'))}</span></div>
-      <div class="cell"><span class="label">AJCC TNM</span><span class="value">${escapeHtml(tnm)}</span></div>
-      <div class="cell"><span class="label">Care Phase</span><span class="value">${escapeHtml(String(fieldState.phase || '—'))}</span></div>
-      <div class="cell"><span class="label">Referred By</span><span class="value">${escapeHtml(String(fieldState.referredBy || '—'))}</span></div>
-      <div class="cell"><span class="label">Caregiver</span><span class="value">${escapeHtml(String(fieldState.caregiver || '—'))}</span></div>
-      <div class="cell"><span class="label">Preferred Language</span><span class="value">${escapeHtml(String(fieldState.language || '—'))}</span></div>
-    </section>
+  // ---- 1 referral and history
+  const referral = [para(s, 'chiefConcern', 'Presenting concern'), para(s, 'patientGoals', 'Patient priorities and goals')].join('');
 
-    ${
-      correlation.isMismatch
-        ? `<div class="warn-banner"><strong>Clinical correlation note:</strong> ${escapeHtml(correlation.mismatchReason)}</div>`
-        : ''
-    }
+  // ---- 2 oncology and treatment
+  const tnm = ['tCategory', 'nCategory', 'mCategory'].map(id => raw(s, id)).filter(Boolean).join(' ');
+  const rt = has(s, 'rtDose') ? `${raw(s, 'rtDose')} Gy${has(s, 'fractions') ? ` in ${raw(s, 'fractions')} fractions` : ''}` : '';
+  const onco = rowsTable([
+    ['Primary site', raw(s, 'tumorSite')],
+    ['Stage (AJCC TNM)', tnm],
+    ['Date of diagnosis', fmtDate(raw(s, 'diagnosisDate'))],
+    ['Disease status', raw(s, 'recurrence')],
+    ['Surgery', [raw(s, 'surgeryType'), has(s, 'flapType') && raw(s, 'flapType') !== 'None' ? `reconstruction: ${raw(s, 'flapType')}` : '', has(s, 'neckDissection') && raw(s, 'neckDissection') !== 'None' ? `neck dissection: ${raw(s, 'neckDissection')}` : ''].filter(Boolean).join('; ')],
+    ['Radiotherapy', rt],
+    ['Systemic therapy', raw(s, 'chemoAgent')],
+    ['Current toxicity', raw(s, 'toxicity')],
+    ['CTCAE dysphagia grade', has(s, 'ctcaeDysphagia') ? `Grade ${raw(s, 'ctcaeDysphagia')} (clinician assigned${has(s, 'ctcaeVersion') ? `, CTCAE ${raw(s, 'ctcaeVersion')}` : ''})` : ''],
+    ['Cancer-related pain', has(s, 'painScore') ? `${raw(s, 'painScore')} / 10` : ''],
+  ]);
+  const healing = findings(s, [['fistula', 'Unhealed fistula'], ['freshFlap', 'Fresh or unhealed flap / wound'], ['exerciseClearance', 'Exercise clearance'], ['clearanceDetails', 'Clearing clinician, date and restrictions']]);
 
-    <h2 class="section-title">Executive Summary</h2>
-    <section class="exec-summary">
-      <div class="impression">${escapeHtml(summary.diagnosis)}</div>
-      <div class="badges">
-        <span class="badge">Severity: ${escapeHtml(String(summary.severity))}</span>
-        <span class="badge risk">Aspiration risk: ${escapeHtml(summary.aspirationRiskLabel)}</span>
-        <span class="badge">Diet route: ${escapeHtml(summary.dietRoute)}</span>
-      </div>
-      <div class="row"><span class="key">Texture / route plan</span><span>${escapeHtml(summary.textureGuidance)}</span></div>
-      <div class="row"><span class="key">Primary concerns</span><span>${escapeHtml(summary.primaryConcerns.join(' • '))}</span></div>
-      <div class="row"><span class="key">Chief complaint</span><span>${escapeHtml(String(fieldState.chiefConcern || '—'))}</span></div>
-    </section>
+  // ---- 3 assessment findings
+  const trials = ['jawTrial1', 'jawTrial2', 'jawTrial3'].map(id => num(s, id)).filter((n): n is number => n !== null);
+  const jawMean = trials.length ? (trials.reduce((a, b) => a + b, 0) / trials.length).toFixed(1) : '';
+  const opme = measures([
+    { label: 'Maximal inter-incisal opening', value: withUnit(s, 'jawOpening', 'mm'), ref: '≤ 35 mm: trismus (Dijkstra et al., 2006)' },
+    { label: 'Inter-incisal opening, trials 1–3', value: trials.length ? `${trials.join(' / ')} mm` : '', ref: jawMean ? `Mean ${jawMean} mm (calculated)` : '' },
+  ]) + findings(s, [['tongueRom', 'Tongue range of motion'], ['lipSeal', 'Lip seal'], ['palatalElevation', 'Palatal elevation'], ['cnV', 'CN V (jaw strength, sensation)'], ['cnVII', 'CN VII (facial and lip closure)'], ['cnIX X', 'CN IX/X (palate, voice, cough)'], ['cnXII', 'CN XII (tongue)'], ['cnXI', 'CN XI (shoulder)']]);
 
-    <h2 class="section-title">WHO-ICF HNC Profile</h2>
-    <table class="icf">
-      <thead>
-        <tr>
-          <th style="width:80px">Code</th>
-          <th>Domain &amp; Category</th>
-          <th class="center" style="width:90px">Qualifier</th>
-          <th>Clinical Manifestation</th>
-        </tr>
-      </thead>
-      <tbody>${renderIcfRows(icfRows)}</tbody>
-    </table>
+  const fois = num(s, 'fois');
+  const swallowMeasures = measures([
+    { label: 'EAT-10 total', value: has(s, 'eat10') ? `${raw(s, 'eat10')} / 40` : '', ref: '≥ 3 abnormal (Belafsky et al., 2008); > 15 higher likelihood of aspiration (Cheney et al., 2015)' },
+    { label: 'MASA-HNC (clinician estimate)', value: raw(s, 'masa'), ref: 'Bedside examination; see instrument source below' },
+    { label: 'FOIS', value: fois ? `Level ${fois}` : '', ref: fois ? `${FOIS[fois]} (Crary et al., 2005)` : '' },
+    { label: 'MDADI global', value: raw(s, 'mdadiGlobal'), ref: '20–100; higher = better swallowing-related quality of life (Chen et al., 2001)' },
+    { label: 'MDADI composite', value: raw(s, 'mdadiComposite'), ref: '20–100' },
+    { label: 'MDADI emotional / functional / physical', value: ['mdadiEmotional', 'mdadiFunctional', 'mdadiPhysical'].some(id => has(s, id)) ? ['mdadiEmotional', 'mdadiFunctional', 'mdadiPhysical'].map(id => raw(s, id) || '—').join(' / ') : '', ref: '20–100 each' },
+    { label: 'PSS-HN normalcy of diet', value: raw(s, 'pssDiet'), ref: '0–100; higher = better (List et al., 1990)' },
+    { label: 'PSS-HN eating in public', value: raw(s, 'pssPublic'), ref: '0–100' },
+    { label: 'PSS-HN understandability of speech', value: raw(s, 'pssSpeech'), ref: '0–100' },
+  ]);
+  const swallow = findings(s, [['wetVoice', 'Wet voice after swallow'], ['cough', 'Cough efficiency'], ['multipleSwallows', 'Multiple swallows per bolus'], ['bolusIssue', 'Primary bolus issue']]) + swallowMeasures + para(s, 'outcomeSource', 'Instrument version, language and assessor');
 
-    <h2 class="section-title">Structured Recommendations</h2>
-    <div class="rec-grid">
-      <div class="rec-card">
-        <h4>Force / Range-of-Motion Exercises</h4>
-        <ul>${renderList(recs.forceRangeOfMotion)}</ul>
-      </div>
-      <div class="rec-card">
-        <h4>Compensatory Strategies &amp; Diet Modification</h4>
-        <ul>${renderList(recs.compensatoryAndDiet)}</ul>
-      </div>
-      <div class="rec-card danger">
-        <h4>Red Flags / Emergency Criteria</h4>
-        <ul>${renderList(recs.redFlags)}</ul>
-      </div>
-      <div class="rec-card timeline">
-        <h4>Follow-up Timeline</h4>
-        <ul>${renderList(recs.followUpTimeline)}</ul>
-      </div>
-    </div>
+  const pas = num(s, 'pas');
+  const instrumental = findings(s, [['vfss', 'VFSS'], ['fees', 'FEES'], ['residue', 'Residue location']]) + measures([
+    { label: 'Penetration-Aspiration Scale (worst)', value: pas !== null ? String(pas) : '', ref: pas !== null ? `1–8; ${pasBand(pas)}; ≥ 6 aspiration (Rosenbek et al., 1996)` : '' },
+    { label: 'DIGEST safety / efficiency', value: has(s, 'digestSafety') || has(s, 'digestEfficiency') ? `${raw(s, 'digestSafety') || '—'} / ${raw(s, 'digestEfficiency') || '—'}` : '', ref: '0–4 (Hutcheson et al., 2017)' },
+    { label: 'DIGEST overall grade', value: raw(s, 'digestOverall'), ref: '0 none – 4 life-threatening; clinician assigned' },
+    { label: 'Yale residue: vallecula / pyriform', value: has(s, 'yaleVallecula') || has(s, 'yalePyriform') ? `${raw(s, 'yaleVallecula') || '—'} / ${raw(s, 'yalePyriform') || '—'}` : '', ref: 'I none – V severe (Neubauer et al., 2015)' },
+  ]) + para(s, 'summary', 'Study summary') + para(s, 'studyProtocol', 'Study details') + para(s, 'upload', 'Report reference');
 
-    <h2 class="section-title">Clinical Documentation Status</h2>
-    <div class="completion-strip">
-      ${completion
-        .map(
-          (section) => `<div class="cell ${section.status}" title="${escapeHtml(section.label)} — ${section.percent}%"></div>`
-        )
-        .join('')}
-    </div>
-    <div class="completion-text">
-      <span>Sections 1–12 captured: ${completion.filter((s) => s.status === 'complete').length} of ${completion.length} complete</span>
-      <span>Field completion: ${overallComplete}% (not clinical validity)</span>
-    </div>
+  const grbas = ['grbasGrade', 'grbasRoughness', 'grbasBreathiness', 'grbasAsthenia', 'grbasStrain'];
+  const voice = findings(s, [['dysarthria', 'Dysarthria pattern'], ['resonance', 'Resonance']]) + measures([
+    { label: 'Speech intelligibility', value: withUnit(s, 'intelligibility', '%') },
+    { label: 'Maximum phonation time', value: withUnit(s, 'mpt', 's') },
+    { label: 'Jitter', value: withUnit(s, 'jitter', '%') },
+    { label: 'Shimmer', value: withUnit(s, 'shimmer', 'dB') },
+    { label: 'Harmonics-to-noise ratio', value: withUnit(s, 'hnr', 'dB') },
+    { label: 'GRBAS (G R B A S)', value: grbas.some(id => has(s, id)) ? grbas.map((id, i) => `${'GRBAS'[i]}${raw(s, id) || '–'}`).join(' ') : '', ref: '0 normal – 3 severe (Hirano, 1981)' },
+    { label: 'VHI-10 total', value: has(s, 'vhi10') ? `${raw(s, 'vhi10')} / 40` : '', ref: '> 11 above normal limits (Arffa et al., 2012)' },
+  ]) + para(s, 'voiceProtocol', 'Recording conditions and rating source') + findings(s, [['laryngectomyType', 'Laryngectomy'], ['communicationMethod', 'Primary communication'], ['tepLeak', 'TEP leakage'], ['tepReview', 'Prosthesis / stoma review']]);
 
-    <h2 class="section-title">Recorded Findings Appendix</h2>
-    ${findings || '<p>No assessment fields recorded.</p>'}
-    <section class="signoff">
-      <div>
-        <p style="margin:0 0 6px;font-weight:800;color:#15302a">Clinician Sign-off</p>
-        <p style="margin:0 0 4px;font-size:10pt;color:#3e5852">${escapeHtml(facility.clinicianName)}</p>
-        <p style="margin:0 0 4px;font-size:10pt;color:#3e5852">${escapeHtml(facility.clinicianTitle)}</p>
-        <p style="margin:0 0 4px;font-size:9.5pt;color:#3e5852">${escapeHtml(facility.registrationNumber)}</p>
-      </div>
-      <div class="signature-block">
-        ${signature ? `<img src="${signature}" alt="" style="max-height:60px;max-width:220px;display:block;margin:0 0 4px auto" />` : ''}
-        <div class="line"></div>
-        <strong>Signature &amp; Date</strong>
-        <div>Authorized SLP / Designation</div>
-      </div>
-    </section>
+  const w = num(s, 'weight'), h = num(s, 'heightCm');
+  const bmi = w && h && h > 50 ? (w / ((h / 100) ** 2)).toFixed(1) : '';
+  const nutrition = measures([
+    { label: 'Weight', value: withUnit(s, 'weight', 'kg'), ref: has(s, 'weightDate') ? `Measured ${fmtDate(raw(s, 'weightDate'))}` : '' },
+    { label: 'Height', value: withUnit(s, 'heightCm', 'cm') },
+    { label: 'Body mass index', value: bmi ? `${bmi} kg/m²` : '', ref: 'Calculated from weight and height' },
+    { label: 'Previous weight', value: withUnit(s, 'previousWeight', 'kg'), ref: has(s, 'previousWeightDate') ? `Measured ${fmtDate(raw(s, 'previousWeightDate'))}` : '' },
+    { label: 'Weight change in one month', value: withUnit(s, 'weightChange', '%'), ref: '≥ 5% flagged for dietitian review' },
+  ]) + findings(s, [['appetite', 'Appetite'], ['hydration', 'Hydration risk'], ['tracheostomy', 'Tracheostomy'], ['secretion', 'Secretion burden'], ['oralCare', 'Oral care support']]) + para(s, 'nutritionPlan', 'Dietitian and nutrition plan');
 
-    <p class="footer">
-      Prepared with DegluTech 0.4.0-review. Recorded findings require clinician verification. No electronic signature or EHR submission is performed.
-    </p>
-  </div>
-</body>
-</html>`;
+  // ---- 4 ICF
+  const icf = buildIcfTable(s);
+  const icfRecorded = icf.some(r => r.qualifier >= 0);
+  const icfTable = icfRecorded ? `<table class="grid"><thead><tr><th style="width:12%">Code</th><th>Category</th><th class="num" style="width:12%">Qualifier</th><th style="width:30%">Descriptor</th></tr></thead><tbody>${
+    icf.map(r => `<tr><td><b>${esc(r.code)}</b></td><td>${esc(r.name)} <span class="muted small">(${esc(r.domain)})</span></td><td class="num">${r.qualifier < 0 ? '–' : r.qualifier}</td><td class="ref">${esc(r.severityLabel)}</td></tr>`).join('')}</tbody></table>
+    <p class="small muted">Qualifiers 0 no impairment, 1 mild, 2 moderate, 3 severe, 4 complete (WHO, 2001). Assigned by the clinician; not derived from test scores.</p>` : '';
+  const icfBlock = icfTable + findings(s, [['familyFactor', 'Family support context'], ['participationGoals', 'Communication, eating and community participation'], ['icfMappingSource', 'ICF mapping rationale and source']]);
+
+  // ---- 5 impression
+  const risk = (id: string) => (has(s, id) ? `${raw(s, id)} / 4 (clinician rated)` : '');
+  const impression = `<div class="box strong"><div class="label">SLP diagnosis</div><div class="impression">${has(s, 'slpDiagnosis') ? esc(raw(s, 'slpDiagnosis')).replace(/\n/g, '<br>') : NR}</div></div>` +
+    rowsTable([['Severity (clinician rated)', raw(s, 'severity')], ['Aspiration risk', risk('aspirationRisk')], ['Airway risk', risk('airwayRisk')], ['Nutrition risk', risk('nutritionRisk')]]);
+
+  // ---- 6 recommendations and plan
+  const doses = readDoses(s);
+  const rx = Object.entries(doses).map(([id, d]) => ({ name: HNC_EXERCISE_LIBRARY.find(e => e.id === id)?.name ?? id, dose: d }));
+  const released = rx.length > 0 && isReleased(s, Object.keys(doses));
+  const programme = rx.length ? `<table class="grid"><thead><tr><th>Exercise</th><th class="num">Sessions / day</th><th>Dose and instructions</th></tr></thead><tbody>${
+    rx.map(r => `<tr><td class="k">${esc(r.name)}</td><td class="num">${r.dose.sessionsPerDay}</td><td>${cell(r.dose.instructions)}</td></tr>`).join('')}</tbody></table>
+    <p class="small muted">${released ? 'Released to the patient home programme after documented clearance.' : 'Not yet released to the patient; clearance or dose review pending.'}</p>` : '';
+  const recommendations = [
+    has(s, 'recommendations') ? `<p>${esc(raw(s, 'recommendations')).replace(/\n/g, '<br>')}</p>` : '',
+    has(s, 'dietPlan') ? `<h3>Diet, posture and bolus plan</h3><p>${esc(raw(s, 'dietPlan')).replace(/\n/g, '<br>')}</p>` : '',
+    programme ? `<h3>Home exercise programme</h3>${programme}` : '',
+    has(s, 'painLimit') ? `<h3>Safety and stop plan</h3><p>${esc(raw(s, 'painLimit')).replace(/\n/g, '<br>')}</p>` : '',
+  ].join('');
+  const followUp = has(s, 'followUp') ? `<p>${esc(raw(s, 'followUp')).replace(/\n/g, '<br>')}</p>` : '<p class="nr">Not recorded.</p>';
+
+  const anyAssessment = HNC_CLINICAL_SECTIONS.filter(sec => !['command', 'demographics', 'exercise', 'patient', 'report'].includes(sec.id))
+    .some(sec => sec.blocks.some(b => b.fields.some(f => has(s, f.id))));
+
+  const body = `${idTable}
+<h2>1. Reason for referral and history</h2>${referral || '<p class="nr">Not recorded.</p>'}
+<h2>2. Oncological and treatment history</h2>${onco}${healing ? `<h3>Healing and exercise clearance</h3>${healing}` : ''}
+<h2>3. Assessment findings</h2>${anyAssessment ? '' : '<p class="nr">No assessment fields recorded.</p>'}
+${sectionBlock('3.1 Oral peripheral mechanism and cranial nerves', opme)}
+${sectionBlock('3.2 Clinical swallowing evaluation', swallow)}
+${sectionBlock('3.3 Instrumental swallowing assessment', instrumental)}
+${sectionBlock('3.4 Voice and speech', voice)}
+${sectionBlock('3.5 Nutrition and airway', nutrition)}
+<h2>4. Functional profile (WHO-ICF)</h2>${icfBlock || notAssessed}
+<h2>5. Clinical impression</h2>${impression}
+<h2>6. Recommendations</h2>${recommendations || '<p class="nr">No recommendations recorded.</p>'}
+<h2>7. Follow-up plan</h2>${followUp}
+<p class="endnote"><b>References for cut-offs.</b> Arffa RE et al. J Voice 2012;26:462–5. Belafsky PC et al. Ann Otol Rhinol Laryngol 2008;117:919–24. Chen AY et al. Arch Otolaryngol Head Neck Surg 2001;127:870–6. Cheney DM et al. Ann Otol Rhinol Laryngol 2015;124:351–4. Crary MA et al. Arch Phys Med Rehabil 2005;86:1516–20. Dijkstra PU et al. Int J Oral Maxillofac Surg 2006;35:337–42. Hirano M. Clinical Examination of Voice. Springer; 1981. Hutcheson KA et al. Cancer 2017;123:62–70. List MA et al. Cancer 1990;66:564–9. Neubauer PD et al. Dysphagia 2015;30:521–8. Rosenbek JC et al. Dysphagia 1996;11:93–8. World Health Organization. ICF. 2001.</p>
+<p class="endnote" style="margin-top:4px;border:0;padding:0">Prepared from clinician-entered findings in ${APP_LABEL}. Values are entered or confirmed by the treating clinician; ICF qualifiers and severity are independent clinical judgements and are not calculated from test scores. Sign according to your institution's procedure; no electronic signature or EHR submission is performed.</p>`;
+
+  const letterhead: Letterhead = { name: facility.facilityName, department: facility.departmentName, address: facility.address, contact: facility.contact, logo: facility.logo };
+  const signer: Signer = { name: facility.clinicianName, title: facility.clinicianTitle, registration: facility.registrationNumber, signature: facility.signature };
+  return renderPrintDocument({
+    title: 'Speech-Language Pathology Evaluation Report',
+    subtitle: 'Head and neck cancer: swallowing, voice and speech',
+    letterhead, runningId, signer,
+    meta: [['Report no.', reportNo], ['Report date', generatedAt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })]],
+    body,
+  }, { toolbar: opts.toolbar });
 }
 
-export function exportDiagnosticReport(
-  fieldState: FieldState,
-  facility: ReportFacility = DEFAULT_FACILITY
-): boolean {
-  const html = buildReportHtml(fieldState, facility);
-  const printWindow = window.open('', '_blank', 'width=900,height=1200');
-  if (!printWindow) {
-    return false;
-  }
-  printWindow.opener = null;
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
-
-  const triggerPrint = () => {
-    try {
-      printWindow.focus();
-      printWindow.print();
-    } catch {
-      // user can manually trigger print from the opened window
-    }
-  };
-
-  if (printWindow.document.readyState === 'complete') {
-    window.setTimeout(triggerPrint, 250);
-  } else {
-    printWindow.addEventListener('load', () => window.setTimeout(triggerPrint, 250));
-  }
-
+export function exportDiagnosticReport(fieldState: FieldState, facility: ReportFacility = DEFAULT_FACILITY): boolean {
+  openPrintWindow(buildReportHtml(fieldState, facility, { toolbar: true }));
   return true;
+}
+
+/** Plain-text evaluation summary in SOAP order, for pasting into the hospital record. */
+export function buildEvaluationEmrNote(fieldState: FieldState, facility: ReportFacility = DEFAULT_FACILITY, date = new Date()): string {
+  const s = fieldState, r = (id: string) => raw(s, id);
+  const idLine = idText(facility.identity ?? [], ', ') || `Study ID ${r('studyId') || 'not recorded'}`;
+  const tnm = ['tCategory', 'nCategory', 'mCategory'].map(r).filter(Boolean).join('');
+  const line = (label: string, value: string) => (value ? `  ${label}: ${value}` : '');
+  const fois = num(s, 'fois');
+  const o = [
+    line('Jaw opening', withUnit(s, 'jawOpening', 'mm')),
+    line('EAT-10', has(s, 'eat10') ? `${r('eat10')}/40` : ''),
+    line('FOIS', fois ? `level ${fois} (${FOIS[fois]})` : ''),
+    line('MASA-HNC', r('masa')),
+    line('MDADI composite', r('mdadiComposite')),
+    line('Clinical signs', [r('wetVoice') && `wet voice ${r('wetVoice').toLowerCase()}`, r('cough') && `cough ${r('cough').toLowerCase()}`, r('bolusIssue')].filter(Boolean).join('; ')),
+    line('Instrumental', [r('vfss') && `VFSS ${r('vfss').toLowerCase()}`, r('fees') && `FEES ${r('fees').toLowerCase()}`, has(s, 'pas') && `worst PAS ${r('pas')}`, r('residue') && `residue ${r('residue').toLowerCase()}`].filter(Boolean).join('; ')),
+    line('Voice', [has(s, 'mpt') && `MPT ${r('mpt')} s`, has(s, 'hnr') && `HNR ${r('hnr')} dB`, has(s, 'vhi10') && `VHI-10 ${r('vhi10')}/40`, r('communicationMethod')].filter(Boolean).join('; ')),
+    line('Nutrition/airway', [has(s, 'weight') && `weight ${r('weight')} kg`, has(s, 'weightChange') && `change ${r('weightChange')}%/month`, r('route') && `route ${r('route')}`, r('tracheostomy') && `tracheostomy ${r('tracheostomy').toLowerCase()}`].filter(Boolean).join('; ')),
+  ].filter(Boolean);
+  return [
+    'SPEECH-LANGUAGE PATHOLOGY – EVALUATION NOTE (HEAD AND NECK CANCER)',
+    `Date: ${date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}   Patient: ${idLine}${r('age') ? `, ${r('age')} y` : ''}${r('gender') ? ` ${r('gender').slice(0, 1)}` : ''}`,
+    `Diagnosis: ${[r('tumorSite'), tnm, r('phase'), has(s, 'rtDose') ? `RT ${r('rtDose')} Gy${has(s, 'fractions') ? `/${r('fractions')} fx` : ''}` : '', r('chemoAgent')].filter(Boolean).join(', ') || 'not recorded'}`,
+    '',
+    `S: ${r('chiefConcern') || 'Presenting concern not recorded.'}`,
+    'O:',
+    ...(o.length ? o : ['  No objective findings recorded.']),
+    `A: ${r('slpDiagnosis') || 'Impression not recorded.'}${r('severity') ? ` Severity: ${r('severity')} (clinician rated).` : ''}${has(s, 'aspirationRisk') ? ` Aspiration risk ${r('aspirationRisk')}/4 (clinician rated).` : ''}`,
+    `P: ${[r('recommendations'), r('dietPlan') && `Diet/posture: ${r('dietPlan')}`, r('followUp') && `Follow-up: ${r('followUp')}`].filter(Boolean).join(' ') || 'Plan not recorded.'}`,
+    '',
+    `SLP: ${[facility.clinicianName, facility.clinicianTitle, facility.registrationNumber].filter(Boolean).join(', ')}${facility.facilityName ? ` | ${facility.facilityName}` : ''}`,
+  ].join('\n');
 }

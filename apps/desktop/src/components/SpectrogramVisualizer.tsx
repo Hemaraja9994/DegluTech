@@ -349,7 +349,7 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
   },
   title: {
-    fontSize: '22px',
+    fontSize: '24px',
     color: '#0d9488',
     margin: '0 0 8px 0',
   },
@@ -357,7 +357,7 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: '#1e293b',
     padding: '10px 16px',
     borderRadius: '8px',
-    fontSize: '13px',
+    fontSize: '15px',
     color: '#94a3b8',
     display: 'flex',
     justifyContent: 'space-between',
@@ -384,7 +384,7 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: '#1e293b',
     color: '#94a3b8',
     padding: '6px 12px',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 'bold',
   },
   canvas: {
@@ -408,7 +408,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '4px',
   },
   label: {
-    fontSize: '11px',
+    fontSize: '13px',
     color: '#94a3b8',
   },
   select: {
@@ -417,7 +417,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #475569',
     borderRadius: '6px',
     padding: '6px 10px',
-    fontSize: '13px',
+    fontSize: '15px',
     outline: 'none',
   },
   btnGroup: {
@@ -431,7 +431,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '6px',
     padding: '10px 16px',
     fontWeight: 'bold',
-    fontSize: '13px',
+    fontSize: '15px',
     cursor: 'pointer',
   },
   stopBtn: {
@@ -441,7 +441,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '6px',
     padding: '10px 16px',
     fontWeight: 'bold',
-    fontSize: '13px',
+    fontSize: '15px',
     cursor: 'pointer',
   },
   resetBtn: {
@@ -450,7 +450,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: 'none',
     borderRadius: '6px',
     padding: '10px 14px',
-    fontSize: '13px',
+    fontSize: '15px',
     cursor: 'pointer',
   },
   timerBadge: {
@@ -459,7 +459,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '8px 12px',
     borderRadius: '6px',
     fontFamily: 'monospace',
-    fontSize: '14px',
+    fontSize: '16px',
     fontWeight: 'bold',
   },
   metricsPanel: {
@@ -471,7 +471,7 @@ const styles: Record<string, React.CSSProperties> = {
     minWidth: '220px',
   },
   panelTitle: {
-    fontSize: '16px',
+    fontSize: '18px',
     color: '#38bdf8',
     margin: '0 0 16px 0',
     borderBottom: '1px solid #334155',
@@ -490,12 +490,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   metricLabel: {
     display: 'block',
-    fontSize: '11px',
+    fontSize: '13px',
     color: '#94a3b8',
   },
   metricValue: {
     display: 'block',
-    fontSize: '20px',
+    fontSize: '22px',
     fontWeight: 'bold',
     color: '#f8fafc',
     fontFamily: 'monospace',
@@ -503,7 +503,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   metricValueSuccess: {
     display: 'block',
-    fontSize: '20px',
+    fontSize: '22px',
     fontWeight: 'bold',
     color: '#10b981',
     fontFamily: 'monospace',
@@ -511,7 +511,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   metricValueWarn: {
     display: 'block',
-    fontSize: '20px',
+    fontSize: '22px',
     fontWeight: 'bold',
     color: '#ef4444',
     fontFamily: 'monospace',
@@ -519,13 +519,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   metricNote: {
     display: 'block',
-    fontSize: '10px',
+    fontSize: '13px',
     color: '#64748b',
     marginTop: '2px',
   },
   emptyState: {
     color: '#64748b',
-    fontSize: '13px',
+    fontSize: '15px',
     textAlign: 'center',
     padding: '40px 0',
   },

@@ -170,12 +170,12 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "'Outfit', 'Inter', sans-serif",
   },
   title: {
-    fontSize: '16px',
+    fontSize: '18px',
     color: '#8fd3b0',
     margin: '0 0 4px 0',
   },
   subtitle: {
-    fontSize: '12px',
+    fontSize: '14px',
     color: '#8fa79d',
     margin: '0 0 16px 0',
     lineHeight: '1.4',
@@ -192,7 +192,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #15302a',
   },
   cardHeader: {
-    fontSize: '14px',
+    fontSize: '16px',
     color: '#2f7a5c',
     margin: '0 0 12px 0',
     fontWeight: 'bold',
@@ -204,7 +204,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '10px',
   },
   label: {
-    fontSize: '13px',
+    fontSize: '15px',
     color: '#c9d7ce',
   },
   select: {
@@ -213,7 +213,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #3e5852',
     borderRadius: '6px',
     padding: '6px 10px',
-    fontSize: '13px',
+    fontSize: '15px',
     width: '220px',
     outline: 'none',
   },

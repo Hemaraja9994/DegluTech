@@ -116,17 +116,19 @@ export function eat10EmrNote(args: { dateLabel: string; patient: PatientLine; re
   const { total, missing } = eat10Score(args.resp), band = eat10Band(total);
   const trend = args.history.map(h => `${h.phaseLabel} ${h.total}`).concat(`Today ${total}`).join(' > ');
   return [
-    'SLP SCREENING – EAT-10',
+    'SPEECH-LANGUAGE PATHOLOGY – SCREENING NOTE',
+    'Instrument: Eating Assessment Tool (EAT-10), patient-reported',
     `Date: ${args.dateLabel}   Patient: ${args.patient.id}${args.patient.ageSex ? ` (${args.patient.ageSex})` : ''}`,
-    `Dx: ${args.patient.dx}`,
+    `Diagnosis: ${args.patient.dx}`,
     '',
-    `EAT-10 total: ${total}/40${missing ? ` (provisional, ${missing} item(s) unanswered)` : ''}`,
-    `Interpretation: ${band.label}. ${band.text}`,
-    `Item scores: ${args.resp.map((v, i) => `${i + 1}=${v === null ? '-' : v}`).join(', ')}`,
-    `Trend: ${trend}`,
+    'S: Patient-reported swallowing symptoms on the EAT-10.',
+    `O: EAT-10 total: ${total}/40${missing ? ` (provisional, ${missing} item(s) unanswered)` : ''}`,
+    `   Item scores: ${args.resp.map((v, i) => `${i + 1}=${v === null ? '-' : v}`).join(', ')}`,
+    `   Trend: ${trend}`,
+    `A: ${band.label}. ${band.text}`,
+    `P: ${args.followUp.trim() || 'Not recorded.'}`,
     '',
-    `Plan: ${args.followUp.trim() || 'Not recorded.'}`,
-    'Cut-offs: >=3 abnormal (Belafsky 2008); >15 increased aspiration risk (Cheney 2015).',
+    'Ref: EAT-10 >=3 abnormal (Belafsky et al., 2008); >15 higher likelihood of aspiration (Cheney et al., 2015).',
   ].join('\n');
 }
 

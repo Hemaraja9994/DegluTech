@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { Check, Send, Download } from 'lucide-react';
+import { Check, Send, Download, Printer } from 'lucide-react';
+import { useClinic } from './ClinicContext';
+import { printIdentity, signingClinician } from '../clinicStore';
+import { openPrintWindow } from '../printDoc';
+import { buildHomeProgrammeHtml } from '../toolPrint';
 import type { FieldState } from '../reportEngine';
 import { HNC_EXERCISE_LIBRARY } from '../../../../packages/core/src/hncClinicalModel';
 import { readDoses, releaseBlock, releaseKey, isReleased } from '../prescriptionRules';
@@ -13,6 +17,7 @@ const readLogs = (state: FieldState): Log[] => {
   try { const raw: unknown = JSON.parse(String(state.sessionLogs || '[]')); return Array.isArray(raw) ? raw.filter((l): l is Log => !!l && typeof l.date === 'string' && typeof l.exerciseId === 'string' && Number.isInteger(l.planned) && Number.isInteger(l.completed) && l.completed >= 0 && l.completed <= l.planned) : []; } catch { return []; }
 };
 export function PrescriptionRelease({ state, ids, update }: { state: FieldState; ids: string[]; update: (patch: FieldState) => void }) {
+  const { settings, active } = useClinic();
   const doses = readDoses(state), blocked = releaseBlock(state, ids);
   return <section className="suite-panel dt-release-panel"><h3>Individual prescription and release</h3>
     <div className="suite-dose-grid">{ids.map(id => <div key={id}><strong>{HNC_EXERCISE_LIBRARY.find(e => e.id === id)?.name}</strong>
@@ -21,6 +26,7 @@ export function PrescriptionRelease({ state, ids, update }: { state: FieldState;
     <label>Individual stop and contact plan<textarea value={String(state.painLimit || '')} onChange={e => update({ painLimit: e.target.value })} /></label>
     <p role="status">{blocked || (isReleased(state, ids) ? 'This prescription is released to the local patient preview.' : 'Ready for clinician review and release. Changes to dose or clearance require a new release.')}</p>
     <button className="dt-primary" type="button" disabled={!!blocked || isReleased(state, ids)} onClick={() => update({ planRelease: releaseKey(state, ids), planReleasedAt: new Date().toISOString() })}><Send size={16} /> Confirm review and release</button>
+    {isReleased(state, ids) && <button type="button" onClick={() => openPrintWindow(buildHomeProgrammeHtml({ settings, clinician: signingClinician(settings), identity: printIdentity(active, settings), state, ids, toolbar: true }))}><Printer size={16} /> Print home programme handout</button>}
   </section>;
 }
 export function PatientSessionLog({ state, ids, update }: { state: FieldState; ids: string[]; update: (patch: FieldState) => void }) {
