@@ -620,3 +620,121 @@
 .cs-preview-sign strong { color: #15302a; font-size: 13.5px; border-top: 1px solid #15302a; padding-top: 4px; }
 
 .cs-card > label.cs-check { flex-direction: row; font-weight: 500; }
+/* Compact clinical navigation and high-contrast audit states. */
+.nav-accordion { border-bottom: 1px solid #36534b; padding: 5px 0; }
+.nav-accordion-trigger { width: 100%; display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: #e4f4ee; cursor: pointer; text-align: left; font-size: 12px; font-weight: 800; }
+.nav-accordion-trigger small { margin-left: auto; color: #b8d5c9; font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.nav-accordion-trigger svg { transition: transform 160ms ease; flex: none; }
+.nav-accordion-trigger svg.is-expanded { transform: rotate(180deg); }
+.nav-accordion-trigger:hover { background: #284c41; }
+.nav-accordion [hidden] { display: none; }
+.deglutech-sidebar button:focus-visible { outline: 3px solid #8ce5c6; outline-offset: -3px; }
+.deglutech-progress-wrap { padding: 10px 14px; width: 180px !important; border: 1px solid #a3bfb2; border-radius: 12px; background: #e4f3ec; }
+.deglutech-progress-wrap > span { font-weight: 800; font-size: 14px !important; color: #164e3c !important; font-variant-numeric: tabular-nums; }
+.deglutech-progress-wrap [role="progressbar"] { height: 10px !important; background: #becdc5 !important; }
+.deglutech-progress-wrap [role="progressbar"] > div { background: #176b50 !important; }
+.readiness-card { border-width: 1.5px !important; border-left-width: 5px !important; }
+.readiness-card:hover { box-shadow: 0 5px 14px #15302a18; }
+.readiness-card strong { font-size: 14px; font-weight: 800; line-height: 1.4; }
+.readiness-label { font-size: 11px; font-weight: 600; line-height: 1.5; margin: 3px 0; }
+.overview-action-icon { background: #dcf5e9 !important; color: #176b50 !important; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+@media print { .nav-accordion, .deglutech-progress-wrap { display: none !important; } .readiness-card { break-inside: avoid; } }
+@media (max-width: 560px) {
+  .deglutech-topbar-actions { justify-content: flex-start !important; gap: 10px !important; }
+  .deglutech-topbar-actions > button { width: 44px !important; height: 44px !important; flex: 0 0 44px; }
+  .deglutech-topbar-actions .workspace-save-status { order: 2; }
+  .deglutech-topbar-actions .deglutech-progress-wrap { margin-right: auto; width: min(180px, 100%) !important; }
+}
+/* DegluTech clinical workspace: expressive masthead, quiet working surfaces. */
+.workspace-hero { position: relative; isolation: isolate; overflow: hidden; margin-bottom: 16px; border: 1px solid #203e48; border-radius: 22px; color: #f4fcf9; background: radial-gradient(ellipse at 90% 0%, #28616b 0%, transparent 48%), linear-gradient(115deg,#102b33,#173d45 65%,#1c384c); box-shadow: 0 12px 32px #132e3614; }
+.workspace-hero::before { content: ''; position: absolute; z-index: -1; width: 370px; height: 370px; right: 50px; top: -210px; border: 1px solid #a8f0d42b; border-radius: 50%; box-shadow: 0 0 0 35px #a8f0d408, 0 0 0 70px #a8f0d408; pointer-events: none; }
+.hero-masthead { padding: 17px 28px; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; border-bottom: 1px solid #ffffff14; }
+.hero-product { display: inline-flex; gap: 9px; align-items: center; font-size: 12px; font-weight: 850; letter-spacing: .12em; color: #a8f0d4; }
+.hero-product > span { margin-left: 8px; border-left: 1px solid #ffffff35; padding-left: 16px; font-size: 10px; color: #c2d6d9; letter-spacing: .12em; font-weight: 600; }
+.hero-command { display: flex; gap: 10px; align-items: center; border: 1px solid #ffffff30; border-radius: 9px; padding: 8px 11px; background: #ffffff08; color: #deebee; cursor: pointer; font-size: 12px; }
+.hero-command kbd { font-size: 10px; color: #adc5cd; border: 1px solid #ffffff25; padding: 1px 5px; border-radius: 4px; }
+.hero-content { display: flex; align-items: center; justify-content: space-between; gap: 34px; padding: 30px 28px 27px; }
+.hero-copy { min-width: 0; max-width: 790px; }
+.hero-breadcrumb { margin: 0 0 12px; font-size: 10px; font-weight: 700; letter-spacing: .13em; color: #a8c8ce; }
+.hero-breadcrumb > span { margin: 0 10px; color: #7a9ba4; }
+.hero-copy h2 { margin: 0; max-width: 720px; font-size: clamp(25px,2.8vw,38px); line-height: 1.14; font-weight: 800; letter-spacing: -.035em; color: #f5fcfa; text-wrap: balance; }
+.hero-description { margin: 13px 0 19px; color: #bfd5db; font-size: 13px; line-height: 1.7; max-width: 620px; }
+.hero-context { display: flex; flex-wrap: wrap; gap: 9px 18px; }
+.hero-context > span { display: inline-flex; align-items: center; gap: 7px; color: #e2eeee; font-size: 11px; font-weight: 600; }
+.hero-context > span:first-child { max-width: 100%; overflow-wrap: anywhere; }
+.hero-context .hero-local { color: #a8f0d4; }
+.hero-local > span, .save-dot { width: 6px; height: 6px; border-radius: 50%; background: #a8f0d4; flex: none; }
+.save-dot-error { width: 7px; height: 7px; background: #ffc7ab; border-radius: 50%; flex: none; }
+.hero-progress-card { display: flex; gap: 16px; align-items: center; flex: 0 0 230px; }
+.hero-progress-ring { width: 92px; height: 92px; flex: 0 0 92px; border-radius: 50%; padding: 6px; box-shadow: 0 0 0 9px #ffffff03; }
+.hero-progress-ring > span { display: flex; align-items: baseline; justify-content: center; padding-top: 21px; height: 100%; border-radius: 50%; background: #1b424a; color: #f4fcf9; font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.06em; }
+.hero-progress-ring small { font-size: 13px; margin-left: 2px; }
+.hero-progress-card strong { font-size: 12px; font-weight: 700; white-space: nowrap; }
+.hero-progress-card p { font-size: 11px; margin: 5px 0; color: #cae2e7; }
+.hero-progress-card > div > small { display: block; color: #9fc0c8; font-size: 10px; line-height: 1.5; }
+.hero-toolbar { padding: 12px 28px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; background: #071d2630; border-top: 1px solid #ffffff12; }
+.hero-save-status { display: inline-flex; gap: 8px; align-items: center; font-size: 10px; color: #bdd2d8; }
+.hero-toolbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.hero-toolbar-actions button { min-height: 38px; display: inline-flex; gap: 8px; align-items: center; justify-content: center; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 750; cursor: pointer; }
+.hero-secondary { border: 1px solid #ffffff38; background: transparent; color: #e1eeee; }
+.hero-primary { border: 1px solid #d7ccff; background: #d7ccff; color: #252143; }
+.workspace-hero button:focus-visible { outline: 3px solid #bba7ff; outline-offset: 3px; }
+.deglutech-sidebar { background: #102b33 !important; border-color: #27464e !important; }
+.deglutech-sidebar > div:first-child { padding: 19px 15px !important; border-color: #2c4850 !important; }
+.deglutech-sidebar > div:nth-child(2) { background: #1a3942 !important; border-color: #36545d !important; border-radius: 13px !important; }
+.nav-accordion { border-color: #2a474f; }
+.nav-accordion-trigger:hover { background: #234650; }
+.deglutech-main { background: #f4f7f8 !important; }
+.demo-notice { background: #fff7e9 !important; border: 0 !important; border-left: 3px solid #bc8c36 !important; border-radius: 6px !important; font-size: 11px !important; padding: 8px 12px !important; margin-bottom: 12px !important; }
+.suite-data { background: transparent !important; border: 0 !important; padding: 0 4px 12px !important; margin-bottom: 8px !important; color: #526971 !important; font-size: 11px !important; }
+.suite-data summary { color: #526971 !important; }
+.deglutech-workflow-nav { border-radius: 14px !important; padding: 15px 18px !important; box-shadow: 0 2px 6px #1b394405 !important; }
+.clinical-section-header { border-radius: 16px !important; padding: 24px !important; align-items: flex-start !important; box-shadow: 0 4px 16px #17374305 !important; }
+.clinical-section-header > div:first-child { flex: 1 1 480px; }
+.clinical-section-header > div:last-child { flex: 0 1 260px; min-width: 0; }
+.clinical-section-header h3 { font-size: clamp(20px,1.7vw,26px) !important; letter-spacing: -.025em; line-height: 1.3 !important; }
+.section-command-dialog { width: min(600px,calc(100vw - 28px)); max-height: min(660px,85vh); padding: 0; border: 1px solid #cfdae1; border-radius: 20px; box-shadow: 0 28px 100px #071d2655; color: #15302a; }
+.section-command-dialog::backdrop { background: #102b3380; backdrop-filter: blur(5px); }
+.command-dialog-heading { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px 12px; }
+.command-dialog-heading h2 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 800; }
+.command-dialog-heading button { background: #edf2f5; border: 0; border-radius: 8px; padding: 8px; cursor: pointer; }
+.command-search { display: flex; align-items: center; gap: 10px; margin: 4px 20px 14px; padding: 12px; border: 1px solid #9bb8bb; border-radius: 10px; }
+.command-search input { width: 100%; min-width: 0; border: 0; outline: none; background: white; font-size: 14px; }
+.command-search:focus-within { outline: 3px solid #a5d9ce; }
+.command-results { max-height: 390px; overflow-y: auto; padding: 0 12px; }
+.command-results button { display: flex; gap: 13px; width: 100%; padding: 12px; align-items: center; border: 0; border-radius: 10px; background: white; cursor: pointer; text-align: left; }
+.command-results button:hover, .command-results button:focus-visible { background: #eef5f3; }
+.command-results button > span { display: grid; gap: 4px; flex: 1; }
+.command-results strong { font-size: 13px; font-weight: 750; }
+.command-results small { font-size: 11px; color: #526971; }
+.command-hint { margin: 10px 0 0; padding: 12px 20px; font-size: 11px; color: #526971; background: #f5f8fa; border-top: 1px solid #e1e8ec; }
+.command-empty { padding: 10px; font-size: 13px; }
+@media (max-width: 1100px) { .hero-content { gap: 20px; } .hero-progress-card { flex-basis: 180px; flex-direction: column; text-align: center; gap: 12px; } }
+@media (max-width: 680px) {
+  .hero-masthead { padding: 15px 18px; gap: 12px; }
+  .hero-product > span { font-size: 8px; margin-left: 0; padding-left: 10px; }
+  .hero-command { width: 100%; }
+  .hero-command kbd { margin-left: auto; }
+  .hero-content { padding: 24px 18px; flex-direction: column; align-items: flex-start; gap: 24px; }
+  .hero-copy h2 { font-size: 30px; }
+  .hero-progress-card { flex: none; flex-direction: row; text-align: left; }
+  .hero-progress-ring { width: 70px; height: 70px; flex-basis: 70px; padding: 5px; }
+  .hero-progress-ring > span { font-size: 24px; padding-top: 14px; }
+  .hero-toolbar { padding: 14px 18px; }
+  .hero-toolbar-actions { width: 100%; }
+  .hero-toolbar-actions button { flex: 1; }
+  .clinical-section-header { flex-wrap: wrap; padding: 18px !important; }
+  .clinical-section-header > div:last-child { flex-basis: 100%; justify-content: flex-start !important; }
+  .clinical-section-header button { white-space: normal; height: auto; min-height: 44px !important; }
+  .readiness-grid { min-width: 0; grid-template-columns: minmax(0,1fr) !important; }
+  .readiness-card { min-width: 0; width: 100%; }
+}
+@media print { .workspace-hero { background: white; color: #15302a; box-shadow: none; border: 1px solid #c9d7ce; } .workspace-hero h2, .hero-description, .hero-context > span, .hero-breadcrumb { color: #15302a; } .hero-masthead, .hero-toolbar, .hero-progress-card, .section-command-dialog { display: none !important; } }
+.report-workspace { min-width: 0; grid-template-columns: minmax(0,1fr); }
+.report-workspace > * { min-width: 0; max-width: 100%; }
+@media (max-width: 680px) {
+  .clinical-section-header > div:first-child { flex-basis: 100%; }
+  .clinical-section-header > div:last-child > div { min-width: 0; justify-content: flex-start !important; }
+  .report-workspace input, .report-workspace textarea, .report-workspace select { max-width: 100%; min-width: 0; }
+}

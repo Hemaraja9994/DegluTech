@@ -197,14 +197,14 @@ export const ClinicianDashboard: React.FC<ClinicianDashboardProps> = ({
   };
 
   return (
-    <div style={styles.dashboardShell}>
+    <div className="dt-dashboard" style={styles.dashboardShell}>
       <header style={styles.dashboardTopbar}>
         <div>
           <p style={styles.overline}>Clinician dashboard</p>
           <h2 style={styles.dashboardTitle}>Caseload command center</h2>
         </div>
         <div style={styles.topbarActions}>
-          <span style={styles.topbarBadge}>{completion}% active chart quality</span>
+          <span style={styles.topbarBadge}>{completion}% fields recorded</span>
           <span style={styles.topbarMeta}>Saved: {savedAt}</span>
           <button type="button" style={styles.primaryAction} onClick={onAddPatient}>Add or switch patient</button>
         </div>
@@ -281,8 +281,8 @@ function KpiCell({
     tone === 'high' ? '#a8402b' :
     tone === 'moderate' ? '#b7791f' :
     tone === 'low' ? '#2f7a5c' :
-    tone === 'info' ? '#1f5c4a' :
-    '#15302a';
+    tone === 'info' ? '#204a6b' :
+    '#173451';
 
   return (
     <div style={styles.kpiCell}>
@@ -439,7 +439,7 @@ function SortHeader({
       style={{
         ...styles.sortButton,
         ...(align === 'right' ? styles.sortButtonRight : {}),
-        color: active ? '#15302a' : '#4d6660',
+        color: active ? '#173451' : '#5b6d7c',
       }}
     >
       <span>{label}</span>
@@ -521,7 +521,7 @@ function RiskPill({ risk }: { risk: RiskLevel }) {
 
 function ScoreCell({ value, suffix, bad }: { value: number; suffix?: string; bad?: boolean }) {
   return (
-    <span style={{ ...styles.scoreCell, color: bad ? '#a8402b' : '#15302a' }}>
+    <span style={{ ...styles.scoreCell, color: bad ? '#a8402b' : '#173451' }}>
       {Number.isInteger(value) ? value : value.toFixed(1)}
       {suffix && <small>{suffix}</small>}
     </span>
@@ -602,7 +602,7 @@ function CohortRiskDonut({ patients }: { patients: PatientCaseloadEntry[] }) {
 
 function PhaseMixPanel({ patients }: { patients: PatientCaseloadEntry[] }) {
   const phaseColors: Record<PatientCaseloadEntry['phase'], string> = {
-    Prehab: '#1f5c4a',
+    Prehab: '#204a6b',
     'Post-op': '#5b4bb7',
     'During RT': '#a8402b',
     'Post-CRT': '#b7791f',
@@ -794,7 +794,7 @@ function PatientDrawer({
   }, [onClose]);
 
   return (
-    <div style={styles.drawerShell}>
+    <div className="dt-drawer-shell" style={styles.drawerShell}>
       <button type="button" aria-label="Close patient analytics" style={styles.drawerBackdrop} onClick={onClose} />
       <aside className="deglutech-patient-drawer" style={styles.drawerPanel}>
         <header style={styles.drawerHeader}>
@@ -824,7 +824,7 @@ function PatientDrawer({
           </div>
         </header>
 
-        <nav style={styles.drawerTabs} aria-label="Patient analytics tabs">
+        <nav className="dt-drawer-tabs" style={styles.drawerTabs} aria-label="Patient analytics tabs">
           {([
             ['overview', 'Overview', Activity],
             ['icf', 'WHO-ICF', HeartPulse],
@@ -835,6 +835,7 @@ function PatientDrawer({
               key={key}
               type="button"
               onClick={() => setTab(key)}
+              aria-pressed={tab === key}
               style={tab === key ? styles.drawerTabActive : styles.drawerTab}
             >
               <Icon size={13} /> {label}
@@ -842,7 +843,7 @@ function PatientDrawer({
           ))}
         </nav>
 
-        <div style={styles.drawerBody}>
+        <div className="dt-drawer-body" style={styles.drawerBody}>
           {tab === 'overview' && <PatientOverview patient={patient} />}
           {tab === 'icf' && <IcfTab patient={patient} />}
           {tab === 'trends' && <TrendsTab patient={patient} />}
@@ -1180,7 +1181,7 @@ function MilestoneTimeline({ patient }: { patient: PatientCaseloadEntry }) {
         {patient.milestones.map((milestone, index) => {
           const color =
             milestone.status === 'done' ? '#2f7a5c' :
-            milestone.status === 'current' ? '#1f5c4a' :
+            milestone.status === 'current' ? '#204a6b' :
             '#8fa79d';
           return (
             <li key={`${milestone.label}-${index}`} style={styles.timelineItem}>
@@ -1369,7 +1370,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   overline: {
     margin: 0,
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 10,
     fontWeight: 900,
     textTransform: 'uppercase',
@@ -1377,7 +1378,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   dashboardTitle: {
     margin: '2px 0 0',
-    color: '#15302a',
+    color: '#173451',
     fontSize: 18,
     lineHeight: 1.15,
     fontWeight: 850,
@@ -1391,7 +1392,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   topbarBadge: {
     border: '1px solid #c9ddd0',
-    background: '#e4eee7',
+    background: '#edf2f7',
     color: '#174a3c',
     borderRadius: 999,
     padding: '5px 9px',
@@ -1400,7 +1401,7 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'nowrap',
   },
   topbarMeta: {
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 11,
     fontWeight: 700,
   },
@@ -1424,7 +1425,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: 7,
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 10.5,
     fontWeight: 850,
     textTransform: 'uppercase',
@@ -1445,7 +1446,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontVariantNumeric: 'tabular-nums',
   },
   kpiSub: {
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 11,
     lineHeight: 1.25,
   },
@@ -1477,12 +1478,12 @@ const styles: Record<string, React.CSSProperties> = {
     minWidth: 140,
   },
   queueTitle: {
-    color: '#15302a',
+    color: '#173451',
     fontSize: 13,
     fontWeight: 850,
   },
   queueCount: {
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 11,
     fontWeight: 650,
   },
@@ -1499,7 +1500,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: 26,
     border: 0,
     background: 'transparent',
-    color: '#3e5852',
+    color: '#475d70',
     borderRadius: 6,
     padding: '0 8px',
     fontSize: 11,
@@ -1510,7 +1511,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: 26,
     border: 0,
     background: '#ffffff',
-    color: '#15302a',
+    color: '#173451',
     borderRadius: 6,
     padding: '0 8px',
     fontSize: 11,
@@ -1523,7 +1524,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #dce5df',
     borderRadius: 8,
     background: '#ffffff',
-    color: '#15302a',
+    color: '#173451',
     padding: '0 10px',
     fontSize: 12,
     fontWeight: 700,
@@ -1548,7 +1549,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: 0,
     outline: 0,
     background: 'transparent',
-    color: '#15302a',
+    color: '#173451',
     fontSize: 12,
   },
   tableWrap: {
@@ -1563,7 +1564,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: 34,
     padding: '0 12px',
     borderBottom: '1px solid #dce5df',
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 10,
     fontWeight: 900,
     textTransform: 'uppercase',
@@ -1606,7 +1607,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '6px 12px',
     textAlign: 'left',
     cursor: 'pointer',
-    color: '#15302a',
+    color: '#173451',
   },
   patientRowSelected: {
     background: '#f5f8f5',
@@ -1634,13 +1635,13 @@ const styles: Record<string, React.CSSProperties> = {
     minWidth: 0,
     gap: 1,
     fontSize: 11.5,
-    color: '#3e5852',
+    color: '#475d70',
   },
   reviewCell: {
     display: 'grid',
     gap: 1,
     fontSize: 11,
-    color: '#3e5852',
+    color: '#475d70',
   },
   riskPill: {
     display: 'inline-flex',
@@ -1720,7 +1721,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 6,
     border: '1px solid #dce5df',
     background: '#f5f8f5',
-    color: '#4d6660',
+    color: '#5b6d7c',
     display: 'grid',
     placeItems: 'center',
   },
@@ -1730,7 +1731,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   emptyState: {
     padding: 28,
-    color: '#4d6660',
+    color: '#5b6d7c',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1757,14 +1758,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   railTitle: {
     margin: 0,
-    color: '#15302a',
+    color: '#173451',
     fontSize: 13,
     lineHeight: 1.2,
     fontWeight: 850,
   },
   railSub: {
     margin: '3px 0 0',
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 11,
     lineHeight: 1.35,
   },
@@ -1783,7 +1784,7 @@ const styles: Record<string, React.CSSProperties> = {
     gridTemplateColumns: '10px minmax(0, 1fr) auto',
     gap: 7,
     alignItems: 'center',
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: 11,
     textTransform: 'capitalize',
   },
@@ -1812,7 +1813,7 @@ const styles: Record<string, React.CSSProperties> = {
   trendCaption: {
     display: 'flex',
     justifyContent: 'space-between',
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 11,
   },
   insightList: {
@@ -1824,7 +1825,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: 0,
     borderRadius: 8,
     background: '#f5f8f5',
-    color: '#15302a',
+    color: '#173451',
     padding: '8px 9px',
     display: 'grid',
     gridTemplateColumns: '22px minmax(0, 1fr)',
@@ -1842,12 +1843,12 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 2,
     minWidth: 0,
     fontSize: 11.5,
-    color: '#3e5852',
+    color: '#475d70',
   },
   activeCard: {
     border: '1px solid #c9ddd0',
     borderRadius: 8,
-    background: '#e4eee7',
+    background: '#edf2f7',
     padding: 12,
     display: 'grid',
     gap: 12,
@@ -1860,7 +1861,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   activeName: {
     margin: '3px 0 0',
-    color: '#15302a',
+    color: '#173451',
     fontSize: 14,
     lineHeight: 1.2,
     fontWeight: 850,
@@ -1882,7 +1883,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '8px 9px',
     display: 'grid',
     gap: 2,
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 10.5,
     fontWeight: 750,
   },
@@ -1890,7 +1891,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: 34,
     border: '1px solid #1f5c4a',
     borderRadius: 8,
-    background: '#1f5c4a',
+    background: '#204a6b',
     color: '#ffffff',
     padding: '0 11px',
     display: 'inline-flex',
@@ -1906,7 +1907,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #c9d7ce',
     borderRadius: 8,
     background: '#ffffff',
-    color: '#15302a',
+    color: '#173451',
     padding: '0 11px',
     display: 'inline-flex',
     alignItems: 'center',
@@ -1975,17 +1976,17 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
     fontSize: 18,
     lineHeight: 1.2,
-    color: '#15302a',
+    color: '#173451',
   },
   drawerId: {
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 11,
     fontWeight: 800,
     fontVariantNumeric: 'tabular-nums',
   },
   drawerSubtitle: {
     margin: 0,
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: 12,
     lineHeight: 1.35,
   },
@@ -2000,7 +2001,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #c9d7ce',
     borderRadius: 8,
     background: '#ffffff',
-    color: '#15302a',
+    color: '#173451',
     display: 'grid',
     placeItems: 'center',
     cursor: 'pointer',
@@ -2016,7 +2017,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: 0,
     borderBottom: '2px solid transparent',
     background: 'transparent',
-    color: '#4d6660',
+    color: '#5b6d7c',
     padding: '0 12px',
     display: 'inline-flex',
     alignItems: 'center',
@@ -2030,7 +2031,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: 0,
     borderBottom: '2px solid #1f5c4a',
     background: 'transparent',
-    color: '#1f5c4a',
+    color: '#204a6b',
     padding: '0 12px',
     display: 'inline-flex',
     alignItems: 'center',
@@ -2080,7 +2081,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   drawerCardTitle: {
     margin: 0,
-    color: '#15302a',
+    color: '#173451',
     fontSize: 13,
     fontWeight: 900,
     textTransform: 'uppercase',
@@ -2138,7 +2139,7 @@ const styles: Record<string, React.CSSProperties> = {
   scoreTileTop: {
     display: 'flex',
     justifyContent: 'space-between',
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 10.5,
     fontWeight: 900,
     textTransform: 'uppercase',
@@ -2155,7 +2156,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   scoreTileNote: {
     margin: 0,
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: 11,
     lineHeight: 1.25,
   },
@@ -2168,7 +2169,7 @@ const styles: Record<string, React.CSSProperties> = {
     gridTemplateColumns: '86px minmax(0, 1fr) 24px',
     gap: 8,
     alignItems: 'center',
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: 12,
     fontWeight: 750,
   },
@@ -2213,7 +2214,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#f5f8f5',
     borderRadius: 8,
     padding: '8px 9px',
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: 11,
     display: 'grid',
     gap: 2,
@@ -2225,7 +2226,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   concernChip: {
     border: '1px solid #c9ddd0',
-    background: '#e4eee7',
+    background: '#edf2f7',
     color: '#174a3c',
     borderRadius: 999,
     padding: '5px 9px',
@@ -2241,12 +2242,12 @@ const styles: Record<string, React.CSSProperties> = {
     gridTemplateColumns: '58px minmax(0, 1fr) 22px',
     gap: 8,
     alignItems: 'center',
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: 12,
   },
   icfCode: {
     color: '#174a3c',
-    background: '#e4eee7',
+    background: '#edf2f7',
     borderRadius: 5,
     padding: '3px 6px',
     fontFamily: 'Consolas, monospace',
@@ -2297,12 +2298,12 @@ const styles: Record<string, React.CSSProperties> = {
     gridTemplateColumns: 'minmax(150px, 1.2fr) minmax(150px, 1fr) 90px 92px',
     gap: 10,
     alignItems: 'center',
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: 12,
   },
   cardText: {
     margin: 0,
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: 12,
     lineHeight: 1.5,
   },

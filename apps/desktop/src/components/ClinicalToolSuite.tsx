@@ -10,10 +10,10 @@ import {
   isoToday, shortDate, longDate, patientLine, eat10EmrNote, handoutProgress, lastResultFor, type CategoryId, type Eat10Response, type Tool,
 } from '../toolSuite';
 
-const SANS = "'Plus Jakarta Sans', 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif";
-const MONO = "'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace";
-const INK = '#15302a', INK2 = '#3e5852', INK3 = '#4d6660', LINE = 'rgba(21,48,42,.10)', LINE2 = 'rgba(21,48,42,.18)';
-const ACCENT = '#1f5c4a', ACCENT_INK = '#123b30', ACCENT_SOFT = '#e4eee7';
+const SANS = "var(--sans)";
+const MONO = "var(--sans)";
+const INK = '#173451', INK2 = '#475d70', INK3 = '#5b6d7c', LINE = 'rgba(21,48,42,.10)', LINE2 = 'rgba(21,48,42,.18)';
+const ACCENT = '#204a6b', ACCENT_INK = '#173451', ACCENT_SOFT = '#edf2f7';
 
 type Overlay = null | 'report' | 'emr' | 'handout';
 type Props = { fieldState: FieldState; update: (patch: FieldState) => void; onOpenSection: (id: HncSectionId) => void; patientFallbackId: string };
@@ -72,7 +72,7 @@ export function ClinicalToolSuite({ fieldState, update, onOpenSection, patientFa
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16 }}>
         <div style={{ maxWidth: 640 }}>
           <div style={eyebrow}>Clinical tool suite</div>
-          <h1 style={{ margin: '6px 0 6px', fontSize: 'clamp(26px,3.2vw,34px)', lineHeight: 1.15, letterSpacing: '-0.01em', fontWeight: 700, color: INK }}>Assessment instruments</h1>
+          <h2 className="dt-tool-title" style={{ margin: '6px 0 6px', fontSize: 'clamp(26px,3.2vw,34px)', lineHeight: 1.15, letterSpacing: '-0.01em', fontWeight: 700, color: INK }}>Assessment instruments</h2>
           <p style={{ margin: 0, fontSize: 15, color: INK2 }}>Validated swallowing, voice and function measures for head and neck cancer. Every score is saved to this patient's timeline and feeds the clinical report.</p>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', flex: '0 1 420px', justifyContent: 'flex-end' }}>
@@ -144,7 +144,7 @@ export function ClinicalToolSuite({ fieldState, update, onOpenSection, patientFa
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16 }}>
         <div>
           <div style={eyebrow}>Screening · Patient-reported</div>
-          <h1 style={{ margin: '6px 0 4px', fontSize: 'clamp(24px,3vw,30px)', fontWeight: 700, color: INK, lineHeight: 1.2 }}>Eating Assessment Tool <span style={{ whiteSpace: 'nowrap' }}>(EAT-10)</span></h1>
+          <h2 className="dt-tool-title" style={{ margin: '6px 0 4px', fontSize: 'clamp(24px,3vw,30px)', fontWeight: 700, color: INK, lineHeight: 1.2 }}>Eating Assessment Tool <span style={{ whiteSpace: 'nowrap' }}>(EAT-10)</span></h2>
           <p style={{ margin: 0, fontSize: 14.5, color: INK2 }}>Ten items, each rated 0 (no problem) to 4 (severe problem). Total 0–40. Belafsky et al., 2008.</p>
         </div>
         <div style={segTrack} role="group" aria-label="Entry mode">
@@ -233,7 +233,7 @@ export function ClinicalToolSuite({ fieldState, update, onOpenSection, patientFa
   const signLine = signerForNote ? `SLP: ${[signerForNote.name, signerForNote.qualification, signerForNote.registration && `RCI ${signerForNote.registration}`].filter(Boolean).join(', ')}${settings.instituteName ? ` | ${settings.instituteName}` : ''}` : '';
   const emrText = useMemo(() => eat10EmrNote({ dateLabel: longDate(today), patient, resp, history, followUp }) + (signLine ? `\n${signLine}` : ''), [today, patient.id, patient.ageSex, patient.dx, JSON.stringify(resp), JSON.stringify(history), followUp, signLine]);
 
-  return <div className="ts-root" style={{ fontFamily: SANS, color: INK, background: '#eef2ef', borderRadius: 14 }}>
+  return <div className="ts-root" style={{ fontFamily: SANS, color: INK, background: '#f4f7fa', borderRadius: 18 }}>
     <div style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(18px,3vw,32px) clamp(14px,3vw,28px) 48px', display: 'flex', flexDirection: 'column', gap: 28 }}>
       {view === 'hub' ? hub() : tool()}
       <p style={{ margin: 0, textAlign: 'center', fontSize: 12, color: INK3 }}>Scores are saved to this browser's workspace draft for the current patient.</p>
@@ -268,9 +268,9 @@ function OutputOverlay({ overlay, setOverlay, onClose, emrText, onToast, total, 
   };
   const th: React.CSSProperties = { padding: '6px 4px', borderBottom: `1px solid ${LINE2}`, textAlign: 'left', color: INK2, fontSize: 12 };
   const td: React.CSSProperties = { padding: '6px 4px', borderBottom: '1px solid rgba(21,48,42,.08)' };
-  return createPortal(<div className="ts-overlay" role="dialog" aria-modal="true" aria-label="EAT-10 outputs" onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+  return createPortal(<div className="ts-overlay dt-overlay" role="dialog" aria-modal="true" aria-label="EAT-10 outputs" onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(21,48,42,.45)', overflow: 'auto', padding: 'clamp(10px,3vw,32px)', fontFamily: SANS, color: INK }}>
-    <div ref={sheet} tabIndex={-1} className="ts-sheet" style={{ maxWidth: 820, margin: '0 auto', background: '#fff', borderRadius: 14, boxShadow: '0 24px 64px rgba(21,48,42,.24)', overflow: 'hidden', animation: 'ts-in .2s ease-out', outline: 'none' }}>
+    <div ref={sheet} tabIndex={-1} className="ts-sheet dt-output-sheet" style={{ maxWidth: 820, margin: '0 auto', background: '#fff', borderRadius: 14, boxShadow: '0 24px 64px rgba(21,48,42,.24)', overflow: 'hidden', animation: 'ts-in .2s ease-out', outline: 'none' }}>
       <div className="ts-noprint" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', padding: '12px 16px', borderBottom: `1px solid ${LINE}`, background: '#f5f8f5' }}>
         <div style={segTrack} role="tablist">{([['report', 'Report'], ['emr', 'EMR note'], ['handout', 'Patient handout']] as const).map(([id, label]) =>
           <button key={id} type="button" role="tab" aria-selected={overlay === id} onClick={() => setOverlay(id)} style={{ ...seg(overlay === id, 36), fontSize: 13 }}>{label}</button>)}</div>

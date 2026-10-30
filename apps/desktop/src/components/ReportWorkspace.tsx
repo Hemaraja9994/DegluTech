@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
+  ChevronRight,
   ClipboardCheck,
   Dumbbell,
   FileDown,
@@ -85,14 +86,14 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   };
 
   const aspirationPalette: Record<typeof summary.aspirationRiskTone, { bg: string; border: string; fg: string }> = {
-    green: { bg: '#ddefe5', border: '#2f7a5c', fg: '#1f5c43' },
-    amber: { bg: '#fdf6e7', border: '#c9822b', fg: '#7a4e00' },
+    green: { bg: '#dcf5e9', border: '#247252', fg: '#155239' },
+    amber: { bg: '#fff1cf', border: '#a46b0b', fg: '#704600' },
     red: { bg: '#fbf1ec', border: '#a8402b', fg: '#8e3420' },
   };
   const tone = aspirationPalette[summary.aspirationRiskTone];
 
   return (
-    <div style={styles.workspaceGrid}>
+    <div className="report-workspace" style={styles.workspaceGrid}>
       <SectionHeader
         eyebrow="Summary, validation, and handoff"
         title={draft.slpDiagnosis || 'Clinical report'}
@@ -104,7 +105,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
           <button type="button" style={styles.iconPillSecondary} onClick={applyAllDefaults}>
             <ClipboardCheck size={16} /> Preserve recorded entries
           </button>
-          <button type="button" style={styles.iconPillPrimary} onClick={handleExportPdf}>
+          <button id="export-diagnostic-report" type="button" style={styles.iconPillPrimary} onClick={handleExportPdf}>
             <FileDown size={16} /> Export diagnostic report
           </button>
           <button type="button" style={styles.iconPillGhost} onClick={() => window.print()}>
@@ -155,7 +156,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
         </div>
       </section>
 
-      <section style={styles.panel}>
+      <section className="dt-panel" style={styles.panel}>
         <div className="deglutech-panel-header" style={styles.panelHeader}>
           <div>
             <h3 style={styles.panelTitle}>WHO-ICF HNC Profile (cross-referenced)</h3>
@@ -288,7 +289,7 @@ function ValidationPanel({
   onJump: (sectionId: HncSectionId) => void;
 }) {
   return (
-    <section style={styles.validationPanel}>
+    <section className="dt-panel dt-validation-panel" style={styles.validationPanel}>
       <div className="deglutech-panel-header" style={styles.panelHeader}>
         <div>
           <p style={styles.overline}>Pre-publication validation</p>
@@ -304,18 +305,19 @@ function ValidationPanel({
         </div>
       </div>
 
-      <div style={styles.sectionsGrid}>
+      <div className="readiness-grid" style={styles.sectionsGrid}>
         {sections.map((section) => {
           const tone =
             section.status === 'complete'
-              ? { bg: '#ddefe5', border: '#2f7a5c', fg: '#1f5c43' }
+              ? { bg: '#dcf5e9', border: '#247252', fg: '#155239' }
               : section.status === 'partial'
-              ? { bg: '#fdf6e7', border: '#c9822b', fg: '#7a4e00' }
-              : { bg: '#fbf1ec', border: '#a8402b', fg: '#8e3420' };
+              ? { bg: '#fff1cf', border: '#a46b0b', fg: '#704600' }
+              : { bg: '#f1f5f9', border: '#8796aa', fg: '#334155' };
 
           return (
             <button
               key={section.id}
+              className="readiness-card"
               type="button"
               onClick={() => onJump(section.id)}
               style={{
@@ -333,11 +335,12 @@ function ValidationPanel({
               <span style={styles.sectionChipNumber}>{section.order}</span>
               <span style={styles.sectionChipBody}>
                 <strong>{section.shortLabel}</strong>
+                <span className="readiness-label">{section.status === 'complete' ? 'Filled · review required' : section.status === 'partial' ? 'In progress' : 'Not started'}</span>
                 <span style={styles.sectionChipPercent}>
                   {section.filled}/{section.total} · {section.percent}%
                 </span>
               </span>
-              <span style={{ ...styles.sectionChipDot, background: tone.border }} />
+              {section.status === 'complete' ? <CheckCircle2 size={18} /> : <ChevronRight size={18} />}
             </button>
           );
         })}
@@ -388,7 +391,7 @@ function SmartDefaultsPanel({
   ];
 
   return (
-    <section style={styles.panel}>
+    <section className="dt-panel" style={styles.panel}>
       <div className="deglutech-panel-header" style={styles.panelHeader}>
         <div>
           <p style={styles.overline}>Clinical authoring</p>
@@ -604,9 +607,9 @@ const styles: Record<string, any> = {
   },
   iconPillSecondary: {
     minHeight: '40px',
-    border: '1px solid #2f7a5c',
-    background: '#2f7a5c',
-    color: '#ffffff',
+    border: '1px solid #98ada5',
+    background: '#ffffff',
+    color: '#174a3c',
     padding: '0 14px',
     borderRadius: '8px',
     display: 'inline-flex',
@@ -682,20 +685,20 @@ const styles: Record<string, any> = {
   }),
   sectionsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-    gap: '8px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
+    gap: '12px',
   },
   sectionChip: {
     display: 'grid',
-    gridTemplateColumns: '28px minmax(0, 1fr) 10px',
+    gridTemplateColumns: '28px minmax(0, 1fr) 18px',
     alignItems: 'center',
     gap: '8px',
     border: '1px solid',
     borderRadius: '10px',
-    padding: '10px 12px',
+    padding: '16px',
     cursor: 'pointer',
     textAlign: 'left',
-    minHeight: '58px',
+    minHeight: '100px',
     background: '#ffffff',
   },
   sectionChipNumber: {
@@ -718,9 +721,10 @@ const styles: Record<string, any> = {
     lineHeight: 1.2,
   },
   sectionChipPercent: {
-    fontSize: '11px',
-    fontWeight: 600,
-    color: '#3e5852',
+    fontSize: '13px',
+    fontWeight: 800,
+    fontVariantNumeric: 'tabular-nums',
+    color: 'inherit',
   },
   sectionChipDot: {
     width: '10px',

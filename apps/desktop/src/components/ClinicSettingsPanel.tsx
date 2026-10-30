@@ -61,7 +61,8 @@ export function ClinicSettingsPanel({ settings, setSettings, store, setStore }: 
   };
 
   return <section className="cs" aria-labelledby="cs-title">
-    <h2 id="cs-title" className="sr-only">Settings</h2>
+    <div className="dt-page-heading"><span className="dt-eyebrow">PRACTICE CONFIGURATION</span><h2 id="cs-title">Clinic settings</h2><p>Your clinic identity, clinicians and records on this device.</p></div>
+    <nav className="dt-settings-index" aria-label="Settings categories"><a href="#cs-inst">Clinic identity</a><a href="#cs-slp">Clinicians</a><a href="#cs-print">Print & privacy</a><a href="#cs-data">Backup & data</a></nav>
     {message && <p className="pm-status" role="status">{message}</p>}
     {error && <p className="pm-error" role="alert">{error}</p>}
 

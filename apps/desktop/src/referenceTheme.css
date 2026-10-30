@@ -1,0 +1,205 @@
+/* Orange / aqua identity adapted from the user's visual references.
+   Decorative brand colors are separate from clinical severity colors. */
+:root { --brand-coral: #f27e4c; --brand-orange-ink: #ba4826; --brand-aqua: #55b0b4; --brand-dark: #173d43; --bg: #f7f8f8; --ink-1: #292c2d; --accent: #246b70; --accent-soft: #e6f2f1; }
+body { background: #f7f8f8; }
+.deglutech-main { background: #fafbfb !important; }
+.workspace-hero { background: #fff; color: #292c2d; border: 1px solid #e3e9e8; border-radius: 24px; box-shadow: 0 10px 36px #15383d08; }
+.workspace-hero::before { width: 260px; height: 260px; top: -160px; right: 26%; border: 0; border-radius: 58px; background: linear-gradient(135deg,#f27e4c,#ffe2c0 48%,#55b0b4); transform: rotate(45deg); box-shadow: none; opacity: .21; }
+.workspace-hero::after { content: ''; z-index: -1; position: absolute; width: 180px; height: 180px; right: -115px; bottom: -95px; border: 20px solid #a4d5d4; border-radius: 32px; transform: rotate(45deg); box-shadow: 0 0 0 15px #ffd7b7,0 0 0 30px #f68a59; pointer-events: none; }
+.hero-masthead { border-bottom: 1px solid #e8edec; padding: 17px 30px; }
+.hero-product { color: #173d43; }
+.hero-product > svg { color: #c4542f; }
+.hero-product > span { color: #587478; border-color: #c3d5d5; }
+.hero-command { background: #f5f8f8; color: #36565b; border-color: #d7e3e2; }
+.hero-command kbd { border-color: #cddcdb; color: #506d70; background: #fff; }
+.hero-content { padding: 40px 34px; min-height: 255px; gap: 50px; }
+.hero-copy { max-width: 690px; }
+.hero-breadcrumb { color: #527479; font-size: 10px; }
+.hero-breadcrumb::before { content: ''; display: inline-block; width: 22px; height: 8px; margin-right: 8px; background: linear-gradient(90deg,#ffd5a8,#f27e4c); clip-path: polygon(0 0,85% 0,100% 50%,85% 100%,0 100%); }
+.hero-breadcrumb > span { color: #96a7a8; }
+.hero-copy h2 { color: #272a2b; font-size: clamp(29px,3.15vw,44px); font-weight: 850; max-width: 650px; letter-spacing: -.04em; line-height: 1.12; }
+.hero-copy h2 > span { color: #c4522d; }
+.hero-description { color: #526163; font-size: 13px; max-width: 580px; }
+.hero-context > span { color: #365c61; }
+.hero-context .hero-local { color: #286b65; }
+.hero-local > span, .save-dot { background: #337b69; }
+.hero-progress-card { position: relative; isolation: isolate; flex: 0 0 230px; min-height: 180px; padding: 24px; gap: 12px; flex-direction: column; text-align: center; justify-content: center; margin: 8px 24px 8px 5px; }
+.hero-progress-card::before, .hero-progress-card::after { content: ''; position: absolute; z-index: -1; inset: -2px 12px; border-radius: 48px; transform: rotate(45deg); pointer-events: none; }
+.hero-progress-card::before { background: linear-gradient(130deg,#f27e4c 15%,#ffdfbc 48%,#55b0b4 85%); box-shadow: 0 12px 28px #355d5c0d; }
+.hero-progress-card::after { inset: 11px 25px; background: #fff; border: 8px solid #b6dddd; }
+.hero-progress-ring { width: 82px; height: 82px; flex: 0 0 82px; padding: 5px; box-shadow: none; }
+.hero-progress-ring > span { background: #fff; color: #173d43; font-size: 28px; padding-top: 18px; }
+.hero-progress-card strong { color: #263f43; font-size: 12px; }
+.hero-progress-card p { color: #486165; margin: 4px 0; }
+.hero-progress-card > div > small { color: #63777a; font-size: 9px; }
+.hero-toolbar { background: #f7f9f9; border-top: 1px solid #e2eae9; padding: 13px 30px; }
+.hero-save-status { color: #526c70; }
+.save-dot-error { background: #b43e26; }
+.hero-secondary { border: 1px solid #afc5c5; color: #2b5257; background: #fff; }
+.hero-primary { border: 1px solid #b74926; background: #be4b28; color: #fff; }
+.hero-primary:hover { background: #a83e20; }
+.workspace-hero button:focus-visible { outline-color: #287b82; }
+.deglutech-sidebar { background: #fff !important; border-right: 1px solid #dce6e5 !important; }
+.deglutech-sidebar > div:first-child { border-color: #dfebea !important; background: linear-gradient(120deg,#fff9f4,#fff 65%); position: relative; }
+.deglutech-sidebar > div:first-child::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 3px; background: linear-gradient(90deg,#f27e4c,#ffe0ba 45%,#55b0b4); border-radius: 4px; }
+.deglutech-sidebar h1 { color: #173d43 !important; font-size: 18px !important; }
+.deglutech-sidebar > div:first-child p { color: #56747a !important; }
+.deglutech-sidebar > div:nth-child(2) { border: 1px solid #cde2df !important; background: #edf6f4 !important; border-radius: 16px !important; margin-top: 18px !important; }
+.deglutech-sidebar > div:nth-child(2) > div:first-child { color: #21464c !important; }
+.deglutech-sidebar > div:nth-child(2) > div:nth-child(2) { color: #5b7477 !important; }
+.sidebar-switch { border-color: #a9c8c4; background: #fff; color: #285b61; font-size: 11px; }
+.sidebar-switch:hover { background: #e1efec; }
+.nav-accordion { border-color: #e2eae9; }
+.nav-accordion-trigger { color: #2a4d53; }
+.nav-accordion-trigger small { color: #5c797d; }
+.nav-accordion-trigger:hover { background: #f1f7f6; }
+.deglutech-nav-list > div:not(.nav-accordion) { color: #587479 !important; }
+.deglutech-nav-list button:not(.nav-accordion-trigger) { color: #355b60 !important; }
+.deglutech-nav-list button[aria-current='page'] { background: #e6f2ef !important; color: #214a4f !important; border-left-color: #e66f40 !important; box-shadow: none !important; }
+.deglutech-nav-list button[aria-current='page'] > span { font-weight: 800; }
+.deglutech-nav-list button > span:last-child { color: #567c7c !important; }
+.deglutech-nav-list button svg[aria-label='All fields filled'] { color: #2b7b64; }
+.deglutech-sidebar button:focus-visible { outline-color: #287b82; }
+.clinical-section-header { border-left-color: #ee8656 !important; background: #fff !important; border-radius: 18px !important; }
+.clinical-section-header::after { background: linear-gradient(100deg,#fff6ed99,transparent 40%); }
+.clinical-section-header h3 { color: #292c2d !important; }
+#export-diagnostic-report { background: #be4b28 !important; border-color: #b74926 !important; color: #fff !important; }
+.overview-eyebrow { color: #be4b28 !important; }
+.overview-heading h3 { color: #292c2d; font-weight: 800; letter-spacing: -.03em; }
+.overview-action-icon { background: #e4f3f1 !important; color: #287c81 !important; border-radius: 12px 5px 12px 5px !important; }
+.overview-actions > button { border-color: #dbe6e5; border-radius: 15px; }
+.overview-actions > button:hover { border-color: #61a4a6; }
+.readiness-card { border-radius: 15px !important; }
+.command-dialog-heading { border-top: 5px solid #f19769; }
+.command-results button:hover { background: #edf6f3; }
+@media (max-width:1100px) { .hero-content { gap: 28px; padding: 34px 26px; } .hero-progress-card { flex-basis: 200px; margin-right: 12px; } }
+@media (max-width:680px) {
+  .hero-content { padding: 28px 20px 35px; gap: 35px; }
+  .hero-copy h2 { font-size: 33px; }
+  .hero-progress-card { flex: none; width: 200px; min-height: 180px; margin: 5px auto 15px; }
+  .hero-progress-card::before { inset: 0 2px; border-radius: 42px; }
+  .hero-progress-card::after { inset: 12px 14px; border-radius: 34px; }
+  .hero-progress-ring { flex-basis: 70px; width: 70px; height: 70px; }
+  .hero-progress-ring > span { padding-top: 14px; font-size: 24px; }
+  .hero-masthead { padding: 16px 20px; }
+  .hero-toolbar { padding: 15px 20px; }
+  .workspace-hero::before { right: -80px; top: -200px; }
+}
+@media print { .workspace-hero { border-color: #ccc; background: #fff; } .workspace-hero::before,.workspace-hero::after { display:none; } }
+/* Typography contract: self-hosted Carlito, genuine regular/bold weights. */
+@font-face { font-family: 'Carlito'; src: url('/fonts/Carlito-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Carlito'; src: url('/fonts/Carlito-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+:root { --sans: 'Carlito', 'Calibri', 'Segoe UI', sans-serif; --dt-font: var(--sans); --serif: var(--sans); --mono: ui-monospace, 'Consolas', monospace; --type-display: clamp(32px,3.4vw,46px); --type-title: 26px; --type-section: 21px; --type-card: 17px; --type-body: 16px; --type-small: 14px; --type-label: 12px; }
+body,button,input,select,textarea { font-family: var(--sans); font-synthesis: none; }
+#root,#root [style*="font-family"] { font-family: var(--sans) !important; }
+#root [style*="font-weight: 8"],#root [style*="font-weight: 9"] { font-weight:700 !important; }
+h1,h2,h3,h4,h5,h6,strong,b { font-weight:700; }
+.hero-copy h2 { font-size:var(--type-display); font-weight:700; line-height:1.1; letter-spacing:-.02em; }
+.hero-description { font-size:17px; line-height:1.5; font-weight:400; }
+.hero-context > span { font-size:13px; font-weight:400; }
+.hero-breadcrumb,.hero-product { font-size:12px; font-weight:700; letter-spacing:.07em; }
+.hero-product > span { font-size:11px; }
+.hero-command { font-size:14px; }
+.hero-command kbd { font-family:var(--mono); }
+.hero-toolbar-actions button { font-size:14px; font-weight:700; min-height:42px; }
+.hero-save-status { font-size:12px; }
+.hero-progress-card strong { font-size:15px; font-weight:700; }
+.hero-progress-card p { font-size:13px; }
+.hero-progress-card > div > small { font-size:11px; }
+.hero-progress-ring > span { font-weight:700; font-size:30px; letter-spacing:-.02em; }
+.deglutech-sidebar h1 { font-size:22px !important; font-weight:700 !important; }
+.deglutech-sidebar > div:first-child p { font-size:12px !important; font-weight:400 !important; }
+.deglutech-sidebar > div:nth-child(2) > div:first-child { font-size:16px !important; font-weight:700 !important; line-height:1.35; }
+.deglutech-sidebar > div:nth-child(2) > div:nth-child(2) { font-size:13px !important; }
+.sidebar-switch { font-size:14px; font-weight:700; }
+.nav-accordion-trigger { font-size:15px; font-weight:700; }
+.nav-accordion-trigger small { font-size:12px; font-weight:400; }
+.deglutech-nav-list button:not(.nav-accordion-trigger) > span { font-size:14px !important; }
+.deglutech-nav-list button:not(.nav-accordion-trigger) { min-height:40px !important; }
+.deglutech-nav-list button svg[aria-label='All fields filled'] { color:#2b7b64 !important; }
+.clinical-section-header h3 { font-size:var(--type-title) !important; font-weight:700 !important; line-height:1.2 !important; letter-spacing:-.015em; }
+.clinical-section-header p { font-size:var(--type-body) !important; line-height:1.5 !important; }
+.clinical-section-header p:first-child { font-size:var(--type-label) !important; font-weight:700 !important; letter-spacing:.06em !important; }
+.clinical-section-header button { font-size:var(--type-small) !important; font-weight:700 !important; }
+.report-workspace h3 { font-size:var(--type-section) !important; font-weight:700 !important; line-height:1.25 !important; }
+.report-workspace .clinical-section-header h3 { font-size:var(--type-title) !important; }
+.report-workspace h4 { font-size:var(--type-card) !important; font-weight:700 !important; letter-spacing:0 !important; text-transform:none !important; line-height:1.3 !important; }
+.report-workspace p,.report-workspace li,.report-workspace td { font-size:var(--type-body) !important; line-height:1.5 !important; }
+.report-workspace p[style*="text-transform: uppercase"] { font-size:var(--type-label) !important; font-weight:700 !important; letter-spacing:.06em !important; }
+.report-workspace th { font-size:var(--type-label) !important; font-weight:700 !important; letter-spacing:.04em; }
+.report-workspace input,.report-workspace textarea,.report-workspace select { font-size:var(--type-body) !important; line-height:1.5; font-weight:400 !important; }
+.report-workspace button { font-weight:700 !important; }
+.readiness-card strong { font-size:17px; font-weight:700; }
+.readiness-label { font-size:13px; font-weight:400; }
+.readiness-card [style*="font-variant-numeric"] { font-size:15px !important; font-weight:700 !important; }
+.overview-heading h3 { font-size:28px; font-weight:700; }
+.overview-heading p { font-size:16px; }
+.overview-actions strong { font-size:17px; font-weight:700; }
+.overview-actions small { font-size:14px; line-height:1.4; }
+.command-results strong { font-size:16px; font-weight:700; }
+.command-results small { font-size:13px; }
+.command-dialog-heading h2 { font-weight:700; }
+@media(max-width:680px) { .hero-copy h2 { font-size:34px; } .hero-description { font-size:16px; } .hero-progress-card { min-height:200px; width:220px; } .report-workspace .clinical-section-header h3 { font-size:24px !important; } }
+.nav-complete-icon { color: #28775f !important; }
+/* Final selected direction: navy + orange, based on the training-layout reference. */
+:root { --brand-coral: #f46b20; --brand-orange-ink: #b74612; --brand-aqua: #224b70; --brand-dark: #173451; --accent: #204a6b; --accent-soft: #edf2f7; --ink-1: #173451; }
+.workspace-hero { border-color: #dfe6ec; border-radius: 18px; background: #fff; }
+.workspace-hero::before { opacity: 1; top: 71px; right: 0; bottom: 68px; width: 32%; height: auto; background: #173451; border: 0; border-radius: 0; transform: none; clip-path: polygon(24% 0,100% 0,100% 100%,0 100%); }
+.workspace-hero::after { width: 100px; height: 190px; right: -68px; bottom: 80px; border: 0; box-shadow: none; background: #f46b20; border-radius: 0; transform: skew(-24deg); }
+.hero-masthead { background: #fff; }
+.hero-product,.hero-product > svg { color: #173451; }
+.hero-product > span,.hero-command { color: #496075; }
+.hero-breadcrumb { color: #4e6578; }
+.hero-breadcrumb::before { background: #f46b20; }
+.hero-copy h2 { color: #173451; max-width: 650px; }
+.hero-copy h2 > span { color: #173451; }
+.hero-description { color: #4f5d69; }
+.hero-context > span { color: #3e596e; }
+.hero-content { min-height: 245px; }
+.hero-progress-card { margin-right: 8px; }
+.hero-progress-card::before { border-radius: 34px; background: #f46b20; inset: 0 12px; box-shadow: none; }
+.hero-progress-card::after { border-radius: 27px; background: #173451; border: 0; inset: 7px 19px; }
+.hero-progress-ring > span { background: #173451; color: #fff; }
+.hero-progress-card strong { color: #fff; }
+.hero-progress-card p { color: #dce5ed; }
+.hero-progress-card > div > small { color: #cedbe5; }
+.hero-toolbar { background: #f4f6f8; border-color: #dfe6ec; }
+.hero-primary,#export-diagnostic-report { background: #be4916 !important; border-color: #b14212 !important; color: #fff !important; }
+.hero-primary:hover,#export-diagnostic-report:hover { background: #a23c10 !important; }
+.hero-secondary { color: #173451; border-color: #b7c5d0; }
+.deglutech-sidebar { background: #173451 !important; border-color: #24435e !important; }
+.deglutech-sidebar > div:first-child { background: #173451; border-color: #34506a !important; }
+.deglutech-sidebar > div:first-child::after { background: #f46b20; }
+.deglutech-sidebar h1 { color: #fff !important; }
+.deglutech-sidebar > div:first-child p { color: #c5d6e2 !important; }
+.deglutech-sidebar > div:nth-child(2) { background: #224360 !important; border-color: #46617a !important; }
+.deglutech-sidebar > div:nth-child(2) > div:first-child { color: #fff !important; }
+.deglutech-sidebar > div:nth-child(2) > div:nth-child(2) { color: #d0dee8 !important; }
+.sidebar-switch { background: #ffffff0c; color: #fff; border-color: #71889a; }
+.sidebar-switch:hover { background: #ffffff19; }
+.nav-accordion { border-color: #38526c; }
+.nav-accordion-trigger { color: #f2f6fa; }
+.nav-accordion-trigger small { color: #c5d4df; }
+.nav-accordion-trigger:hover { background: #254762; }
+.deglutech-nav-list > div:not(.nav-accordion) { color: #b7cad9 !important; }
+.deglutech-nav-list button:not(.nav-accordion-trigger) { color: #dfebf3 !important; }
+.deglutech-nav-list button[aria-current='page'] { background: #2a4c69 !important; color: #fff !important; border-left-color: #f78242 !important; }
+.deglutech-nav-list button > span:last-child { color: #c4d7e4 !important; }
+.nav-complete-icon { color: #a4dec9 !important; }
+.deglutech-sidebar button:focus-visible { outline-color: #ffb07c; }
+.clinical-section-header { border-left-color: #f46b20 !important; }
+.clinical-section-header h3 { color: #173451 !important; }
+.clinical-section-header::after { background: linear-gradient(100deg,#fff5ec88,transparent 35%); }
+.report-workspace h3,.overview-heading h3,.deglutech-workflow-current h3 { color: #173451 !important; }
+.overview-eyebrow { color: #b74612 !important; }
+.overview-action-icon { background: #edf2f7 !important; color: #214b6d !important; border-radius: 10px !important; }
+.command-dialog-heading { border-top-color: #f46b20; }
+.command-results button:hover { background: #edf2f7; }
+@media(max-width:680px) {
+ .workspace-hero::before { top: auto; bottom: 102px; width: 100%; height: 255px; clip-path: polygon(0 15%,100% 0,100% 100%,0 100%); }
+ .workspace-hero::after { display:none; }
+ .hero-content { gap:40px; padding-bottom: 30px; }
+ .hero-progress-card::before { inset:0 6px; }
+ .hero-progress-card::after { inset:7px 13px; }
+}
+@media print { .deglutech-sidebar { display:none !important; } .hero-progress-card,.workspace-hero::before,.workspace-hero::after { display:none !important; } }

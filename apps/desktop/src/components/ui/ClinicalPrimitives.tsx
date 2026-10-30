@@ -69,7 +69,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,
   description,
   icon,
-  accent = '#1f5c4a',
+  accent = '#204a6b',
   action,
   className,
 }) => (
@@ -181,7 +181,7 @@ interface TicketBarProps {
 }
 
 export const TicketBar: React.FC<TicketBarProps> = ({
-  accent = '#1f5c4a',
+  accent = '#204a6b',
   active = false,
   children,
   onClick,

@@ -14,13 +14,13 @@ const readLogs = (state: FieldState): Log[] => {
 };
 export function PrescriptionRelease({ state, ids, update }: { state: FieldState; ids: string[]; update: (patch: FieldState) => void }) {
   const doses = readDoses(state), blocked = releaseBlock(state, ids);
-  return <section className="suite-panel"><h3>Individual prescription and release</h3>
+  return <section className="suite-panel dt-release-panel"><h3>Individual prescription and release</h3>
     <div className="suite-dose-grid">{ids.map(id => <div key={id}><strong>{HNC_EXERCISE_LIBRARY.find(e => e.id === id)?.name}</strong>
       <label>Sessions per day<select value={doses[id]?.sessionsPerDay ?? 1} onChange={e => update({ prescriptionDoses: JSON.stringify({ ...doses, [id]: { instructions: doses[id]?.instructions ?? '', sessionsPerDay: Number(e.target.value) } }) })}>{Array.from({length: 12}, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}</select></label>
       <label>Clinician dose and instructions<textarea value={doses[id]?.instructions ?? ''} onChange={e => update({ prescriptionDoses: JSON.stringify({ ...doses, [id]: { sessionsPerDay: doses[id]?.sessionsPerDay ?? 1, instructions: e.target.value } }) })} /></label></div>)}</div>
     <label>Individual stop and contact plan<textarea value={String(state.painLimit || '')} onChange={e => update({ painLimit: e.target.value })} /></label>
     <p role="status">{blocked || (isReleased(state, ids) ? 'This prescription is released to the local patient preview.' : 'Ready for clinician review and release. Changes to dose or clearance require a new release.')}</p>
-    <button type="button" disabled={!!blocked || isReleased(state, ids)} onClick={() => update({ planRelease: releaseKey(state, ids), planReleasedAt: new Date().toISOString() })}><Send size={16} /> Confirm review and release</button>
+    <button className="dt-primary" type="button" disabled={!!blocked || isReleased(state, ids)} onClick={() => update({ planRelease: releaseKey(state, ids), planReleasedAt: new Date().toISOString() })}><Send size={16} /> Confirm review and release</button>
   </section>;
 }
 export function PatientSessionLog({ state, ids, update }: { state: FieldState; ids: string[]; update: (patch: FieldState) => void }) {

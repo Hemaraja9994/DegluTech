@@ -1,9 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity,
+  ArrowUpRight,
+  Command,
+  Search,
+  X,
   Apple,
   BarChart3,
   Brain,
+  CheckCircle2,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
@@ -57,6 +63,7 @@ import {
 } from './clinicStore';
 import { FloatingBadge, SectionHeader } from './components/ui/ClinicalPrimitives';
 import { T } from './theme';
+import { computeSectionCompletion } from './reportEngine';
 
 type FieldState = Record<string, string | string[]>;
 
@@ -94,6 +101,21 @@ export const App: React.FC = () => {
   const [activeSectionId, setActiveSectionId] = useState<HncSectionId>('command');
   // The tool suite is a separate view, not a 14th section (the protocol fixes 13 sections).
   const [toolSuiteOpen, setToolSuiteOpen] = useState(false);
+  const commandDialog = useRef<HTMLDialogElement>(null);
+  const [sectionQuery, setSectionQuery] = useState('');
+  useEffect(() => {
+    const shortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setSectionQuery('');
+        if (!commandDialog.current?.open) commandDialog.current?.showModal();
+        commandDialog.current?.querySelector('input')?.focus();
+      }
+    };
+    window.addEventListener('keydown', shortcut);
+    return () => window.removeEventListener('keydown', shortcut);
+  }, []);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(['Triage']);
   // Patients and clinic settings live in this browser (see clinicStore.ts). The open chart is the active patient's.
   const [store, setStore] = useState<PatientStore>(EMPTY_STORE);
   const [settings, setSettings] = useState<ClinicSettings>(DEFAULT_SETTINGS);
@@ -127,6 +149,12 @@ export const App: React.FC = () => {
       setFieldState(previous => ({ ...previous, releaseLanguage: patientLanguage }));
     }
   }, [storageReady, patientLanguage, fieldState.releaseLanguage]);
+
+  const sectionReadiness = useMemo(() => computeSectionCompletion(fieldState), [fieldState]);
+  useEffect(() => {
+    const group = toolSuiteOpen ? 'Assessment' : sectionGroupFor(activeSectionId);
+    setExpandedGroups(previous => previous.includes(group) ? previous : [...previous, group]);
+  }, [activeSectionId, toolSuiteOpen]);
 
   const activeSection = HNC_CLINICAL_SECTIONS.find((section) => section.id === activeSectionId) ?? HNC_CLINICAL_SECTIONS[0];
   const activeSectionIndex = Math.max(0, HNC_CLINICAL_SECTIONS.findIndex((section) => section.id === activeSection.id));
@@ -263,42 +291,33 @@ export const App: React.FC = () => {
             style={{ ...styles.navButton, ...(view === 'patients' ? styles.navButtonActive : {}), borderLeftColor: view === 'patients' ? '#f4b8a6' : 'transparent' }}>
             <Users size={16} /><span style={styles.navLabel}>Patients</span><span style={styles.navIndex}>{store.patients.length}</span>
           </button>
-          {HNC_CLINICAL_SECTIONS.map((section, index) => {
-            const Icon = sectionIcons[section.id];
-            const isActive = view === 'workspace' && !toolSuiteOpen && activeSectionId === section.id;
-            const group = sectionGroupFor(section.id);
-            const previousGroup = index > 0 ? sectionGroupFor(HNC_CLINICAL_SECTIONS[index - 1].id) : undefined;
-            return (
-              <React.Fragment key={section.id}>
-                {group !== previousGroup && <div style={styles.navGroup}>{group}</div>}
-                <button
-                  type="button"
-                  aria-current={isActive ? 'page' : undefined}
-                  onClick={() => navigateToSection(section.id)}
-                  style={{
-                    ...styles.navButton,
-                    ...(isActive ? styles.navButtonActive : {}),
-                    borderLeftColor: isActive ? section.accent : 'transparent',
-                  }}
-                >
-                  <Icon size={16} />
-                  <span style={styles.navLabel}>{section.label}</span>
-                  <span style={styles.navIndex}>{section.order}</span>
-                </button>
-                {section.id === 'instrumental' && (
-                  <button
-                    type="button"
-                    aria-current={view === 'workspace' && toolSuiteOpen ? 'page' : undefined}
-                    onClick={openToolSuite}
-                    style={{ ...styles.navButton, ...(view === 'workspace' && toolSuiteOpen ? styles.navButtonActive : {}), borderLeftColor: view === 'workspace' && toolSuiteOpen ? '#1f5c4a' : 'transparent' }}
-                  >
-                    <ClipboardList size={16} />
-                    <span style={styles.navLabel}>Clinical tool suite</span>
-                    <span style={styles.navIndex}>T</span>
-                  </button>
-                )}
-              </React.Fragment>
-            );
+          {['Triage', 'Intake', 'Assessment', 'Synthesis', 'Plan'].map(group => {
+            const members = HNC_CLINICAL_SECTIONS.filter(section => sectionGroupFor(section.id) === group);
+            const expanded = expandedGroups.includes(group);
+            const filled = members.filter(section => sectionReadiness.find(item => item.id === section.id)?.status === 'complete').length;
+            return <div className="nav-accordion" key={group}>
+              <button type="button" className="nav-accordion-trigger" aria-expanded={expanded} aria-controls={`nav-${group}`}
+                onClick={() => setExpandedGroups(previous => expanded ? previous.filter(item => item !== group) : [...previous, group])}>
+                <span>{group}</span><small>{filled}/{members.length} filled</small><ChevronDown size={15} className={expanded ? 'is-expanded' : ''} />
+              </button>
+              <div id={`nav-${group}`} hidden={!expanded}>
+                {members.map(section => {
+                  const Icon = sectionIcons[section.id];
+                  const isActive = view === 'workspace' && !toolSuiteOpen && activeSectionId === section.id;
+                  const readiness = sectionReadiness.find(item => item.id === section.id);
+                  return <button key={section.id} type="button" aria-current={isActive ? 'page' : undefined}
+                    onClick={() => navigateToSection(section.id)}
+                    style={{ ...styles.navButton, ...(isActive ? styles.navButtonActive : {}), borderLeftColor: isActive ? '#79e0c7' : 'transparent' }}>
+                    <Icon size={16} /><span style={styles.navLabel}>{section.label}</span>
+                    {readiness?.status === 'complete' ? <CheckCircle2 className="nav-complete-icon" size={15} color="#8ce5c6" aria-label="All fields filled" /> : <span style={styles.navIndex}>{section.order}</span>}
+                  </button>;
+                })}
+                {group === 'Assessment' && <button type="button" onClick={openToolSuite} aria-current={toolSuiteOpen && view === 'workspace' ? 'page' : undefined}
+                  style={{ ...styles.navButton, ...(toolSuiteOpen && view === 'workspace' ? styles.navButtonActive : {}) }}>
+                  <ClipboardList size={16} /><span style={styles.navLabel}>Clinical tool suite</span><span style={styles.navIndex}>T</span>
+                </button>}
+              </div>
+            </div>;
           })}
           <div style={styles.navGroup}>Clinic</div>
           <button type="button" aria-current={view === 'settings' ? 'page' : undefined} onClick={() => showView('settings')}
@@ -308,7 +327,7 @@ export const App: React.FC = () => {
         </nav>
       </aside>
 
-      <main className="deglutech-main" style={styles.main}>
+      <main className="deglutech-main" data-view={view} data-section={shownId} style={styles.main}>
         {view === 'workspace' && active?.demo && <div className="demo-notice">Demo patient: example data for teaching. Remove demo patients in Settings.</div>}
         <label className="mobile-section-select">
           <span>Clinical section</span>
@@ -318,27 +337,47 @@ export const App: React.FC = () => {
             <option value="__settings">Settings</option>
           </select>
         </label>
-        <header className="deglutech-topbar" style={styles.topbar}>
-          <div>
-            <p style={styles.overline}>{view === 'workspace' && active ? `${patientLabel(active)}${active.studyId && active.name ? ` · ${active.studyId}` : ''}` : 'Head and neck cancer clinical workspace'}</p>
-            <h2 style={styles.pageTitle}>{view === 'patients' ? 'Patients' : view === 'settings' ? 'Settings' : toolSuiteOpen ? 'Clinical tool suite' : activeSection.label}</h2>
+        <header className="workspace-hero">
+          <div className="hero-masthead">
+            <span className="hero-product"><Activity size={16} /> DEGLUTECH <span>CLINICAL WORKSPACE</span></span>
+            <button className="hero-command" type="button" onClick={() => { setSectionQuery(''); commandDialog.current?.showModal(); commandDialog.current?.querySelector('input')?.focus(); }}><Search size={16} /><span>Jump to a section</span><kbd>Ctrl K</kbd></button>
           </div>
-          <div className="deglutech-topbar-actions" style={styles.topbarActions}>
-            {view === 'workspace' && <div className="deglutech-progress-wrap" style={styles.progressWrap}>
-              <span style={styles.progressText}>{completion}% complete</span>
-              <div style={styles.progressTrack}>
-                <div style={{ ...styles.progressFill, width: `${completion}%` }} />
+          <div className="hero-content">
+            <div className="hero-copy">
+              <p className="hero-breadcrumb">HEAD & NECK REHABILITATION <span>/</span> {view === 'workspace' ? toolSuiteOpen ? 'CLINICAL TOOLS' : sectionGroupFor(activeSectionId).toUpperCase() : 'CLINIC'}</p>
+              <h2><ThemeHeading text={view === 'patients' ? 'Care starts with connection.' : view === 'settings' ? 'Your practice. Your workspace.' : toolSuiteOpen ? 'Precision at the point of care.' : activeSectionId === 'command' ? 'A clearer view of care.' : activeSectionId === 'report' ? 'From clinical insight to care.' : activeSection.label} /></h2>
+              <p className="hero-description">{view === 'patients' ? 'Open a patient chart and bring every stage of rehabilitation together.' : view === 'settings' ? 'Manage your clinic identity, clinician profiles and device backups.' : toolSuiteOpen ? 'Clinical assessment tools, recorded findings and longitudinal measures in one place.' : activeSectionId === 'report' ? 'Review the complete picture. Document your judgement. Prepare the next step.' : activeSectionId === 'command' ? 'Assessment, rehabilitation and meaningful progress. One connected clinical workflow.' : activeSection.purpose}</p>
+              <div className="hero-context">
+                <span><UserRound size={15} />{active ? patientLabel(active) : 'No patient selected'}</span>
+                {view === 'workspace' && <span><ClipboardCheck size={15} />{toolSuiteOpen ? 'Clinical tool suite' : `Section ${activeSectionIndex + 1} / 13 · ${activeSection.shortLabel}`}</span>}
+                <span className="hero-local"><span /> Device workspace</span>
               </div>
+            </div>
+            {view === 'workspace' && <div className="hero-progress-card">
+              <div className="hero-progress-ring" style={{ background: `conic-gradient(#ffad73 ${completion}%, #45637c 0)` }} role="progressbar" aria-label="Recorded field completion" aria-valuemin={0} aria-valuemax={100} aria-valuenow={completion}><span>{completion}<small>%</small></span></div>
+              <div><strong>Chart completion</strong><p>{sectionReadiness.filter(item => item.status === 'complete').length} of {sectionReadiness.length} sections filled</p><small>Clinician review required</small></div>
             </div>}
-            <span className="workspace-save-status" role="status">{storedAt}</span>
-            <button type="button" onClick={saveSession} style={styles.iconButton} aria-label="Save session">
-              <Save size={18} />
-            </button>
-            <button type="button" onClick={() => window.print()} style={styles.iconButton} aria-label="Export report">
-              <Download size={18} />
-            </button>
+          </div>
+          <div className="hero-toolbar">
+            <span className="hero-save-status" role="status"><span className={storedAt.startsWith('Not saved') ? 'save-dot-error' : 'save-dot'} />{storedAt}</span>
+            <div className="hero-toolbar-actions">
+              {view === 'workspace' && <><button type="button" className="hero-secondary" onClick={saveSession}><Save size={15} /> Save session</button><button type="button" className="hero-primary" onClick={() => activeSectionId === 'report' && !toolSuiteOpen ? document.getElementById('export-diagnostic-report')?.click() : navigateToSection('report')}>{activeSectionId === 'report' && !toolSuiteOpen ? <Download size={16} /> : <ArrowUpRight size={16} />}{activeSectionId === 'report' && !toolSuiteOpen ? 'Export diagnostic report' : 'Review report'}</button></>}
+              {view !== 'workspace' && <button type="button" className="hero-primary" onClick={() => active ? navigateToSection('command') : showView('patients')}>{active ? 'Open active chart' : 'Patient workspace'}<ArrowUpRight size={16} /></button>}
+            </div>
           </div>
         </header>
+        <dialog className="section-command-dialog" ref={commandDialog} aria-labelledby="command-title">
+          <div className="command-dialog-heading"><h2 id="command-title"><Command size={20} /> Navigate workspace</h2><button type="button" aria-label="Close section search" onClick={() => commandDialog.current?.close()}><X size={20} /></button></div>
+          <label className="command-search"><Search size={19} /><input autoFocus placeholder="Find a section or clinical tool…" aria-label="Find a clinical section" value={sectionQuery} onChange={event => setSectionQuery(event.target.value)} /></label>
+          <div className="command-results">
+            {HNC_CLINICAL_SECTIONS.filter(section => `${section.label} ${section.purpose}`.toLowerCase().includes(sectionQuery.toLowerCase())).map(section => {
+              const Icon = sectionIcons[section.id];
+              return <button type="button" key={section.id} onClick={() => { navigateToSection(section.id); commandDialog.current?.close(); }}><Icon size={19} /><span><strong>{section.label}</strong><small>{sectionGroupFor(section.id)} · Section {section.order}</small></span><ArrowUpRight size={16} /></button>;
+            })}
+            {'clinical tools tool suite assessment measures'.includes(sectionQuery.toLowerCase()) && <button type="button" onClick={() => { openToolSuite(); commandDialog.current?.close(); }}><ClipboardList size={19} /><span><strong>Clinical tool suite</strong><small>Assessment tools and outcome measures</small></span><ArrowUpRight size={16} /></button>}
+            {sectionQuery && !HNC_CLINICAL_SECTIONS.some(section => `${section.label} ${section.purpose}`.toLowerCase().includes(sectionQuery.toLowerCase())) && !'clinical tools tool suite assessment measures'.includes(sectionQuery.toLowerCase()) && <p className="command-empty">No matching sections. Try “swallow”, “report” or “tools”.</p>}
+          </div><p className="command-hint">Tab to move · Enter to open · Esc to close</p>
+        </dialog>
 
         <WorkspaceNotice />
 
@@ -464,6 +503,11 @@ export const App: React.FC = () => {
   );
 };
 
+function ThemeHeading({ text }: { text: string }) {
+  const space = text.indexOf(' ');
+  return space < 0 ? <span>{text}</span> : <><span>{text.slice(0, space)}</span>{text.slice(space)}</>;
+}
+
 function SectionNavigator({
   activeSection,
   activeSectionIndex,
@@ -545,7 +589,7 @@ function SectionNavigator({
                 style={{
                   ...styles.workflowStepNumber,
                   background: isActive ? section.accent : '#dce5df',
-                  color: isActive ? '#ffffff' : '#3e5852',
+                  color: isActive ? '#ffffff' : '#475d70',
                 }}
               >
                 {section.order}
@@ -600,65 +644,51 @@ function SectionPager({
   );
 }
 
-function SectionWorkspace({
-  section,
-  fieldState,
-  setFieldState,
-}: {
+function SectionWorkspace({ section, fieldState, setFieldState }: {
   section: ClinicalSection;
   fieldState: FieldState;
   setFieldState: React.Dispatch<React.SetStateAction<FieldState>>;
 }) {
-  return (
-    <div style={styles.workspaceGrid}>
-      <SectionHeader
-        eyebrow={`${section.shortLabel} module`}
-        title={section.purpose}
-        icon={React.createElement(sectionIcons[section.id], { size: 20 })}
-        accent={section.accent}
-        action={<FloatingBadge tone="info">{section.status}</FloatingBadge>}
-      />
-
-      <div className="deglutech-block-grid" style={styles.blockGrid}>
-        <ClinicalMeasures section={section.id} values={fieldState} />
-        {section.blocks.map((block) => (
-          <section key={block.title} style={styles.panel}>
-            <div style={styles.blockHeaderLine}>
-              <h3 style={styles.panelTitle}>{block.title}</h3>
-              <p style={styles.blockDescription}>{block.description}</p>
-            </div>
-            <div className="deglutech-form-grid" style={styles.formGrid}>
-              {block.fields.map((field) => (
-                <FieldControl
-                  key={field.id}
-                  field={field}
-                  value={fieldState[field.id]}
-                  onChange={(value) =>
-                    setFieldState((prev) => ({
-                      ...prev,
-                      [field.id]: value,
-                    }))
-                  }
-                />
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
-
-      <section style={styles.panel}>
-        <div style={styles.panelHeader}>
-          <h3 style={styles.panelTitle}>Expected outputs</h3>
-          <ClipboardCheck size={18} color={section.accent} />
-        </div>
-        <div style={styles.outputGrid}>
-          {section.outputs.map((output) => (
-            <span key={output} style={styles.outputChip}>{output}</span>
-          ))}
-        </div>
-      </section>
+  const [collapsed, setCollapsed] = useState<string[]>([]);
+  const isRecorded = (id: string) => {
+    const value = fieldState[id];
+    return Array.isArray(value) ? value.length > 0 : Boolean(value?.trim());
+  };
+  const total = section.blocks.reduce((n, block) => n + block.fields.length, 0);
+  const recorded = section.blocks.reduce((n, block) => n + block.fields.filter(field => isRecorded(field.id)).length, 0);
+  return <div className="dt-section-workspace" style={styles.workspaceGrid}>
+    <div className="dt-section-status"><span><ClipboardCheck size={18} /> Clinical documentation</span><strong>{recorded} / {total} fields recorded</strong><small>Recording progress · clinician review required</small></div>
+    <nav className="dt-block-index" aria-label={`${section.shortLabel} subsections`}>
+      <span className="dt-index-label">IN THIS SECTION</span>
+      {section.blocks.map((block, index) => <button key={block.title} type="button" onClick={() => {
+        setCollapsed(previous => previous.filter(title => title !== block.title));
+        document.getElementById(`block-${section.id}-${index}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }}><span>{String(index + 1).padStart(2, '0')}</span>{block.title}</button>)}
+    </nav>
+    <div className="deglutech-block-grid" style={styles.blockGrid}>
+      <ClinicalMeasures section={section.id} values={fieldState} />
+      {section.blocks.map((block, index) => {
+        const filled = block.fields.filter(field => isRecorded(field.id)).length;
+        const isCollapsed = collapsed.includes(block.title);
+        return <section key={block.title} id={`block-${section.id}-${index}`} className="dt-panel dt-form-panel">
+          <div className="dt-panel-heading">
+            <span className="dt-block-number">{String(index + 1).padStart(2, '0')}</span>
+            <div><h3>{block.title}</h3><p>{block.description}</p></div>
+            <div className="dt-block-actions"><span className={filled === block.fields.length ? 'dt-count is-filled' : 'dt-count'}>{filled}/{block.fields.length} recorded</span>
+              <button type="button" className="dt-collapse" aria-expanded={!isCollapsed} aria-controls={`fields-${section.id}-${index}`} aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} ${block.title}`}
+                onClick={() => setCollapsed(previous => isCollapsed ? previous.filter(title => title !== block.title) : [...previous, block.title])}><ChevronDown size={18} className={isCollapsed ? '' : 'is-expanded'} /></button></div>
+          </div>
+          <div className="deglutech-form-grid" id={`fields-${section.id}-${index}`} hidden={isCollapsed} style={styles.formGrid}>
+            {block.fields.map(field => <FieldControl key={field.id} field={field} value={fieldState[field.id]}
+              onChange={value => setFieldState(previous => ({ ...previous, [field.id]: value }))} />)}
+          </div>
+        </section>;
+      })}
     </div>
-  );
+    <section className="dt-panel dt-outputs"><div className="dt-panel-heading"><ClipboardCheck size={19} /><div><h3>Documentation checklist</h3><p>Expected outputs for this section. Review clinically before completing the report.</p></div></div>
+      <div style={styles.outputGrid}>{section.outputs.map(output => <span className="dt-output-item" key={output}><ClipboardCheck size={15} />{output}</span>)}</div>
+    </section>
+  </div>;
 }
 
 function FieldControl({
@@ -673,9 +703,9 @@ function FieldControl({
   if (field.kind === 'multi') {
     const selected = Array.isArray(value) ? value : [];
     return (
-      <div style={styles.fieldWide} role="group" aria-label={field.label}>
-        <span style={styles.fieldLabel}>{field.label}</span>
-        <div style={styles.chipGroup}>
+      <div className="dt-field dt-field-wide" style={styles.fieldWide} role="group" aria-label={field.label}>
+        <span className="dt-field-label" style={styles.fieldLabel}>{field.label}</span>
+        <div className="dt-choice-group" style={styles.chipGroup}>
           {(field.options ?? []).map((option) => {
             const isSelected = selected.includes(option);
             return (
@@ -693,29 +723,29 @@ function FieldControl({
             );
           })}
         </div>
-        {field.helper && <span style={styles.fieldHelper}>{field.helper}</span>}
+        {field.helper && <span className="dt-field-helper" style={styles.fieldHelper}>{field.helper}</span>}
       </div>
     );
   }
 
   if (field.kind === 'textarea') {
     return (
-      <label style={styles.fieldWide}>
-        <span style={styles.fieldLabel}>{field.label}</span>
+      <label className="dt-field dt-field-wide" style={styles.fieldWide}>
+        <span className="dt-field-label" style={styles.fieldLabel}>{field.label}</span>
         <textarea
           value={typeof value === 'string' ? value : ''}
           onChange={(event) => onChange(event.target.value)}
           style={styles.textarea}
         />
-        {field.helper && <span style={styles.fieldHelper}>{field.helper}</span>}
+        {field.helper && <span className="dt-field-helper" style={styles.fieldHelper}>{field.helper}</span>}
       </label>
     );
   }
 
   if (field.kind === 'select') {
     return (
-      <label style={styles.field}>
-        <span style={styles.fieldLabel}>{field.label}</span>
+      <label className="dt-field" style={styles.field}>
+        <span className="dt-field-label" style={styles.fieldLabel}>{field.label}</span>
         <select
           value={typeof value === 'string' ? value : ''}
           onChange={(event) => onChange(event.target.value)}
@@ -726,16 +756,16 @@ function FieldControl({
             <option key={option} value={option}>{option}</option>
           ))}
         </select>
-        {field.helper && <span style={styles.fieldHelper}>{field.helper}</span>}
+        {field.helper && <span className="dt-field-helper" style={styles.fieldHelper}>{field.helper}</span>}
       </label>
     );
   }
 
   if (field.kind === 'scale') {
     return (
-      <div style={styles.field} role="group" aria-label={field.label}>
-        <span style={styles.fieldLabel}>{field.label}</span>
-        <div style={styles.scaleRow}>
+      <div className="dt-field" style={styles.field} role="group" aria-label={field.label}>
+        <span className="dt-field-label" style={styles.fieldLabel}>{field.label}</span>
+        <div className="dt-scale-group" style={styles.scaleRow}>
           {(field.id === 'painScore' ? Array.from({ length: 11 }, (_, i) => String(i)) : ['0', '1', '2', '3', '4']).map((score) => (
             <button
               key={score}
@@ -748,7 +778,7 @@ function FieldControl({
             </button>
           ))}
         </div>
-        {field.helper && <span style={styles.fieldHelper}>{field.helper}</span>}
+        {field.helper && <span className="dt-field-helper" style={styles.fieldHelper}>{field.helper}</span>}
       </div>
     );
   }
@@ -761,8 +791,8 @@ function FieldControl({
   const numberValue = typeof value === 'string' && value !== '' ? Number(value) : undefined;
   const invalid = range && numberValue !== undefined && (numberValue < range.min || numberValue > range.max);
   return (
-    <label style={styles.field}>
-      <span style={styles.fieldLabel}>{field.label}</span>
+    <label className="dt-field" style={styles.field}>
+      <span className="dt-field-label" style={styles.fieldLabel}>{field.label}</span>
       <input
         type={field.kind === 'number' || field.kind === 'metric' ? 'number' : field.kind === 'date' ? 'date' : 'text'}
         value={typeof value === 'string' ? value : ''}
@@ -774,8 +804,8 @@ function FieldControl({
         aria-invalid={invalid || undefined}
       />
       {invalid && <span role="alert" style={{ color: '#a12622', fontSize: 12 }}>Enter a value from {range.min} to {range.max}.</span>}
-      {field.unit && <span style={styles.fieldHelper}>Unit: {field.unit}</span>}
-      {field.helper && <span style={styles.fieldHelper}>{field.helper}</span>}
+      {field.unit && <span className="dt-field-helper" style={styles.fieldHelper}>Unit: {field.unit}</span>}
+      {field.helper && <span className="dt-field-helper" style={styles.fieldHelper}>{field.helper}</span>}
     </label>
   );
 }
@@ -806,13 +836,13 @@ function ExercisePrescription({
   const prescribedExercises = HNC_EXERCISE_LIBRARY.filter((exercise) => prescribedExerciseIds.includes(exercise.id));
 
   return (
-    <div style={styles.workspaceGrid}>
+    <div className="dt-workspace-grid" style={styles.workspaceGrid}>
       <SectionHeader
         eyebrow="Exercise prescription"
         title="Illustrated home program with clinical dosage and safety stop rules."
         icon={<Dumbbell size={20} />}
         accent="#2f7a5c"
-        action={<FloatingBadge tone="success">patient-ready</FloatingBadge>}
+        action={<FloatingBadge tone="neutral">Clinician review required</FloatingBadge>}
       />
 
       <LanguageSelector selectedLanguage={patientLanguage} onSelect={setPatientLanguage} />
@@ -828,7 +858,7 @@ function ExercisePrescription({
       />
 
       <div className="deglutech-exercise-layout" style={styles.exerciseLayout}>
-        <section style={styles.exerciseMenu}>
+        <section className="dt-exercise-menu" aria-label="Exercise library" style={styles.exerciseMenu}>
           {HNC_EXERCISE_LIBRARY.map((exercise) => {
             const isPatientVisible = prescribedExerciseIds.includes(exercise.id);
 
@@ -837,6 +867,7 @@ function ExercisePrescription({
                 key={exercise.id}
                 type="button"
                 onClick={() => setSelectedExerciseId(exercise.id)}
+                aria-pressed={selectedExerciseId === exercise.id}
                 style={selectedExerciseId === exercise.id ? styles.exerciseMenuItemActive : styles.exerciseMenuItem}
               >
                 <span style={styles.exerciseName}>{exercise.name}</span>
@@ -849,7 +880,7 @@ function ExercisePrescription({
           })}
         </section>
 
-        <section style={styles.panel}>
+        <section className="dt-panel" style={styles.panel}>
           <div className="deglutech-exercise-header" style={styles.exerciseHeaderBlock}>
             <div>
               <p style={styles.overline}>{selectedExercise.category} {localizedBundle.protocolLabel}</p>
@@ -913,7 +944,7 @@ function RegimenSopCard({ exercise }: { exercise: ExerciseProtocol }) {
   ];
 
   return (
-    <section style={styles.regimenPanel}>
+    <section className="dt-regimen-panel" style={styles.regimenPanel}>
       <div style={styles.regimenHeader}>
         <div>
           <p style={styles.overline}>Standard operating protocol</p>
@@ -1138,7 +1169,7 @@ function PatientPortalPreview({
   if (!isReleased(fieldState, prescribedExerciseIds)) return <section className="suite-panel"><h3>No current released prescription</h3><p>The clinician must review healing findings, document clearance and set the individual dose before releasing this plan.</p><button type="button" onClick={() => setActiveSectionId('exercise')}>Review prescription</button></section>;
 
   return (
-    <div style={styles.workspaceGrid}>
+    <div className="dt-workspace-grid" style={styles.workspaceGrid}>
       <PatientSessionLog state={fieldState} ids={prescribedExerciseIds} update={update} />
       <SectionHeader
         eyebrow="Patient app surface"
@@ -1183,7 +1214,7 @@ function PatientPortalPreview({
           </div>
         </section>
 
-        {patientExercise && selectedLocalizedExercise && <section style={styles.panel}>
+        {patientExercise && selectedLocalizedExercise && <section className="dt-panel" style={styles.panel}>
           <div style={styles.panelHeader}>
             <div>
               <p style={styles.overline}>Patient phone module</p>
@@ -1234,7 +1265,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'var(--sans)',
   },
   sidebar: {
-    background: '#15302a',
+    background: '#173451',
     borderRight: '1px solid #22413a',
     minHeight: '100vh',
     padding: 0,
@@ -1257,8 +1288,8 @@ const styles: Record<string, React.CSSProperties> = {
     width: '42px',
     height: '42px',
     borderRadius: '8px',
-    background: '#e4eee7',
-    color: '#1f5c4a',
+    background: '#edf2f7',
+    color: '#204a6b',
     display: 'grid',
     placeItems: 'center',
   },
@@ -1451,7 +1482,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: '44px',
     border: '1px solid #1f5c4a',
     borderRadius: '8px',
-    background: '#1f5c4a',
+    background: '#204a6b',
     color: '#ffffff',
     padding: '8px 10px',
     display: 'flex',
@@ -1505,13 +1536,13 @@ const styles: Record<string, React.CSSProperties> = {
     justifyItems: 'start',
     alignContent: 'center',
     gap: '6px',
-    color: '#3e5852',
+    color: '#475d70',
     cursor: 'pointer',
     textAlign: 'left',
   },
   workflowStepActive: {
     boxShadow: 'inset 0 0 0 1px rgba(15, 23, 42, 0.04)',
-    color: '#15302a',
+    color: '#173451',
     fontWeight: 900,
   },
   workflowStepNumber: {
@@ -1539,7 +1570,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #c9d7ce',
     borderRadius: '8px',
     background: '#ffffff',
-    color: '#15302a',
+    color: '#173451',
     padding: '10px 12px',
     display: 'flex',
     alignItems: 'center',
@@ -1581,7 +1612,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   progressText: {
     fontSize: '12px',
-    color: '#3e5852',
+    color: '#475d70',
     textAlign: 'right',
   },
   progressTrack: {
@@ -1593,7 +1624,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   progressFill: {
     height: '100%',
-    background: '#1f5c4a',
+    background: '#204a6b',
   },
   iconButton: {
     width: '38px',
@@ -1630,7 +1661,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   heroText: {
     margin: '8px 0 0',
-    color: '#3e5852',
+    color: '#475d70',
   },
   goalList: {
     display: 'flex',
@@ -1640,7 +1671,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   goalChip: {
     border: '1px solid #c9ddd0',
-    background: '#e4eee7',
+    background: '#edf2f7',
     color: '#174a3c',
     borderRadius: '999px',
     padding: '6px 10px',
@@ -1660,12 +1691,12 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#2f7a5c',
   },
   statusLabel: {
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: '13px',
     fontWeight: 700,
   },
   savedLine: {
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: '12px',
     marginTop: '10px',
   },
@@ -1689,12 +1720,12 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '12px',
   },
   metricLabel: {
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: '12px',
     fontWeight: 700,
   },
   metricValue: {
-    color: '#15302a',
+    color: '#173451',
     fontSize: '24px',
     fontWeight: 900,
     marginTop: '4px',
@@ -1727,7 +1758,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: '14px',
   },
   alertMark: {
@@ -1749,7 +1780,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'space-between',
     cursor: 'pointer',
-    color: '#15302a',
+    color: '#173451',
     fontWeight: 700,
   },
   platformHub: {
@@ -1776,21 +1807,21 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '10px',
     cursor: 'pointer',
     textAlign: 'left',
-    color: '#15302a',
+    color: '#173451',
   },
   platformIcon: {
     width: '34px',
     height: '34px',
     borderRadius: '8px',
-    background: '#e4eee7',
-    color: '#1f5c4a',
+    background: '#edf2f7',
+    color: '#204a6b',
     display: 'grid',
     placeItems: 'center',
   },
   platformCopy: {
     display: 'grid',
     gap: '6px',
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: '13px',
     lineHeight: 1.35,
   },
@@ -1800,7 +1831,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     gap: '10px',
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: '11px',
     fontWeight: 800,
   },
@@ -1824,7 +1855,7 @@ const styles: Record<string, React.CSSProperties> = {
   moduleBadge: {
     borderRadius: '999px',
     color: '#ffffff',
-    background: '#1f5c4a',
+    background: '#204a6b',
     padding: '7px 11px',
     fontWeight: 800,
     fontSize: '12px',
@@ -1842,7 +1873,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   blockDescription: {
     margin: '5px 0 0',
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: '13px',
     lineHeight: 1.45,
   },
@@ -1861,7 +1892,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '6px',
   },
   fieldLabel: {
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: '12px',
     fontWeight: 800,
   },
@@ -1873,7 +1904,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '12px',
     padding: '8px 10px',
     fontSize: '14px',
-    color: '#15302a',
+    color: '#173451',
     background: '#f9fbf9',
   },
   textarea: {
@@ -1884,13 +1915,13 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '12px',
     padding: '9px 10px',
     fontSize: '14px',
-    color: '#15302a',
+    color: '#173451',
     background: '#f9fbf9',
     resize: 'vertical',
     fontFamily: 'inherit',
   },
   fieldHelper: {
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: '11px',
   },
   chipGroup: {
@@ -1902,7 +1933,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #dce5df',
     borderRadius: '999px',
     background: '#ffffff',
-    color: '#3e5852',
+    color: '#475d70',
     padding: '7px 10px',
     cursor: 'pointer',
     fontWeight: 700,
@@ -1935,7 +1966,7 @@ const styles: Record<string, React.CSSProperties> = {
     height: '34px',
     border: '1px solid #1f5c4a',
     borderRadius: '7px',
-    background: '#1f5c4a',
+    background: '#204a6b',
     color: '#ffffff',
     cursor: 'pointer',
     fontWeight: 800,
@@ -1947,7 +1978,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   outputChip: {
     background: '#eef2ef',
-    color: '#3e5852',
+    color: '#475d70',
     border: '1px solid #dce5df',
     borderRadius: '999px',
     padding: '7px 10px',
@@ -1971,13 +2002,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   clinicianPlanTitle: {
     margin: 0,
-    color: '#15302a',
+    color: '#173451',
     fontSize: '19px',
     lineHeight: 1.25,
   },
   storageStatusCard: {
     border: '1px solid #c9ddd0',
-    background: '#e4eee7',
+    background: '#edf2f7',
     borderRadius: '8px',
     padding: '12px',
     display: 'grid',
@@ -1991,7 +2022,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   storageText: {
     margin: 0,
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: '12px',
     lineHeight: 1.35,
   },
@@ -2072,7 +2103,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid',
     gap: '3px',
     fontSize: '12px',
-    color: '#3e5852',
+    color: '#475d70',
   },
   patientVisiblePill: {
     border: '1px solid #c9ddd0',
@@ -2087,7 +2118,7 @@ const styles: Record<string, React.CSSProperties> = {
   clinicianOnlyPill: {
     border: '1px solid #dce5df',
     background: '#f5f8f5',
-    color: '#4d6660',
+    color: '#5b6d7c',
     borderRadius: '999px',
     padding: '4px 8px',
     fontSize: '11px',
@@ -2130,11 +2161,11 @@ const styles: Record<string, React.CSSProperties> = {
   },
   exerciseName: {
     fontWeight: 800,
-    color: '#15302a',
+    color: '#173451',
     fontSize: '13px',
   },
   exerciseMeta: {
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: '11px',
     textTransform: 'capitalize',
   },
@@ -2147,7 +2178,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   exerciseText: {
     margin: '7px 0 0',
-    color: '#3e5852',
+    color: '#475d70',
     lineHeight: 1.5,
   },
   languageNote: {
@@ -2173,7 +2204,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   regimenTitle: {
     margin: 0,
-    color: '#15302a',
+    color: '#173451',
     fontSize: '16px',
     lineHeight: 1.25,
   },
@@ -2230,7 +2261,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   protocolBasis: {
     margin: 0,
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: '12px',
     lineHeight: 1.45,
   },
@@ -2278,7 +2309,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
   },
   stepLabel: {
-    color: '#1f5c4a',
+    color: '#204a6b',
     fontSize: '12px',
     fontWeight: 900,
   },
@@ -2340,7 +2371,7 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'absolute',
     right: '24%',
     top: '40px',
-    color: '#1f5c4a',
+    color: '#204a6b',
     fontSize: '30px',
     fontWeight: 900,
   },
@@ -2357,7 +2388,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   stepInstruction: {
     margin: 0,
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: '13px',
     lineHeight: 1.35,
   },
@@ -2376,17 +2407,17 @@ const styles: Record<string, React.CSSProperties> = {
   smallTitle: {
     margin: '0 0 7px',
     fontSize: '13px',
-    color: '#15302a',
+    color: '#173451',
   },
   smallText: {
     margin: 0,
-    color: '#3e5852',
+    color: '#475d70',
     fontSize: '13px',
     lineHeight: 1.45,
   },
   primaryButton: {
     border: '0',
-    background: '#1f5c4a',
+    background: '#204a6b',
     color: '#ffffff',
     borderRadius: '8px',
     padding: '10px 13px',
@@ -2421,7 +2452,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '24px',
   },
   phoneSub: {
-    color: '#4d6660',
+    color: '#5b6d7c',
     margin: '4px 0 16px',
   },
   homeTask: {
@@ -2445,7 +2476,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   phoneTaskDose: {
     display: 'block',
-    color: '#4d6660',
+    color: '#5b6d7c',
     fontSize: '11px',
     fontWeight: 700,
     lineHeight: 1.35,
@@ -2482,7 +2513,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid',
     gridTemplateColumns: '160px minmax(0, 1fr)',
     gap: '14px',
-    color: '#3e5852',
+    color: '#475d70',
     lineHeight: 1.45,
   },
   icfBars: {
@@ -2498,7 +2529,7 @@ const styles: Record<string, React.CSSProperties> = {
   icfCode: {
     fontFamily: 'Consolas, monospace',
     color: '#174a3c',
-    background: '#e4eee7',
+    background: '#edf2f7',
     borderRadius: '6px',
     padding: '3px 6px',
     fontSize: '12px',
@@ -2517,7 +2548,7 @@ const styles: Record<string, React.CSSProperties> = {
   icfValue: {
     fontSize: '12px',
     fontWeight: 900,
-    color: '#3e5852',
+    color: '#475d70',
   },
   icfGrid: {
     display: 'grid',
