@@ -374,3 +374,5 @@
 }
 /* The decorative orange shape sits past the hero's right edge; clip (not hidden) so focus or scroll calls can never slide the hero sideways. */
 .workspace-hero { overflow:hidden; overflow:clip; }
+.cs a.cs-file { display:inline-flex; align-items:center; gap:8px; text-decoration:none; }
+.footer-docs a { color:#204a6b; font-weight:700; }

@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DegluTech — User Manual for Speech-Language Pathologists</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+
+<section class="cover">
+  <img class="logo" src="{{ICON}}" alt="">
+  <div class="title">DegluTech</div>
+  <p class="sub">User manual for speech-language pathologists<br>Head and neck cancer rehabilitation: charting, swallowing and voice assessment, instrument scoring, reading reports, exercise prescription and clinical reporting</p>
+  <div class="meta">
+    <b>Version 0.4 (review build)</b> · October 2026 · https://deglutech.pages.dev<br>
+    Team: <b>Mr. Prasanna Hegde</b> · <b>Ms. Priyanka Nayak</b> · <b>Mr. Hemaraja Nayaka S</b> · <b>Mr. Sumanth A V</b> · <b>Mr. Joju Joseph</b><br>
+    <span class="dot">●</span> Clinical decision support for qualified speech-language pathologists. It supports, and does not replace, clinical judgement.
+  </div>
+</section>
+
+<section class="front">
+  <span class="booktitle">DegluTech · User Manual</span>
+  <h2 class="fronttitle">About this manual</h2>
+  <p>This manual describes DegluTech version 0.4 (review build), a browser-based clinical workspace for speech-language pathologists (SLPs) who assess and rehabilitate swallowing, voice and speech in people treated for head and neck cancer (HNC). It is written for practising SLPs and for students working under supervision. It also serves research teams who use DegluTech to keep structured, pseudonymised study records.</p>
+  <p>Each chapter follows one part of the application. It starts with the purpose of the page, gives the procedure as numbered steps, and ends with notes on interpretation and limits. Screen names, buttons and fields are written in <b>bold</b> exactly as they appear on screen; keyboard keys appear as <span class="kbd">Ctrl</span> <span class="kbd">K</span>. All screenshots were taken with the eight fictitious <i>demo patients</i> that ship with the application and with two synthetic sample documents made for this manual. No real patient data were used.</p>
+  <h3>Conventions</h3>
+  <ul>
+    <li><b>Chart</b> — the record of one patient: thirteen sections, the tool suite scores, the exercise prescription and attached files.</li>
+    <li><b>Section</b> — one of the thirteen pages of the chart (for example <b>6. Swallowing Assessment</b>). A section is divided into numbered <b>blocks</b>.</li>
+    <li><b>Study ID</b> — a pseudonymous code such as <code>DT-HNC-001</code>. Names and hospital IDs are optional and can be hidden on every printout.</li>
+    <li><b>Demo patient</b> — fictitious teaching data, labelled <i>Demo</i> wherever it appears.</li>
+  </ul>
+  <div class="callout"><b>Clinical responsibility</b>DegluTech does not diagnose and does not grade severity. Every score, rating and qualifier is entered or confirmed by the clinician. Values read from documents are suggestions that the clinician ticks before they enter the chart. Alerts and readiness indicators are prompts, not clinical conclusions. Exercise programmes reach the patient view only after the clinician documents clearance and releases them. Clinical decisions remain with the treating SLP.</div>
+  <h3>Team</h3>
+  <table>
+    <tr><th>Name</th></tr>
+    <tr><td>Mr. Prasanna Hegde</td></tr>
+    <tr><td>Ms. Priyanka Nayak</td></tr>
+    <tr><td>Mr. Hemaraja Nayaka S</td></tr>
+    <tr><td>Mr. Sumanth A V</td></tr>
+    <tr><td>Mr. Joju Joseph</td></tr>
+  </table>
+  <p class="small muted">Patient-facing exercise instructions in Kannada, Hindi, Malayalam, Telugu and Tamil are draft translations. A native-speaking SLP should review them before clinical use. 3D patient models: Microsoft Rocketbox avatar library (MIT licence). Interface fonts: Carlito (SIL Open Font Licence). Icons: Lucide (ISC licence). Document reading: PDF.js (Apache 2.0) and Tesseract.js (Apache 2.0).</p>
+</section>
+
+<nav class="toc" id="toc">
+  <h2 class="fronttitle">Contents</h2>
+  {{TOC}}
+</nav>
+
+<!-- ============================================================ -->
+<h1 id="ch-intro"><span class="num">Chapter 1</span><span class="ctitle">Introduction</span></h1>
+<h2 id="s-purpose">1.1 Purpose and scope</h2>
+<p>Rehabilitation after head and neck cancer draws on many sources: the oncology summary, the radiotherapy record, the bedside swallowing examination, instrumental studies, voice measures, nutrition and airway status, patient-reported outcomes and the home programme. These are usually spread across paper case sheets, separate score forms and word-processed reports. DegluTech brings them into one structured chart that runs in a web browser. From that chart an SLP can:</p>
+<ul>
+  <li>document the patient across thirteen sections, from referral and oncology staging to a WHO-ICF functioning profile;</li>
+  <li>administer the EAT-10 on screen and keep a dated score history, with linked records for other instruments;</li>
+  <li>attach discharge summaries, swallow-study reports, voice-analysis printouts and photographs, and let DegluTech propose values from them for review;</li>
+  <li>prescribe exercises shown by a 3D patient model, with dose, safety stop rules and patient instructions in six languages;</li>
+  <li>review chart readiness, write the clinical impression and print a signed diagnostic report on the institute's letterhead.</li>
+</ul>
+
+<h2 id="s-glance">1.2 The workspace at a glance</h2>
+<p>The <b>Clinician Dashboard</b> ({{fig:f-dash}}) is the first section of every chart. The sidebar on the left lists the patient, the files page, the thirteen sections in five groups, and Settings. The masthead shows where you are, the chart completion ring and the main actions.</p>
+<figure id="f-dash"><img src="{{SHOTS}}/desktop-clinician-dashboard.png" alt=""><figcaption>The Clinician Dashboard for a demo patient: grouped section navigation (left), the masthead with chart completion, and the quick links to Patient, Swallow, Exercises and Report.</figcaption></figure>
+
+<table class="num" id="t-pages"><caption>The pages of DegluTech and where they are described.</caption>
+  <tr><th>Sidebar group</th><th>Page</th><th>What it holds</th><th>Chapter</th></tr>
+  <tr><td>—</td><td>Patients</td><td>Add, open, edit, export and delete patient records</td><td>4</td></tr>
+  <tr><td>—</td><td>Files and reports</td><td>Reports, photos and videos attached to the open patient; reading values from them</td><td>8</td></tr>
+  <tr><td>Triage</td><td>1. Clinician Dashboard</td><td>Care phase, feeding route, risk board, caseload and analytics</td><td>6</td></tr>
+  <tr><td rowspan="3">Intake</td><td>2. Demographics and Referral</td><td>Identity, language, caregiver, referral, study record</td><td>5</td></tr>
+  <tr><td>3. Oncology and Staging</td><td>Primary site, TNM, diagnosis date, recurrence, pain</td><td>5</td></tr>
+  <tr><td>4. Treatment and Toxicity</td><td>Surgery, reconstruction, radiotherapy, systemic therapy, toxicity, healing and exercise clearance</td><td>5</td></tr>
+  <tr><td rowspan="6">Assessment</td><td>5. OPME and Cranial Nerves</td><td>Oral structures, jaw opening trials, cranial nerve screen</td><td>5</td></tr>
+  <tr><td>6. Swallowing Assessment</td><td>Clinical swallow markers, EAT-10, MASA-HNC, FOIS, MDADI, PSS-HN</td><td>5</td></tr>
+  <tr><td>7. Voice and Speech</td><td>Intelligibility, resonance, MPT, jitter, shimmer, HNR, GRBAS, VHI-10, laryngectomy</td><td>5</td></tr>
+  <tr><td>8. Nutrition and Airway</td><td>Weight, hydration, tracheostomy, secretions, oral care</td><td>5</td></tr>
+  <tr><td>9. Instrumental Studies</td><td>FEES, VFSS, PAS, residue, DIGEST, Yale scale</td><td>5</td></tr>
+  <tr><td>Clinical tool suite</td><td>Twelve instruments, on-screen EAT-10, report, EMR note and handout</td><td>7</td></tr>
+  <tr><td>Synthesis</td><td>10. WHO-ICF HNC Profile</td><td>Body function, activity, participation and environment qualifiers</td><td>5</td></tr>
+  <tr><td rowspan="3">Plan</td><td>11. Exercise Prescription</td><td>3D and drawn exercise demonstrations, dose, release to the patient</td><td>9</td></tr>
+  <tr><td>12. Patient Portal</td><td>The released home programme as the patient sees it, session log</td><td>9</td></tr>
+  <tr><td>13. Summary and Report</td><td>Readiness check, clinical impression, sign-off, report export</td><td>10</td></tr>
+  <tr><td>Clinic</td><td>Settings</td><td>Institute letterhead, clinicians, print privacy, backup, demo patients</td><td>3</td></tr>
+</table>
+
+<h2 id="s-principles">1.3 Design principles</h2>
+<h3>Records stay on the device</h3>
+<p>DegluTech has no server that stores patient data. Charts and settings are kept in the browser's local storage, and attached files in the browser's database (IndexedDB), on the computer or phone you use. Documents are read on the same device. Nothing leaves it unless you export a backup, a patient file or a report. The other side of this design is that clearing the browser's site data deletes the records, so regular backups are part of the workflow (Chapter 3).</p>
+<h3>The clinician decides</h3>
+<p>Severity, CTCAE grade, DIGEST grade, ICF qualifiers and the diagnosis are clinician-entered fields. The application never infers one from another; the report states, for example, that no automatic correlation is made between ICF qualifiers and clinical severity.</p>
+<h3>Suggestions are reviewed before use</h3>
+<p>When DegluTech reads a document, each value it finds is shown with the line of text it came from. Only ticked values are added, and values that would overwrite something already in the chart start unticked.</p>
+<h3>Safety gates for home exercise</h3>
+<p>A home programme cannot be released while a fistula or an unhealed flap or wound is present or unknown, until exercise clearance and restrictions are documented, and until an individual stop rule, a language and a dose for each exercise are recorded (Chapter 9).</p>
+
+<!-- ============================================================ -->
+<h1 id="ch-start"><span class="num">Chapter 2</span><span class="ctitle">Getting started</span></h1>
+<h2 id="s-req">2.1 Requirements</h2>
+<ul>
+  <li><b>Browser:</b> a current version of Chrome or Edge on Windows, macOS, Linux or Android is recommended. Safari and Firefox also run DegluTech. The 3D exercise demonstrations need WebGL; when it is unavailable the drawn illustration is shown instead.</li>
+  <li><b>Hardware:</b> a laptop or desktop is best for charting and report review. A phone or tablet is well suited to demonstrating exercises and showing the patient view.</li>
+  <li><b>Network:</b> an internet connection is needed to open the site. Records are then kept on the device and documents are read on the device; the first time a photograph is read, the text-recognition files (about 10 MB per language) are downloaded once.</li>
+  <li><b>Pop-ups:</b> allow pop-ups for the site; the diagnostic report opens in a new window.</li>
+</ul>
+<h2 id="s-open">2.2 Opening the workspace</h2>
+<ol class="steps">
+  <li>Open <b>https://deglutech.pages.dev</b> in the browser.</li>
+  <li>On first use the <b>Patients</b> page is empty ({{fig:f-empty}}). Go to <b>Settings</b> first to enter your institute and clinicians (Chapter 3), then add patients (Chapter 4).</li>
+  <li>To use the workspace like an app, choose <i>Install</i> or <i>Add to Home screen</i> from the browser menu where the browser offers it. It then opens in its own window with the DegluTech icon. It still needs a connection to start.</li>
+</ol>
+<figure id="f-empty"><img src="{{SHOTS}}/desktop-patients-empty.png" alt=""><figcaption>A new installation: the Patients page with no records. Demo patients for teaching can be loaded from Settings.</figcaption></figure>
+
+<h2 id="s-tour">2.3 A tour of the interface</h2>
+<p><b>Sidebar.</b> The panel at the top shows the open patient, their hospital and study IDs and the risk band, with <b>Switch or add patient</b>. Below it are <b>Patients</b>, <b>Files and reports</b> and the five section groups: <b>Triage</b>, <b>Intake</b>, <b>Assessment</b>, <b>Synthesis</b> and <b>Plan</b>. Each group heading shows how many of its sections are filled (for example <i>1/3 filled</i>) and opens or closes when clicked; the group containing the current section opens automatically. A tick replaces the section number once every field in that section is recorded ({{fig:f-sidebar}}).</p>
+<p><b>Masthead.</b> The masthead names the page and the section group, shows the patient and the section number (<i>Section 6 / 13</i>), and holds the <b>Chart completion</b> ring: the percentage of recorded fields and the number of sections filled. Under it are <b>Save session</b> and the main action of the page, <b>Review report</b> (or <b>Export diagnostic report</b> on the report section). Entries are saved to the device automatically as you type; the line <i>Saved on this device</i> shows the last save, and <b>Save session</b> records a save time on demand.</p>
+<p><b>Jump to a section.</b> The search box in the masthead, or <span class="kbd">Ctrl</span> <span class="kbd">K</span>, opens a finder (right of {{fig:f-sidebar}}). Type part of a section name or its content (for example <i>swallow</i>, <i>report</i> or <i>tools</i>) and press <span class="kbd">Enter</span>, or click the result. <span class="kbd">Esc</span> closes it.</p>
+<figure class="pair" id="f-sidebar"><div><img src="{{SHOTS}}/el-sidebar.png" alt="" style="max-height:105mm"></div><div><img src="{{SHOTS}}/desktop-command.png" alt=""></div><figcaption>Left: the sidebar with the patient panel and section groups with fill counts. Right: the section finder opened with Ctrl K and filtered by “swal”.</figcaption></figure>
+
+<h2 id="s-phone">2.4 Using DegluTech on a phone</h2>
+<p>On a phone the sidebar is replaced by a <b>Clinical section</b> list at the top of every page; it contains Patients, Files and reports, the thirteen sections, the Clinical tool suite and Settings. The completion ring becomes a compact strip and form fields are shown one per row ({{fig:f-phone}}).</p>
+<figure class="pair" id="f-phone"><div><img src="{{SHOTS}}/phone-home.png" alt=""></div><div><img src="{{SHOTS}}/phone-section-form.png" alt=""></div><div><img src="{{SHOTS}}/phone-patients.png" alt=""></div><figcaption>DegluTech at phone width: the dashboard with the section list, a swallowing form block, and the Patients page.</figcaption></figure>
+
+<h2 id="s-privacy">2.5 Privacy and data storage</h2>
+<ul>
+  <li>Records are stored only in this browser on this device. Another browser, another device or a private window will not see them.</li>
+  <li>Clearing site data or browsing history for the site deletes the records and files. Export a backup at the end of each clinic day (Chapter 3.4).</li>
+  <li>Use the study ID as the main identifier for research records and switch on <b>Hide patient names and hospital IDs on printouts and exports</b> in Settings.</li>
+  <li>Check that consent covers photographs or video of the patient before attaching them, and keep exported backups in encrypted institutional storage.</li>
+</ul>
+<div class="callout note"><b>Shared computers</b>Anyone who opens the site in the same browser profile on the same computer can see the records. Use a personal browser profile protected by the operating-system login.</div>
+
+<!-- ============================================================ -->
+<h1 id="ch-settings"><span class="num">Chapter 3</span><span class="ctitle">Settings</span></h1>
+<p>Settings hold everything that is the same for every patient: the letterhead, the clinicians who sign reports, print privacy and backups. Open <b>Settings</b> at the bottom of the sidebar. The four links at the top of the page (<b>Clinic identity</b>, <b>Clinicians</b>, <b>Print &amp; privacy</b>, <b>Backup &amp; data</b>) jump to each card.</p>
+<h2 id="s-inst">3.1 Clinic or institute</h2>
+<ol class="steps">
+  <li>Enter the <b>Institute or clinic name</b>, <b>Department</b>, <b>Address</b>, <b>Phone</b> and <b>Email</b>.</li>
+  <li>Add a logo with <b>Change logo</b> (PNG or JPG). <b>Remove logo</b> clears it.</li>
+  <li>Changes save automatically and appear on the letterhead of every report and handout ({{fig:f-set}}).</li>
+</ol>
+<h2 id="s-slp">3.2 Speech-language pathologists</h2>
+<ol class="steps">
+  <li>Click <b>Add clinician</b>. Enter <b>Full name</b>, <b>Qualification</b>, <b>Designation</b> and <b>RCI registration number</b>.</li>
+  <li>Optionally add a scanned signature image (PNG with a white or transparent background works best); it prints above the clinician's name.</li>
+  <li>Click <b>Save clinician</b>. Repeat for each SLP, intern or student who signs reports, and choose the default signer with the radio button.</li>
+</ol>
+<p>On the report, the signing clinician can be changed per report (Chapter 10.3).</p>
+<figure class="pair" id="f-set"><div><img src="{{SHOTS}}/el-settings-clinic.png" alt=""></div><div><img src="{{SHOTS}}/el-settings-print.png" alt=""></div><figcaption>Clinic identity with logo (left) and the printing and privacy card with its letterhead preview (right).</figcaption></figure>
+<h2 id="s-print">3.3 Printing and privacy</h2>
+<p>Tick <b>Hide patient names and hospital IDs on printouts and exports</b> to print reports with the study ID only. Use this for research records, case presentations and teaching. The preview on the card shows the letterhead as it will print.</p>
+<h2 id="s-backup">3.4 Backup and data</h2>
+<ol class="steps">
+  <li><b>Export backup</b> downloads one file (<code>.json</code>) with every patient, chart and setting on this device. Tick <b>Include patient files (reports, photos, videos)</b> to add attached files; the backup becomes much larger.</li>
+  <li><b>Import backup</b> reads such a file. Choose <b>Merge with this device</b> to add patients that are not already here, or <b>Replace everything</b> to make this device an exact copy of the backup.</li>
+  <li>Store backups in encrypted institutional storage; a backup holds identifiable clinical data.</li>
+</ol>
+<figure class="half" id="f-backup"><img src="{{SHOTS}}/el-settings-data.png" alt=""><figcaption>Backup and data: export with or without files, import, and the demo patients for teaching.</figcaption></figure>
+<h2 id="s-demo">3.5 Demo patients for teaching</h2>
+<p><b>Load demo patients</b> adds eight fictitious charts (IDs <code>DEMO-01</code> to <code>DEMO-08</code>) covering different sites, care phases and risk levels. They are marked <i>Demo</i> and a banner reminds users that they are teaching data. <b>Remove demo patients</b> deletes all of them and leaves real records untouched.</p>
+<h2 id="s-manuals">3.6 User manual and quick start</h2>
+<p>The <b>User manual and quick start</b> card in Settings, and the links at the foot of every page, open this manual and the two-page quick start as PDF files.</p>
+
+<!-- ============================================================ -->
+<h1 id="ch-patients"><span class="num">Chapter 4</span><span class="ctitle">Patients</span></h1>
+<p>The <b>Patients</b> page lists every chart on the device ({{fig:f-pat}}). Search by name, hospital ID, study ID or tumour site.</p>
+<figure id="f-pat"><img src="{{SHOTS}}/desktop-patients.png" alt=""><figcaption>The Patients page with demo patients. Each row offers Open, Details, Export and Delete.</figcaption></figure>
+<h2 id="s-add">4.1 Adding a patient</h2>
+<ol class="steps">
+  <li>Click <b>Add patient</b>.</li>
+  <li>Enter at least one of <b>Full name</b>, <b>Hospital ID / UHID</b> or <b>Study ID</b>; add <b>Age (years)</b>, <b>Sex</b> and <b>Care phase</b> ({{fig:f-add}}). A study ID already used on this device is refused.</li>
+  <li>Click <b>Add and open chart</b>. The chart opens at <b>2. Demographics and Referral</b>.</li>
+</ol>
+<figure id="f-add"><img src="{{SHOTS}}/el-patient-form.png" alt=""><figcaption>The Add patient form. Names are optional and can be hidden on printouts.</figcaption></figure>
+<h2 id="s-manage">4.2 Opening, editing, exporting and deleting</h2>
+<ul>
+  <li><b>Open</b> makes the patient active; their chart, files and prescription load. The open patient is marked <i>Open</i>.</li>
+  <li><b>Details</b> edits the identity fields.</li>
+  <li><b>Export</b> downloads that one patient as a backup file, for example to hand a case over to another clinician who imports it.</li>
+  <li><b>Delete</b> asks for confirmation and then permanently removes the patient's records and attached files from the device (<b>Delete permanently</b> or <b>Keep patient</b>).</li>
+</ul>
+
+<!-- ============================================================ -->
+<h1 id="ch-chart"><span class="num">Chapter 5</span><span class="ctitle">Charting the sections</span></h1>
+<h2 id="s-layout">5.1 How a section page works</h2>
+<p>Sections 2 to 10 share one layout ({{fig:f-sec}}):</p>
+<ol class="steps">
+  <li>The <b>section card</b> names the section (<i>Section 6 of 13</i>) with <b>Previous</b> and <b>Next</b> buttons and the <b>Clinical workflow map</b>, which opens a grid of all thirteen sections.</li>
+  <li>The <b>Clinical documentation</b> strip counts the recorded fields in this section, for example <i>7 / 17 fields recorded</i>.</li>
+  <li><b>In this section</b> lists the numbered blocks; clicking one scrolls to it.</li>
+  <li><b>Fill this section from a report, photo or file</b> opens the document reader for this section (Chapter 8.5).</li>
+  <li>Each <b>block</b> has a number, a title, a description, a count such as <i>4/4 recorded</i> (green when complete) and a button that folds the block away. Folded blocks still print.</li>
+  <li>The <b>Documentation checklist</b> at the end lists the outputs the section is meant to support.</li>
+</ol>
+<figure id="f-sec"><img src="{{SHOTS}}/desktop-swallowing-assessment.png" alt=""><figcaption>Section 6, Swallowing Assessment: the section card with Previous and Next, the field count, the block index and the document reader.</figcaption></figure>
+<figure id="f-block"><img src="{{SHOTS}}/el-form-panel.png" alt=""><figcaption>A form block: number, title, recorded count, the fold button and its fields. Selected choices are filled navy with an orange underline.</figcaption></figure>
+<p><b>Field types.</b> Choices appear as buttons (one or several can be selected, as stated by the field), short lists as drop-down menus, measurements as number boxes with their unit, and narrative as text boxes. Fields with a helper line state the unit or convention, for example <i>MDADI global (20–100 convention)</i>.</p>
+
+<h2 id="s-sections">5.2 What each section records</h2>
+<table class="num" id="t-sections"><caption>Sections 2 to 10, their blocks and principal fields.</caption>
+<tr><th>Section</th><th>Blocks and principal fields</th></tr>
+<tr><td>2. Demographics and Referral</td><td><b>Patient details</b>: age, gender, preferred language, caregiver contact role. <b>Referral context</b>: referred by, evaluation date, primary concern. <b>Study record</b>: study ID, encounter date, patient priorities and participation goals.</td></tr>
+<tr><td>3. Oncology and Staging</td><td><b>Tumour profile</b>: primary site, T, N and M category. <b>Disease context</b>: diagnosis date, recurrence status, cancer-related pain.</td></tr>
+<tr><td>4. Treatment and Toxicity</td><td><b>Surgery and reconstruction</b>: surgery type, flap or reconstruction, neck dissection side. <b>Radiation and systemic therapy</b>: dose (Gy), fractions, systemic agent, current toxicity. <b>Clearance and healing</b>: unhealed fistula, fresh or unhealed flap or wound, exercise clearance, clearing clinician with date and restrictions, CTCAE dysphagia grade (clinician assigned) and CTCAE version.</td></tr>
+<tr><td>5. OPME and Cranial Nerves</td><td><b>Oral structures</b>: maximal jaw opening, tongue range of motion, lip seal, palatal elevation. <b>Cranial nerve screen</b>: CN V, VII, IX/X and XII. <b>Three-trial jaw measurement</b>: three inter-incisal openings and CN XI shoulder function.</td></tr>
+<tr><td>6. Swallowing Assessment</td><td><b>Clinical swallow markers</b>: wet voice after swallow, cough efficiency, multiple swallows per bolus, primary bolus issue. <b>Screening scores</b>: EAT-10 total, MASA-HNC estimate, FOIS level. <b>Patient-reported and functional outcomes</b>: MDADI global, composite and subscales; PSS-HN normalcy of diet, eating in public and understandability of speech; instrument version, language and assessor; the clinician-tested diet, posture and bolus plan.</td></tr>
+<tr><td>7. Voice and Speech</td><td><b>Perceptual speech</b>: intelligibility, dysarthria pattern, resonance. <b>Voice metrics</b>: maximum phonation time, jitter, shimmer, HNR. <b>Perceptual and patient-reported voice</b>: GRBAS, VHI-10 total, task and recording conditions. <b>Laryngectomy and communication</b>: laryngectomy status, primary communication method, TEP leakage, prosthesis and stoma review.</td></tr>
+<tr><td>8. Nutrition and Airway</td><td><b>Nutrition status</b>: weight, weight change in one month, appetite, hydration risk. <b>Airway and secretion</b>: tracheostomy status, secretion burden, oral care support. <b>Weight comparison</b>: height, previous weight and dates, dietitian plan.</td></tr>
+<tr><td>9. Instrumental Studies</td><td><b>Swallow instrumentals</b>: FEES and VFSS status, worst PAS score, residue pattern. <b>Document ingestion</b>: report or media reference, clinical study summary. <b>Instrumental ratings</b>: DIGEST safety, efficiency and overall grade (clinician assigned), Yale vallecular and pyriform residue ratings, study details.</td></tr>
+<tr><td>10. WHO-ICF HNC Profile</td><td><b>Body function and structure</b>: b5105 swallowing, b310 voice, b320 articulation, s320 mouth. <b>Activity, participation, environment</b>: d550 eating, d560 drinking, d330 speaking, e310 family support. <b>Context and participation</b>: family support context, participation narrative, ICF mapping rationale and source.</td></tr>
+</table>
+<figure class="pair" id="f-onc"><div><img src="{{SHOTS}}/desktop-oncology-and-staging.png" alt=""></div><div><img src="{{SHOTS}}/desktop-who-icf-hnc-profile.png" alt=""></div><figcaption>Section 3, Oncology and Staging (left) and Section 10, WHO-ICF HNC Profile (right).</figcaption></figure>
+
+<h2 id="s-notes">5.3 Recording notes</h2>
+<ul>
+  <li><b>Staging.</b> Record the TNM categories from the oncology record; DegluTech does not stage. Note the AJCC edition in the narrative when it matters for the study.</li>
+  <li><b>Jaw opening.</b> Record three inter-incisal trials in millimetres. An opening of 35 mm or less is flagged as a trismus risk on the dashboard, following the criterion of Dijkstra et al. (2006).</li>
+  <li><b>Clinician-assigned grades.</b> CTCAE dysphagia grade, DIGEST grades and ICF qualifiers are judgements that need the full clinical picture and, for DIGEST, the instrumental study itself (Hutcheson et al., 2017). Record the version used.</li>
+  <li><b>Patient-reported outcomes.</b> MDADI (Chen et al., 2001) and VHI-10 (Rosen et al., 2004) totals are entered after scoring on the licensed forms; record the language version and who administered it.</li>
+  <li><b>Acoustics.</b> Record the task (sustained /a/, duration), microphone distance and software in <b>Task, recording conditions and rating source</b>; jitter, shimmer and HNR vary with these settings. Shimmer is recorded in dB.</li>
+  <li><b>Weight.</b> Weight change in one month of 5% or more raises a dashboard alert. Agree the nutrition plan with the dietitian.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h1 id="ch-dash"><span class="num">Chapter 6</span><span class="ctitle">Clinician dashboard</span></h1>
+<h2 id="s-status">6.1 Patient status and risk board</h2>
+<p>Section 1 records the <b>care phase</b>, the <b>current feeding route</b> and the clinician's rating of <b>aspiration</b>, <b>airway</b> and <b>nutrition</b> risk. The highest of the three sets the risk band shown with the patient: a rating of 3 or more is <i>High risk</i>, 2 is <i>Moderate</i> and lower is <i>Low</i>.</p>
+<h2 id="s-caseload">6.2 Caseload command center</h2>
+<p>Below the patient status the dashboard summarises the caseload on this device ({{fig:f-case}}): the number of active patients, a queue of patients with their site, phase and risk, and key scores. Click a patient to open the analytics drawer.</p>
+<figure id="f-case"><img src="{{SHOTS}}/desktop-dashboard-drawer.png" alt=""><figcaption>The analytics drawer for a demo patient: alerts with acknowledgement, PAS, FOIS, EAT-10 and jaw opening, the risk heat map, home adherence and treatment milestones.</figcaption></figure>
+<h2 id="s-drawer">6.3 The analytics drawer</h2>
+<p>The drawer has four tabs. <b>Overview</b> shows alerts, the latest key scores, a risk heat map, home-programme adherence and treatment milestones. <b>WHO ICF</b> shows the functioning profile. <b>Score trends</b> plots repeated scores. <b>Plan</b> shows the prescription. Buttons in the drawer header open the patient's swallowing section or report.</p>
+<table class="num" id="t-alerts"><caption>Rules that raise an alert for a patient.</caption>
+<tr><th>Alert</th><th>Rule</th><th>Basis</th></tr>
+<tr><td>Trismus risk</td><td>Jaw opening ≤ 35 mm</td><td>Dijkstra et al., 2006</td></tr>
+<tr><td>Higher aspiration risk</td><td>EAT-10 total &gt; 15</td><td>Cheney et al., 2015</td></tr>
+<tr><td>Aspiration on instrumental study</td><td>Worst PAS ≥ 6</td><td>Rosenbek et al., 1996</td></tr>
+<tr><td>Wet voice after swallow</td><td>Recorded as intermittent or consistent</td><td>Clinical sign</td></tr>
+<tr><td>Weight loss</td><td>Weight change ≥ 5% in one month</td><td>Nutrition risk screen</td></tr>
+</table>
+<p>Alerts prompt review; they do not establish a diagnosis. Acknowledge an alert once it has been acted on.</p>
+
+<!-- ============================================================ -->
+<h1 id="ch-tools"><span class="num">Chapter 7</span><span class="ctitle">Clinical tool suite</span></h1>
+<p>The <b>Clinical tool suite</b> (in the Assessment group, after Instrumental Studies) collects the instruments used in HNC rehabilitation ({{fig:f-tools}}). Each card shows who completes it, how long it takes and the latest result. Filter by <b>Screening</b>, <b>Patient-reported outcomes</b>, <b>Instrumental</b> or <b>Function &amp; therapy</b>, search by name, or switch from <b>Cards</b> to <b>Index</b>.</p>
+<figure id="f-tools"><img src="{{SHOTS}}/desktop-tools.png" alt=""><figcaption>The Clinical tool suite with its category filters and search.</figcaption></figure>
+<table class="num" id="t-tools"><caption>Instruments in the tool suite and what opening them does.</caption>
+<tr><th>Code</th><th>Instrument</th><th>Completed by</th><th>Opens</th></tr>
+<tr><td>SCR-01</td><td>EAT-10</td><td>Patient</td><td>On-screen form with scoring and history (7.1)</td></tr>
+<tr><td>SCR-02</td><td>MASA-HNC</td><td>Clinician</td><td>Section 6, Swallowing Assessment</td></tr>
+<tr><td>SCR-03</td><td>Trismus screen</td><td>Clinician</td><td>Section 5, OPME and Cranial Nerves</td></tr>
+<tr><td>PRO-01</td><td>MDADI</td><td>Patient</td><td>Not built: needs licensed item text</td></tr>
+<tr><td>PRO-02</td><td>VHI-10</td><td>Patient</td><td>Not built: needs licensed item text</td></tr>
+<tr><td>PRO-03</td><td>Xerostomia Questionnaire</td><td>Patient</td><td>Not built: needs licensed item text</td></tr>
+<tr><td>INS-01</td><td>Penetration-Aspiration Scale</td><td>Clinician</td><td>Section 9, Instrumental Studies</td></tr>
+<tr><td>INS-02</td><td>Pharyngeal residue rating</td><td>Clinician</td><td>Section 9, Instrumental Studies</td></tr>
+<tr><td>INS-03</td><td>Acoustic voice analysis</td><td>Clinician</td><td>Section 7, Voice and Speech</td></tr>
+<tr><td>FUN-01</td><td>FOIS</td><td>Clinician</td><td>Section 6, Swallowing Assessment</td></tr>
+<tr><td>FUN-02</td><td>ICF profile</td><td>Clinician</td><td>Section 10, WHO-ICF HNC Profile</td></tr>
+<tr><td>FUN-03</td><td>Exercise adherence</td><td>Patient app</td><td>Section 12, Patient Portal</td></tr>
+</table>
+<p>MDADI, VHI-10 and the Xerostomia Questionnaire are scored on the licensed paper forms; enter their totals in the sections listed in Chapter 5.</p>
+<h2 id="s-eat10">7.1 Administering the EAT-10</h2>
+<ol class="steps">
+  <li>Click the <b>EAT-10</b> card. Choose <b>Clinician entry</b> when you read the items aloud, or <b>Hand to patient</b> to give the device to the patient.</li>
+  <li>For each of the ten items select 0 (no problem) to 4 (severe problem) ({{fig:f-eat}}). <b>Bedside</b> and <b>Desk</b> change the row spacing.</li>
+  <li>The <b>Total score</b> panel shows the total out of 40 and its interpretation; while items are unanswered the total is marked provisional.</li>
+  <li>Click <b>Save to patient timeline</b>. The total is copied to the EAT-10 field of Section 6 and added to <b>Trend across sessions</b>; a second save on the same day replaces the first.</li>
+</ol>
+<figure id="f-eat"><img src="{{SHOTS}}/desktop-eat10.png" alt=""><figcaption>The EAT-10 being completed. Each response is a large button; the total and its interpretation update as items are answered.</figcaption></figure>
+<p><b>Interpretation shown on screen.</b> A total of 3 or more is abnormal (Belafsky et al., 2008). A total above 15 is associated with a higher likelihood of aspiration on instrumental examination (Cheney et al., 2015), which should prompt consideration of VFSS or FEES. The EAT-10 is a symptom screen; it does not replace an instrumental study.</p>
+<h2 id="s-outputs">7.2 Report, EMR note and handout</h2>
+<p>Under the score, three buttons open output sheets ({{fig:f-eatout}}). <b>Report / PDF</b> is a one-page EAT-10 report on the letterhead with item scores and history; <b>Print / PDF</b> prints it or saves it as PDF. <b>EMR note</b> is a short text note copied to the clipboard for pasting into the hospital record. <b>Patient handout</b> is a plain-language explanation for the patient. <span class="kbd">Esc</span> closes the sheet.</p>
+<figure class="pair" id="f-eatout"><div><img src="{{SHOTS}}/desktop-eat10-report.png" alt=""></div><div><img src="{{SHOTS}}/desktop-eat10-handout.png" alt=""></div><figcaption>EAT-10 output sheets: the report (left) and the patient handout (right).</figcaption></figure>
+
+<!-- ============================================================ -->
+<h1 id="ch-files"><span class="num">Chapter 8</span><span class="ctitle">Files and reports</span></h1>
+<p>The <b>Files and reports</b> page keeps the documents that come with a patient: discharge summaries, oncology and radiotherapy notes, VFSS or FEES reports, voice-analysis printouts, photographs of case sheets, images and swallow-study clips. DegluTech can read the text of these documents and propose values for the chart. Reading happens on the device; files are not uploaded.</p>
+<h2 id="s-filetypes">8.1 What can be attached and read</h2>
+<table class="num" id="t-files"><caption>File types, how DegluTech handles them, and the size limit.</caption>
+<tr><th>File</th><th>Kept and viewable</th><th>Values read</th></tr>
+<tr><td>Typed PDF (discharge summary, RT summary, study report)</td><td>Yes</td><td>Yes, from the text layer</td></tr>
+<tr><td>Scanned PDF, photo of a report (JPG, PNG, WebP)</td><td>Yes</td><td>Yes, by on-device text recognition (OCR)</td></tr>
+<tr><td>Text or CSV export (Praat report, instrument export)</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Video (MP4, WebM, MOV) and other images</td><td>Yes</td><td>No; kept for viewing only</td></tr>
+</table>
+<p>Each file can be up to 60 MB. Pages of a PDF that carry little typed text are recognised as images automatically.</p>
+<h2 id="s-addfile">8.2 Adding and reading a file</h2>
+<ol class="steps">
+  <li>Open the patient, then <b>Files and reports</b> in the sidebar.</li>
+  <li>Under <b>Text in photos</b>, choose the language of the document: <b>English</b>, <b>English + ಕನ್ನಡ</b> or <b>English + हिन्दी</b>.</li>
+  <li>Drop files onto the box, or click <b>Choose files</b> ({{fig:f-drop}}). A progress line shows reading and recognition.</li>
+  <li>When reading ends, <b>Values found in …</b> opens with the proposed values grouped by section.</li>
+</ol>
+<figure id="f-drop"><img src="{{SHOTS}}/el-drop.png" alt=""><figcaption>The drop box with Choose files and the language for text in photos.</figcaption></figure>
+<h2 id="s-review">8.3 Reviewing the values</h2>
+<p>Every proposed value is shown with the line of the document it came from ({{fig:f-rev}}). Its state decides whether it starts ticked:</p>
+<ul>
+  <li><span class="pill new">New</span> the chart field is empty. Ticked.</li>
+  <li><b>Adds</b> a multiple-choice field gains options, for example a second surgery type. Ticked.</li>
+  <li><span class="pill diff">Chart has … report says …</span> the chart already holds a different value. <b>Not ticked</b>; tick it only if the document is newer and correct.</li>
+  <li><span class="pill same">Already in chart</span> the same value is already recorded. Cannot be ticked.</li>
+  <li><b>Notes</b> (in amber) flag findings that need a decision, for example a T4 or N2 category without its sub-letter, an oropharyngeal site without p16 status, or shimmer given in per cent when the chart records dB. They are shown for information and are never added.</li>
+</ul>
+<ol class="steps">
+  <li>Read each value against its source line. Untick anything doubtful.</li>
+  <li>Click <b>Add <i>n</i> ticked values to the chart</b>. A message confirms how many were added. Check them in each section.</li>
+  <li><b>Show text read from file</b> displays the full text that was read, so you can copy anything DegluTech did not recognise. <b>Cancel</b> closes the review without changes.</li>
+</ol>
+<figure id="f-rev"><img src="{{SHOTS}}/el-review-top.png" alt=""><figcaption>Values found in a synthetic discharge summary for a demo patient. New values are ticked; values that differ from the chart are not.</figcaption></figure>
+<table class="num" id="t-read"><caption>Information DegluTech looks for in documents.</caption>
+<tr><th>Area</th><th>Values</th></tr>
+<tr><td>Patient</td><td>UHID or hospital number, age, sex, chief complaint</td></tr>
+<tr><td>Oncology</td><td>Diagnosis date (dd/mm/yyyy read first), T, N and M category, primary site, recurrence</td></tr>
+<tr><td>Treatment</td><td>Surgery type, flap, neck dissection side, RT dose and fractions, systemic agent, toxicity, CTCAE dysphagia grade</td></tr>
+<tr><td>Airway and nutrition</td><td>Tracheostomy status, feeding route (Ryles tube or NGT, PEG, combined), weight, height</td></tr>
+<tr><td>Swallowing</td><td>EAT-10, FOIS, PAS, MASA, MDADI, VFSS or FEES completed, residue sites, impression, severity, wet voice; DIGEST appears as a note</td></tr>
+<tr><td>Oral motor and voice</td><td>Jaw opening, MPT, jitter, shimmer (dB), HNR, VHI-10, resonance, laryngectomy type, TEP or electrolarynx</td></tr>
+</table>
+<p>Phrases that negate a finding (for example <i>no tracheostomy</i>, <i>not done</i>) are recognised, and values outside a field's valid range are discarded.</p>
+<h2 id="s-photo">8.4 Photographs and scans</h2>
+<p>For photographs, lay the page flat in good light, fill the frame and avoid shadows. {{fig:f-ocr}} shows values read from a photographed synthetic VFSS report. Text recognition reads printed text well; handwriting is read poorly or not at all, so typed reports give the best results. If nothing is found, DegluTech says so; retake the photograph or enter the values by hand.</p>
+<figure id="f-ocr"><img src="{{SHOTS}}/el-review-ocr.png" alt=""><figcaption>Values recognised from a photograph of a synthetic swallow-study report: EAT-10, PAS, VFSS status, study summary, residue pattern and severity.</figcaption></figure>
+<h2 id="s-inline">8.5 Filling one section from a document</h2>
+<p>Every data section has <b>Fill this section from a report, photo or file</b> above its blocks ({{fig:f-inline}}). It works like the Files page, but values for the open section are listed first and the four most recent files are shown. Files added here are kept on the Files page too.</p>
+<figure id="f-inline"><img src="{{SHOTS}}/el-inline.png" alt=""><figcaption>The document reader opened inside Section 3, Oncology and Staging.</figcaption></figure>
+<h2 id="s-manage-files">8.6 Viewing and managing files</h2>
+<p>Each file in the list shows its size, date, how it was read and how many of its values were used ({{fig:f-flist}}). <b>View</b> opens it in a viewer (PDF, image, video or text) with <b>Save a copy</b>. <b>Find values</b> opens the review again. <b>Read again</b> repeats recognition, for example after changing the photo language. The bin button deletes the file after confirmation. The line at the foot of the page shows how much browser storage is in use.</p>
+<figure id="f-flist"><img src="{{SHOTS}}/el-file-list.png" alt=""><figcaption>Attached files for a demo patient with View, Find values, Read again and Delete.</figcaption></figure>
+<div class="callout"><b>Verify every value</b>Reading is rule-based pattern matching on the document's text. It cannot judge whether a document is current, whether a value refers to this patient or to a previous episode, or whether a report is internally inconsistent. The clinician remains responsible for each value added to the chart.</div>
+
+<!-- ============================================================ -->
+<h1 id="ch-exercise"><span class="num">Chapter 9</span><span class="ctitle">Exercise prescription and patient portal</span></h1>
+<h2 id="s-library">9.1 Exercise library and demonstrations</h2>
+<p>Section 11 lists the eight core exercises of the home programme: Masako manoeuvre (tongue-hold swallow), effortful swallow, Mendelsohn manoeuvre, supraglottic swallow, active-assisted jaw stretch, lingual resistance press, back-tongue speech drills and the neck and shoulder range programme. Select an exercise to see its purpose, dose guidance, steps and safety notes. The <b>Expanded exercise catalogue</b> holds 30 further exercises for tongue, jaw, lips, neck, posture, airway, voice, speech and respiration for review; exercises are released to patients only from the core library.</p>
+<p>Each exercise is demonstrated by a <b>3D patient</b> ({{fig:f-3d}}). Choose <b>Front view</b>, <b>Side view</b> or <b>Inside view</b> (a schematic cut-away of the oral cavity, pharynx and larynx with the working muscles highlighted), and a <b>Woman</b> or <b>Man</b> model. Drag the model to turn it. Play, restart, half-speed and the step buttons <b>1</b>, <b>2</b>, <b>3</b> control the movement; holds are counted down on screen. <b>Drawing</b> switches to a line illustration, which is also used automatically on devices without 3D support.</p>
+<figure class="half" id="f-3d"><img src="{{SHOTS}}/desktop-exercise-3d.png" alt=""><figcaption>The 3D patient demonstrating an exercise in the inside view. The anatomy is schematic.</figcaption></figure>
+<h2 id="s-release">9.2 Prescribing and releasing a programme</h2>
+<ol class="steps">
+  <li>Select the exercises for this patient and choose the patient's instruction language: English, ಕನ್ನಡ (Kannada), മലയാളം (Malayalam), తెలుగు (Telugu), हिन्दी (Hindi) or தமிழ் (Tamil).</li>
+  <li>In <b>Individual prescription and release</b>, set <b>Sessions per day</b> and write the <b>Clinician dose and instructions</b> for every selected exercise ({{fig:f-rel}}).</li>
+  <li>Record the individual stop and contact plan (for example <i>stop if sharp pain, bleeding or breathing discomfort, and call the clinic</i>).</li>
+  <li>The status line names anything still missing. When nothing is missing, click <b>Confirm review and release</b>.</li>
+</ol>
+<figure id="f-rel"><img src="{{SHOTS}}/el-release-top.png" alt=""><figcaption>Individual prescription and release: sessions per day and the clinician's dose for each selected exercise.</figcaption></figure>
+<table class="num" id="t-gate"><caption>Conditions that must be met before a programme can be released.</caption>
+<tr><th>Condition</th><th>Where it is recorded</th></tr>
+<tr><td>At least one exercise selected, all from the core library</td><td>Section 11</td></tr>
+<tr><td>Unhealed fistula recorded as <i>No</i>, and fresh or unhealed flap or wound recorded as <i>No</i></td><td>Section 4, Clearance and healing</td></tr>
+<tr><td>Exercise clearance recorded as <i>Cleared</i>, with clearing clinician, date and restrictions</td><td>Section 4, Clearance and healing</td></tr>
+<tr><td>An individual stop and contact plan</td><td>Section 11</td></tr>
+<tr><td>A patient instruction language</td><td>Section 11</td></tr>
+<tr><td>Sessions per day and an individual dose for every exercise</td><td>Section 11</td></tr>
+</table>
+<p>Any later change to the exercises, dose, language, clearance, healing findings or stop plan withdraws the release until it is confirmed again.</p>
+<h2 id="s-portal">9.3 Patient portal and session log</h2>
+<p>Section 12 shows the released programme as the patient sees it, in the chosen language, with a <b>Done</b> button per exercise that counts the day's sessions against the prescribed number. Each exercise carries the regimen set in Section 11 ({{fig:f-portal}}). It also records today's exercises, a symptom check-in and the patient's confidence. <b>Export session log</b> downloads the logged days as a CSV file with study ID, exercise, sessions prescribed and logged, dose and release time. The log covers only the days logged on this device; it is not a complete adherence record and is not synchronised between devices.</p>
+<figure class="half" id="f-portal"><img src="{{SHOTS}}/el-regimen.png" alt=""><figcaption>The standard regimen panel for a selected exercise: frequency, sets and repetitions, hold time, rest period and session length, with the adherence target.</figcaption></figure>
+
+<!-- ============================================================ -->
+<h1 id="ch-report"><span class="num">Chapter 10</span><span class="ctitle">Summary and report</span></h1>
+<h2 id="s-ready">10.1 Pre-publication validation</h2>
+<p>Section 13 opens with a summary card: the recorded diagnosis, three actions and a <b>Sections 1–12 readiness</b> grid ({{fig:f-valid}}). Each tile shows the section, its state and the number and percentage of fields recorded: green tiles with a tick are <i>Filled · review required</i>; amber tiles with an arrow are <i>In progress</i>. A badge counts the sections with missing fields. Click a tile to go to that section. Field completion shows that fields are recorded; it does not measure clinical validity.</p>
+<figure id="f-valid"><img src="{{SHOTS}}/el-validation.png" alt=""><figcaption>The readiness grid: filled sections in green, sections in progress in amber, with recorded-field counts.</figcaption></figure>
+<h2 id="s-impression">10.2 Clinical impression</h2>
+<p>Write the <b>SLP diagnosis</b>, choose the <b>Clinical severity</b>, and enter <b>Recommendations</b> and the <b>Follow-up plan</b>. These are the clinician's own conclusions. Below them the page assembles the executive summary, the WHO-ICF table with qualifiers, and recommendation panels (strength and range-of-motion exercises, compensatory strategies and diet, red flags and emergency criteria, follow-up timeline) for review.</p>
+<h2 id="s-signoff">10.3 Sign-off</h2>
+<p>The <b>Clinician sign-off</b> panel shows the signature, name, qualification, designation, RCI registration number and institute of the signing clinician ({{fig:f-sign}}). When more than one clinician is set up, choose the signer from the list. DegluTech performs no electronic signature or EHR submission: sign the exported document according to your institution's procedure.</p>
+<figure id="f-sign"><img src="{{SHOTS}}/el-signoff.png" alt=""><figcaption>The sign-off panel with the clinician's signature and registration details taken from Settings.</figcaption></figure>
+<h2 id="s-export">10.4 Exporting and printing</h2>
+<p>The three report actions differ in visual weight so that the main one stands out ({{fig:f-act}}):</p>
+<ul>
+  <li><b>Export diagnostic report</b> (orange) opens the formatted report in a new window and the browser's print dialog. Choose <i>Save as PDF</i> or a printer. The report carries the letterhead, patient identity (or study ID only, if names are hidden), AJCC TNM, care phase, the executive summary, ICF table, recommendations and sign-off ({{fig:f-exp}}).</li>
+  <li><b>Preserve recorded entries</b> stores the impression fields with the chart.</li>
+  <li><b>Print current view</b> prints the page as shown.</li>
+</ul>
+<figure id="f-act"><img src="{{SHOTS}}/el-report-actions.png" alt=""><figcaption>The report summary card with the primary action, Export diagnostic report, and two outlined secondary actions.</figcaption></figure>
+<figure id="f-exp"><img src="{{SHOTS}}/desktop-report-export.png" alt=""><figcaption>The exported diagnostic report for a demo patient on a sample letterhead.</figcaption></figure>
+<p>If nothing opens, the browser blocked the pop-up; allow pop-ups for deglutech.pages.dev and try again.</p>
+
+<!-- ============================================================ -->
+<h1 id="ch-practice"><span class="num">Chapter 11</span><span class="ctitle">Good practice and limitations</span></h1>
+<h2 id="s-good">11.1 Good practice</h2>
+<ul>
+  <li>Set up Settings before the first patient so that every report carries the correct letterhead and signer.</li>
+  <li>Use study IDs consistently for research participants and hide names on printouts.</li>
+  <li>Export a backup at the end of each clinic day and before clearing browser data, changing computers or updating the browser profile.</li>
+  <li>Attach source documents to the chart so that the origin of each value can be checked later.</li>
+  <li>Record instrument versions, languages, assessors and recording conditions in the fields provided; these determine whether repeated measures can be compared.</li>
+  <li>Review the readiness grid before exporting a report, and treat green tiles as <i>recorded</i>, not as <i>verified</i>.</li>
+</ul>
+<h2 id="s-limits">11.2 Known limitations</h2>
+<ul>
+  <li>This is a review build. It has not been validated as a medical device and is intended for clinical documentation support, teaching and research under supervision.</li>
+  <li>Records are not synchronised between devices or users. Hand over cases with patient export and import.</li>
+  <li>Document reading recognises the common phrasing of typed English reports; unusual layouts, tables, abbreviations and handwriting may be missed or misread. Kannada and Hindi recognition reads the script, but the value rules match English labels.</li>
+  <li>MDADI, VHI-10 and the Xerostomia Questionnaire are not administered on screen.</li>
+  <li>The 3D anatomy is schematic and the exercise demonstrations await clinician verification; patient-language instructions are draft translations awaiting native-speaker SLP review.</li>
+  <li>The patient session log counts sessions recorded on this device only.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h1 id="ch-trouble"><span class="num">Chapter 12</span><span class="ctitle">Troubleshooting</span></h1>
+<table class="num" id="t-trouble"><caption>Common problems and their remedies.</caption>
+<tr><th>Problem</th><th>Remedy</th></tr>
+<tr><td>Patients have disappeared</td><td>Check that you are in the same browser, browser profile and device, and not in a private window. If site data was cleared, import the latest backup in Settings.</td></tr>
+<tr><td>The report does not open</td><td>Allow pop-ups for the site in the browser's address bar and click <b>Export diagnostic report</b> again.</td></tr>
+<tr><td>The 3D patient does not appear</td><td>The device or browser has WebGL turned off; the drawing is shown instead. Update the browser or turn on hardware acceleration.</td></tr>
+<tr><td>No values were found in a photo</td><td>Retake it flat, in good light, filling the frame; check the <b>Text in photos</b> language; use <b>Read again</b>. Handwritten notes are not reliably read.</td></tr>
+<tr><td>A value was read wrongly</td><td>Untick it before adding, or correct the field in its section afterwards. Use <b>Show text read from file</b> to see what was recognised.</td></tr>
+<tr><td>A file cannot be added</td><td>Files over 60 MB are refused; trim videos or compress scans. Check the storage line on the Files page.</td></tr>
+<tr><td><b>Confirm review and release</b> is greyed out</td><td>Read the status line above it; it names the missing condition (Table on release conditions, Chapter 9.2).</td></tr>
+<tr><td>A study ID is refused</td><td>Another patient on this device already uses it (letter case is ignored).</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h1 id="ch-ref"><span class="num">Appendix</span><span class="ctitle">Reference tables</span></h1>
+<h2 id="s-keys">A. Keyboard</h2>
+<table class="num" id="t-keys"><caption>Keyboard shortcuts.</caption>
+<tr><th>Keys</th><th>Action</th></tr>
+<tr><td><span class="kbd">Ctrl</span> <span class="kbd">K</span></td><td>Open the section finder</td></tr>
+<tr><td><span class="kbd">Enter</span></td><td>Open the highlighted section in the finder</td></tr>
+<tr><td><span class="kbd">Esc</span></td><td>Close the finder, an output sheet or the file viewer</td></tr>
+<tr><td><span class="kbd">Tab</span></td><td>Move between fields and buttons</td></tr>
+</table>
+<h2 id="s-gloss">B. Glossary</h2>
+<table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>CTCAE</td><td>Common Terminology Criteria for Adverse Events (NCI); grades toxicity including dysphagia.</td></tr>
+<tr><td>DIGEST</td><td>Dynamic Imaging Grade of Swallowing Toxicity; grades safety and efficiency from a modified barium swallow.</td></tr>
+<tr><td>EAT-10</td><td>Eating Assessment Tool, ten-item patient-reported symptom screen, total 0–40.</td></tr>
+<tr><td>FOIS</td><td>Functional Oral Intake Scale, levels 1 (nothing by mouth) to 7 (total oral diet without restriction).</td></tr>
+<tr><td>GRBAS</td><td>Perceptual voice rating: grade, roughness, breathiness, asthenia, strain.</td></tr>
+<tr><td>ICF</td><td>WHO International Classification of Functioning, Disability and Health; qualifiers 0–4.</td></tr>
+<tr><td>MASA</td><td>Mann Assessment of Swallowing Ability, bedside examination; MASA-HNC is the head and neck adaptation recorded here.</td></tr>
+<tr><td>MDADI</td><td>M. D. Anderson Dysphagia Inventory, swallowing-related quality of life.</td></tr>
+<tr><td>OCR</td><td>Optical character recognition: reading printed text from an image.</td></tr>
+<tr><td>OPME</td><td>Oral peripheral mechanism examination.</td></tr>
+<tr><td>PAS</td><td>Penetration-Aspiration Scale, 1–8, per bolus on VFSS or FEES.</td></tr>
+<tr><td>PSS-HN</td><td>Performance Status Scale for Head and Neck Cancer.</td></tr>
+<tr><td>TEP</td><td>Tracheoesophageal puncture and voice prosthesis.</td></tr>
+<tr><td>UHID</td><td>Unique hospital identification number.</td></tr>
+<tr><td>VHI-10</td><td>Voice Handicap Index, ten-item version.</td></tr>
+</table>
+
+<h1 id="ch-refs"><span class="num">&nbsp;</span><span class="ctitle">References</span></h1>
+<ul class="small">
+  <li>Amin MB, Edge SB, Greene FL, et al., eds. <i>AJCC Cancer Staging Manual</i>. 8th ed. Springer; 2017.</li>
+  <li>Belafsky PC, Mouadeb DA, Rees CJ, et al. Validity and reliability of the Eating Assessment Tool (EAT-10). <i>Ann Otol Rhinol Laryngol</i>. 2008;117(12):919–924.</li>
+  <li>Chen AY, Frankowski R, Bishop-Leone J, et al. The development and validation of a dysphagia-specific quality-of-life questionnaire for patients with head and neck cancer: the M. D. Anderson Dysphagia Inventory. <i>Arch Otolaryngol Head Neck Surg</i>. 2001;127(7):870–876.</li>
+  <li>Cheney DM, Siddiqui MT, Litts JK, Kuhn MA, Belafsky PC. The ability of the 10-item Eating Assessment Tool (EAT-10) to predict aspiration risk in persons with dysphagia. <i>Ann Otol Rhinol Laryngol</i>. 2015;124(5):351–354.</li>
+  <li>Crary MA, Mann GD, Groher ME. Initial psychometric assessment of a functional oral intake scale for dysphagia in stroke patients. <i>Arch Phys Med Rehabil</i>. 2005;86(8):1516–1520.</li>
+  <li>Dijkstra PU, Huisman PM, Roodenburg JLN. Criteria for trismus in head and neck oncology. <i>Int J Oral Maxillofac Surg</i>. 2006;35(4):337–342.</li>
+  <li>Hirano M. <i>Clinical Examination of Voice</i>. Springer; 1981.</li>
+  <li>Hutcheson KA, Barrow MP, Barringer DA, et al. Dynamic Imaging Grade of Swallowing Toxicity (DIGEST): scale development and validation. <i>Cancer</i>. 2017;123(1):62–70.</li>
+  <li>List MA, Ritter-Sterr C, Lansky SB. A performance status scale for head and neck cancer patients. <i>Cancer</i>. 1990;66(3):564–569.</li>
+  <li>Mann G. <i>MASA: The Mann Assessment of Swallowing Ability</i>. Singular/Thomson Learning; 2002.</li>
+  <li>National Cancer Institute. <i>Common Terminology Criteria for Adverse Events (CTCAE)</i>, version 5.0. 2017.</li>
+  <li>Neubauer PD, Rademaker AW, Leder SB. The Yale Pharyngeal Residue Severity Rating Scale: an anatomically defined and image-based tool. <i>Dysphagia</i>. 2015;30(5):521–528.</li>
+  <li>Rosen CA, Lee AS, Osborne J, Zullo T, Murry T. Development and validation of the Voice Handicap Index-10. <i>Laryngoscope</i>. 2004;114(9):1549–1556.</li>
+  <li>Rosenbek JC, Robbins JA, Roecker EB, Coyle JL, Wood JL. A penetration-aspiration scale. <i>Dysphagia</i>. 1996;11(2):93–98.</li>
+  <li>World Health Organization. <i>International Classification of Functioning, Disability and Health (ICF)</i>. WHO; 2001.</li>
+</ul>
+</body>
+</html>

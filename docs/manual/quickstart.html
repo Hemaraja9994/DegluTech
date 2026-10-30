@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>DegluTech — Quick start</title><link rel="stylesheet" href="manual.css">
+<style>
+  @page { margin: 13mm 14mm 13mm 14mm; @top-left { content: none; } @top-right { content: none; } @bottom-center { content: 'DegluTech quick start · ' counter(page) ' / 2'; font-size: 8pt; } }
+  @page :first { margin: 13mm 14mm 13mm 14mm; @bottom-center { content: 'DegluTech quick start · ' counter(page) ' / 2'; font-size: 8pt; } }
+  html { font-size: 10.2pt; line-height: 1.38; }
+  .qs-head { display: flex; align-items: center; gap: 4mm; background: linear-gradient(135deg, #24527a, #173451); color: #fff; border-radius: 3mm; padding: 4mm 5mm; margin-bottom: 4mm; }
+  .qs-head img { width: 14mm; height: 14mm; background: #fff; border-radius: 3mm; padding: 1.2mm; box-sizing: border-box; }
+  .qs-head .qs-title { font: 700 17pt 'Noto Sans', sans-serif; display: block; }
+  .qs-head p { margin: 0.5mm 0 0; color: #dbe6ef; font: 9pt 'Noto Sans', sans-serif; text-align: left; }
+  .qs-head .who { margin-left: auto; flex: none; text-align: right; font: 7.4pt/1.4 "Noto Sans", sans-serif; color: #b9cbdb; }
+  h2 { font-size: 11pt; margin: 3mm 0 1.5mm; border-bottom: 0.5mm solid #f46b20; padding-bottom: 0.8mm; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 6mm; }
+  .grid > div { break-inside: avoid; }
+  .steps > li { margin-bottom: 1.2mm; padding-left: 7mm; }
+  .steps > li::before { width: 4.6mm; height: 4.6mm; font-size: 7.5pt; line-height: 4.6mm; }
+  figure { margin: 1mm 0 2mm; }
+  figcaption::before { content: none; }
+  figcaption .fn { display: none; }
+  figcaption { font-size: 7.6pt; margin-top: 0.8mm; }
+  table { font-size: 8.4pt; margin: 1mm 0 2mm; }
+  .callout { padding: 1.8mm 3mm; margin: 2mm 0; }
+  .pb { break-before: page; }
+</style></head>
+<body>
+<div class="qs-head"><img src="{{ICON}}" alt=""><div><div class="qs-title">DegluTech — Quick start</div><p>From the first patient to a signed report in seven steps<br>deglutech.pages.dev</p></div><div class="who">Mr. Prasanna Hegde · Ms. Priyanka Nayak<br>Mr. Hemaraja Nayaka S · Mr. Sumanth A V<br>Mr. Joju Joseph · v0.4 review · Oct 2026</div></div>
+<div class="grid">
+<div>
+<h2>Before you start</h2>
+<ul>
+  <li>Use Chrome or Edge. Allow pop-ups for the site (the report opens in a new window).</li>
+  <li>Records stay in <b>this browser on this device</b>. Export a backup daily from <b>Settings → Backup and data</b>; clearing browser data deletes records.</li>
+  <li>Use <b>study IDs</b> for research records and tick <b>Hide patient names and hospital IDs on printouts</b>.</li>
+  <li>For teaching, <b>Settings → Load demo patients</b> adds eight fictitious charts.</li>
+</ul>
+<h2>1 · Settings</h2>
+<ol class="steps">
+  <li><b>Clinic or institute</b>: name, department, address, phone, email, logo. They print on every report.</li>
+  <li><b>Add clinician</b>: name, qualification, designation, RCI number, signature image → <b>Save clinician</b>. Pick the default signer.</li>
+</ol>
+<h2>2 · Add a patient</h2>
+<ol class="steps">
+  <li><b>Patients → Add patient</b>: at least one of name, hospital ID / UHID or study ID; age, sex, care phase.</li>
+  <li><b>Add and open chart</b>. The chart opens at <b>2. Demographics and Referral</b>.</li>
+</ol>
+<h2>3 · Chart the sections</h2>
+<ol class="steps">
+  <li>Work through the groups in the sidebar: <b>Triage</b>, <b>Intake</b>, <b>Assessment</b>, <b>Synthesis</b>, <b>Plan</b>. <b>Next</b> moves on; <span class="kbd">Ctrl</span> <span class="kbd">K</span> jumps to any section.</li>
+  <li>Each block shows <i>n/n recorded</i>; the ring shows chart completion. Entries save automatically.</li>
+  <li>Grades (CTCAE, DIGEST, ICF qualifiers, severity) are clinician-assigned. Record instrument versions and recording conditions.</li>
+</ol>
+</div>
+<div>
+<figure><img src="{{SHOTS}}/desktop-swallowing-assessment.png" alt=""><figcaption>A section page: groups and fill counts (left), completion ring, block index and the document reader.</figcaption></figure>
+<h2>4 · Read reports and photos</h2>
+<ol class="steps">
+  <li><b>Files and reports</b> (or <b>Fill this section from a report</b> in any section). Set <b>Text in photos</b> (English, + ಕನ್ನಡ, + हिन्दी).</li>
+  <li>Drop a typed PDF, a photo of a report or a Praat text export. Videos are kept for viewing only.</li>
+  <li>Check every value against its source line. New values are ticked; values that differ from the chart are not. <b>Add ticked values to the chart</b>.</li>
+</ol>
+<h2>5 · Clinical tool suite</h2>
+<ol class="steps">
+  <li>Open <b>Clinical tool suite → EAT-10</b>; <b>Clinician entry</b> or <b>Hand to patient</b>; score items 0–4.</li>
+  <li><b>Save to patient timeline</b>. ≥ 3 abnormal; &gt; 15 higher aspiration risk: consider VFSS/FEES. <b>Report / PDF</b>, <b>EMR note</b>, <b>Handout</b>.</li>
+</ol>
+</div>
+</div>
+<div class="grid pb">
+<div>
+<h2>6 · Prescribe exercises</h2>
+<ol class="steps">
+  <li>In <b>4. Treatment and Toxicity</b> record fistula and flap/wound status (<i>No</i>), <b>Exercise clearance</b> <i>Cleared</i>, and the clearing clinician with restrictions.</li>
+  <li>In <b>11. Exercise Prescription</b> pick exercises; demonstrate with the <b>3D patient</b> (front, side, inside view; woman or man; drag to turn).</li>
+  <li>Choose the patient's language; set <b>Sessions per day</b> and the dose for each exercise; record the stop and contact plan.</li>
+  <li><b>Confirm review and release</b>. If it is greyed out, the status line names what is missing. <b>12. Patient Portal</b> shows the patient view and the session log (CSV).</li>
+</ol>
+<h2>7 · Report</h2>
+<ol class="steps">
+  <li><b>13. Summary and Report</b>: check the readiness grid (green = filled, amber = in progress; click a tile to go there).</li>
+  <li>Write the SLP diagnosis, severity, recommendations and follow-up; choose the signing clinician.</li>
+  <li><b>Export diagnostic report</b> → print dialog → <i>Save as PDF</i>. Sign according to your institution's procedure.</li>
+</ol>
+</div>
+<div>
+<figure><img src="{{SHOTS}}/el-validation.png" alt=""><figcaption>Readiness grid in Summary and Report.</figcaption></figure>
+<h2>Dashboard alerts</h2>
+<table>
+<tr><th>Alert</th><th>Rule</th></tr>
+<tr><td>Trismus risk</td><td>Jaw opening ≤ 35 mm</td></tr>
+<tr><td>Higher aspiration risk</td><td>EAT-10 &gt; 15</td></tr>
+<tr><td>Aspiration on study</td><td>PAS ≥ 6</td></tr>
+<tr><td>Wet voice</td><td>Intermittent or consistent</td></tr>
+<tr><td>Weight loss</td><td>≥ 5% in one month</td></tr>
+</table>
+<div class="callout"><b>Remember</b>DegluTech is clinical decision support. It does not diagnose or grade; values read from documents are suggestions; home exercise is released only after documented clearance. Decisions stay with the SLP. Full details: the <i>User manual</i>.</div>
+</div>
+</div>
+</body>
+</html>

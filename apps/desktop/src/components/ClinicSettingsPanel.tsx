@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, ImagePlus, Plus, Trash2, Upload } from 'lucide-react';
+import { BookOpen, Download, ImagePlus, Plus, Trash2, Upload } from 'lucide-react';
 import {
   buildBackup, mergeStores, newId, parseBackup, removeDemoPatients, signingClinician,
   type ClinicSettings, type Clinician, type PatientStore,
@@ -85,7 +85,7 @@ export function ClinicSettingsPanel({ settings, setSettings, store, setStore }: 
 
   return <section className="cs" aria-labelledby="cs-title">
     <div className="dt-page-heading"><span className="dt-eyebrow">PRACTICE CONFIGURATION</span><h2 id="cs-title">Clinic settings</h2><p>Your clinic identity, clinicians and records on this device.</p></div>
-    <nav className="dt-settings-index" aria-label="Settings categories"><a href="#cs-inst">Clinic identity</a><a href="#cs-slp">Clinicians</a><a href="#cs-print">Print & privacy</a><a href="#cs-data">Backup & data</a></nav>
+    <nav className="dt-settings-index" aria-label="Settings categories"><a href="#cs-inst">Clinic identity</a><a href="#cs-slp">Clinicians</a><a href="#cs-print">Print & privacy</a><a href="#cs-data">Backup & data</a><a href="#cs-help">Manuals</a></nav>
     {message && <p className="pm-status" role="status">{message}</p>}
     {error && <p className="pm-error" role="alert">{error}</p>}
 
@@ -151,6 +151,15 @@ export function ClinicSettingsPanel({ settings, setSettings, store, setStore }: 
             <span>{[signer?.qualification, signer?.designation].filter(Boolean).join(', ')}</span>
             <span>{signer?.registration ? `RCI Reg. No. ${signer.registration}` : 'RCI Reg. No. ______'}</span>
           </div>
+        </div>
+      </section>
+
+      <section className="cs-card" aria-labelledby="cs-help">
+        <h3 id="cs-help">User manual and quick start</h3>
+        <p className="pm-hint">Step-by-step guides for clinicians and students, with screenshots of every page. Print the quick start for the clinic desk.</p>
+        <div className="pm-actions">
+          <a className="cs-file" href="downloads/deglutech-user-manual.pdf" target="_blank" rel="noopener" download><BookOpen size={16} /> User manual (PDF)</a>
+          <a className="cs-file" href="downloads/deglutech-quick-start.pdf" target="_blank" rel="noopener" download><Download size={16} /> Quick start, 2 pages (PDF)</a>
         </div>
       </section>
 
