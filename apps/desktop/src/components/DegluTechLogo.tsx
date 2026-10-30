@@ -27,8 +27,8 @@ export const DegluTechLogo: React.FC<DegluTechLogoProps> = ({
       <desc id={descId}>A head and neck rehab mark with a swallowing pathway and speech wave cues.</desc>
       <defs>
         <linearGradient id={shellId} x1="8" y1="6" x2="56" y2="60" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#0f8ea8" />
-          <stop offset="1" stopColor="#114e6b" />
+          <stop stopColor="#1f5c4a" />
+          <stop offset="1" stopColor="#123b30" />
         </linearGradient>
         <linearGradient id={pulseId} x1="17" y1="18" x2="51" y2="48" gradientUnits="userSpaceOnUse">
           <stop stopColor="#d8f3f7" />

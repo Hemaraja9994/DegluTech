@@ -8,17 +8,17 @@ import {
   isoToday, shortDate, longDate, patientLine, eat10EmrNote, handoutProgress, lastResultFor, type CategoryId, type Eat10Response, type Tool,
 } from '../toolSuite';
 
-const SANS = "'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif";
+const SANS = "'Plus Jakarta Sans', 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif";
 const MONO = "'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace";
-const INK = '#10202f', INK2 = '#425466', INK3 = '#7b8b9c', LINE = 'rgba(15,39,59,.10)', LINE2 = 'rgba(15,39,59,.18)';
-const ACCENT = '#118aa3', ACCENT_INK = '#07566b', ACCENT_SOFT = '#dff5f8';
+const INK = '#15302a', INK2 = '#3e5852', INK3 = '#4d6660', LINE = 'rgba(21,48,42,.10)', LINE2 = 'rgba(21,48,42,.18)';
+const ACCENT = '#1f5c4a', ACCENT_INK = '#123b30', ACCENT_SOFT = '#e4eee7';
 
 type Overlay = null | 'report' | 'emr' | 'handout';
 type Props = { fieldState: FieldState; update: (patch: FieldState) => void; onOpenSection: (id: HncSectionId) => void; patientFallbackId: string };
 
 const pill = (bg: string, fg: string): React.CSSProperties => ({ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', borderRadius: 999, background: bg, color: fg, fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' });
-const segTrack: React.CSSProperties = { display: 'inline-flex', gap: 4, background: '#e6eff5', borderRadius: 10, padding: 4 };
-const seg = (on: boolean, h = 40): React.CSSProperties => ({ minHeight: h, padding: '0 14px', border: 0, borderRadius: 7, cursor: 'pointer', fontSize: 13.5, fontWeight: 600, fontFamily: SANS, background: on ? '#fff' : 'transparent', color: on ? ACCENT_INK : INK2, boxShadow: on ? '0 1px 3px rgba(16,32,47,.12)' : 'none' });
+const segTrack: React.CSSProperties = { display: 'inline-flex', gap: 4, background: '#e1eae4', borderRadius: 10, padding: 4 };
+const seg = (on: boolean, h = 40): React.CSSProperties => ({ minHeight: h, padding: '0 14px', border: 0, borderRadius: 7, cursor: 'pointer', fontSize: 13.5, fontWeight: 600, fontFamily: SANS, background: on ? '#fff' : 'transparent', color: on ? ACCENT_INK : INK2, boxShadow: on ? '0 1px 3px rgba(21,48,42,.12)' : 'none' });
 const secondaryBtn: React.CSSProperties = { minHeight: 44, border: `1px solid ${LINE2}`, borderRadius: 10, background: '#fff', color: ACCENT_INK, fontWeight: 600, fontSize: 13.5, fontFamily: SANS, cursor: 'pointer', padding: '0 10px' };
 const eyebrow: React.CSSProperties = { font: `600 11.5px ${MONO}`, letterSpacing: '.06em', color: ACCENT_INK, textTransform: 'uppercase' };
 
@@ -99,10 +99,10 @@ export function ClinicalToolSuite({ fieldState, update, onOpenSection, patientFa
             {g.tools.map(t => { const last = lastResultFor(t.id, fieldState), tone = TONE[last ? last.tone : 'none'];
               return <button key={t.id} type="button" className="ts-card" onClick={() => openTool(t)} style={{ textAlign: 'left', background: '#fff', border: `1px solid ${LINE}`, borderRadius: 12, padding: '16px 16px 14px', minHeight: 184, display: 'flex', flexDirection: 'column', gap: 10, cursor: 'pointer', fontFamily: SANS, color: INK }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, width: '100%' }}>
-                  <span style={{ font: `500 11.5px ${MONO}`, color: INK3 }}>{t.code}</span><span style={pill('#f1f5f9', INK2)}>{t.rater} · {t.time}</span></div>
+                  <span style={{ font: `500 11.5px ${MONO}`, color: INK3 }}>{t.code}</span><span style={pill('#eef2ef', INK2)}>{t.rater} · {t.time}</span></div>
                 <span style={{ fontSize: 17, fontWeight: 700 }}>{t.name}</span>
                 <span style={{ fontSize: 13.5, color: INK2, flex: 1 }}>{t.measures}</span>
-                <span style={{ borderTop: `1px dashed rgba(15,39,59,.14)`, paddingTop: 10, width: '100%', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ borderTop: `1px dashed rgba(21,48,42,.14)`, paddingTop: 10, width: '100%', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   {last ? <><span style={{ font: `600 15px ${MONO}` }}>{last.value}</span><span style={pill(tone.bg, tone.fg)}>{last.label}</span>{last.date && <span style={{ fontSize: 12, color: INK3, marginLeft: 'auto' }}>{last.date}</span>}</>
                     : <span style={{ fontSize: 13, color: INK3 }}>Not yet administered</span>}
                 </span>
@@ -130,7 +130,7 @@ export function ClinicalToolSuite({ fieldState, update, onOpenSection, patientFa
     const prev = history[history.length - 1];
     const delta = prev ? total - prev.total : 0;
     const deltaText = !prev ? 'No earlier session saved' : delta === 0 ? `No change since ${shortDate(prev.date)}` : `${delta < 0 ? '↓' : '↑'} ${Math.abs(delta)} since ${shortDate(prev.date)}`;
-    const deltaColor = !prev || delta === 0 ? INK2 : delta < 0 ? '#0f766e' : '#991b1b';
+    const deltaColor = !prev || delta === 0 ? INK2 : delta < 0 ? '#2f7a5c' : '#8e3420';
     return <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'ts-in .25s ease-out' }}>
       <nav aria-label="Breadcrumb" style={{ fontSize: 13.5, color: INK2, display: 'flex', alignItems: 'center', gap: 6 }}>
         <button type="button" onClick={() => setView('hub')} style={{ border: 0, background: 'transparent', color: ACCENT_INK, fontWeight: 600, cursor: 'pointer', padding: '6px 4px', display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: SANS }}><ChevronLeft size={16} />Tool suite</button>
@@ -153,7 +153,7 @@ export function ClinicalToolSuite({ fieldState, update, onOpenSection, patientFa
             ? <div style={{ background: ACCENT_SOFT, color: ACCENT_INK, padding: '20px 24px' }}>
               <div style={{ fontSize: 20, fontWeight: 700 }}>How much is each of these a problem for you?</div>
               <div style={{ fontSize: 16, marginTop: 4 }}>Tap one number for every sentence. 0 means no problem, 4 means a severe problem.</div></div>
-            : <div style={{ background: '#f8fbfd', borderBottom: `1px solid ${LINE}`, padding: '12px 20px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, fontSize: 13.5, color: INK2 }}>
+            : <div style={{ background: '#f5f8f5', borderBottom: `1px solid ${LINE}`, padding: '12px 20px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, fontSize: 13.5, color: INK2 }}>
               <span>Session <strong style={{ color: INK, fontFamily: MONO }}>{longDate(today)}</strong></span><span>Language <strong style={{ color: INK }}>English</strong></span>
               <span>Completed <strong style={{ color: INK, fontFamily: MONO }}>{answered}/10</strong></span>
               <span style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -193,7 +193,7 @@ export function ClinicalToolSuite({ fieldState, update, onOpenSection, patientFa
                 {[0, 3, 15, 40].map(v => <span key={v} style={{ position: 'absolute', left: `${v / 40 * 100}%`, transform: v === 40 ? 'translateX(-100%)' : v === 0 ? 'none' : 'translateX(-50%)' }}>{v}</span>)}</div>
             </div>
             <p style={{ margin: 0, fontSize: 14, color: INK }}>{band.text}</p>
-            {missing > 0 && <p style={{ margin: 0, padding: '8px 12px', borderRadius: 8, background: '#fef3c7', color: '#92400e', fontSize: 13.5 }}>{missing} item{missing === 1 ? '' : 's'} unanswered. Total is provisional.</p>}
+            {missing > 0 && <p style={{ margin: 0, padding: '8px 12px', borderRadius: 8, background: '#fbefd6', color: '#7a4e00', fontSize: 13.5 }}>{missing} item{missing === 1 ? '' : 's'} unanswered. Total is provisional.</p>}
             <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: 12.5, color: INK2, display: 'grid', gap: 2 }}>
               <li><strong style={{ fontFamily: MONO }}>0–2</strong> Within normal limits</li><li><strong style={{ fontFamily: MONO }}>≥ 3</strong> Abnormal swallowing (Belafsky 2008)</li>
               <li><strong style={{ fontFamily: MONO }}>&gt; 15</strong> Associated with higher aspiration risk on instrumental exam (Cheney 2015)</li></ul>
@@ -201,7 +201,7 @@ export function ClinicalToolSuite({ fieldState, update, onOpenSection, patientFa
           <section aria-label="Trend across sessions" style={{ background: '#fff', borderRadius: 14, border: `1px solid ${LINE}`, padding: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}><strong style={{ fontSize: 14.5 }}>Trend across sessions</strong><span style={{ fontSize: 13, fontWeight: 600, color: deltaColor }}>{deltaText}</span></div>
             <div style={{ position: 'relative', height: 150, display: 'grid', gridTemplateColumns: `repeat(${Math.max(bars.length, 6)}, 1fr)`, gap: 8, alignItems: 'end', marginTop: 18 }} role="img" aria-label={`EAT-10 totals: ${bars.map(b => `${b.label} ${b.value}`).join(', ')}`}>
-              {[3, 15].map(v => <span key={v} aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: `${v / 40 * 100}%`, borderTop: `1px dashed ${v === 3 ? '#0f766e' : '#991b1b'}`, opacity: 0.6 }} />)}
+              {[3, 15].map(v => <span key={v} aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: `${v / 40 * 100}%`, borderTop: `1px dashed ${v === 3 ? '#2f7a5c' : '#8e3420'}`, opacity: 0.6 }} />)}
               {bars.map((b, k) => <div key={k} style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', position: 'relative' }}>
                 <span style={{ font: `600 12px ${MONO}`, color: INK, marginBottom: 2 }}>{b.value}</span>
                 <span style={{ width: '70%', maxWidth: 34, height: `${Math.max(2, b.value / 40 * 100)}%`, borderRadius: '4px 4px 0 0', transition: 'height .25s', background: b.current ? ACCENT : b.value > 15 ? 'rgba(180,35,24,.35)' : b.value >= 3 ? 'rgba(183,121,31,.4)' : 'rgba(15,118,110,.4)' }} /></div>)}
@@ -226,14 +226,14 @@ export function ClinicalToolSuite({ fieldState, update, onOpenSection, patientFa
 
   const emrText = useMemo(() => eat10EmrNote({ dateLabel: longDate(today), patient, resp, history, followUp }), [today, patient.id, patient.ageSex, patient.dx, JSON.stringify(resp), JSON.stringify(history), followUp]);
 
-  return <div className="ts-root" style={{ fontFamily: SANS, color: INK, background: '#f3f7fb', borderRadius: 14 }}>
+  return <div className="ts-root" style={{ fontFamily: SANS, color: INK, background: '#eef2ef', borderRadius: 14 }}>
     <div style={{ maxWidth: 1280, margin: '0 auto', padding: 'clamp(18px,3vw,32px) clamp(14px,3vw,28px) 48px', display: 'flex', flexDirection: 'column', gap: 28 }}>
       {view === 'hub' ? hub() : tool()}
       <p style={{ margin: 0, textAlign: 'center', fontSize: 12, color: INK3 }}>Scores are saved to this browser's workspace draft for the current patient.</p>
     </div>
     {overlay && <OutputOverlay overlay={overlay} setOverlay={setOverlay} onClose={() => setOverlay(null)} emrText={emrText} onToast={showToast}
       total={total} band={band} resp={resp} history={history} patient={patient} today={today} followUp={followUp} />}
-    {toast && createPortal(<div role="status" className="ts-noprint" style={{ position: 'fixed', left: '50%', bottom: 24, transform: 'translateX(-50%)', zIndex: 1001, background: INK, color: '#fff', fontSize: 14, fontWeight: 500, padding: '12px 18px', borderRadius: 10, boxShadow: '0 12px 32px rgba(16,32,47,.3)', animation: 'ts-in .2s ease-out', maxWidth: 'calc(100% - 32px)', fontFamily: SANS }}>{toast}</div>, document.body)}
+    {toast && createPortal(<div role="status" className="ts-noprint" style={{ position: 'fixed', left: '50%', bottom: 24, transform: 'translateX(-50%)', zIndex: 1001, background: INK, color: '#fff', fontSize: 14, fontWeight: 500, padding: '12px 18px', borderRadius: 10, boxShadow: '0 12px 32px rgba(21,48,42,.3)', animation: 'ts-in .2s ease-out', maxWidth: 'calc(100% - 32px)', fontFamily: SANS }}>{toast}</div>, document.body)}
   </div>;
 }
 
@@ -257,11 +257,11 @@ function OutputOverlay({ overlay, setOverlay, onClose, emrText, onToast, total, 
     else window.print();
   };
   const th: React.CSSProperties = { padding: '6px 4px', borderBottom: `1px solid ${LINE2}`, textAlign: 'left', color: INK2, fontSize: 12 };
-  const td: React.CSSProperties = { padding: '6px 4px', borderBottom: '1px solid rgba(15,39,59,.08)' };
+  const td: React.CSSProperties = { padding: '6px 4px', borderBottom: '1px solid rgba(21,48,42,.08)' };
   return createPortal(<div className="ts-overlay" role="dialog" aria-modal="true" aria-label="EAT-10 outputs" onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-    style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(16,32,47,.45)', overflow: 'auto', padding: 'clamp(10px,3vw,32px)', fontFamily: SANS, color: INK }}>
-    <div ref={sheet} tabIndex={-1} className="ts-sheet" style={{ maxWidth: 820, margin: '0 auto', background: '#fff', borderRadius: 14, boxShadow: '0 24px 64px rgba(16,32,47,.24)', overflow: 'hidden', animation: 'ts-in .2s ease-out', outline: 'none' }}>
-      <div className="ts-noprint" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', padding: '12px 16px', borderBottom: `1px solid ${LINE}`, background: '#f8fbfd' }}>
+    style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(21,48,42,.45)', overflow: 'auto', padding: 'clamp(10px,3vw,32px)', fontFamily: SANS, color: INK }}>
+    <div ref={sheet} tabIndex={-1} className="ts-sheet" style={{ maxWidth: 820, margin: '0 auto', background: '#fff', borderRadius: 14, boxShadow: '0 24px 64px rgba(21,48,42,.24)', overflow: 'hidden', animation: 'ts-in .2s ease-out', outline: 'none' }}>
+      <div className="ts-noprint" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', padding: '12px 16px', borderBottom: `1px solid ${LINE}`, background: '#f5f8f5' }}>
         <div style={segTrack} role="tablist">{([['report', 'Report'], ['emr', 'EMR note'], ['handout', 'Patient handout']] as const).map(([id, label]) =>
           <button key={id} type="button" role="tab" aria-selected={overlay === id} onClick={() => setOverlay(id)} style={{ ...seg(overlay === id, 36), fontSize: 13 }}>{label}</button>)}</div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -277,20 +277,20 @@ function OutputOverlay({ overlay, setOverlay, onClose, emrText, onToast, total, 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ font: `600 44px/1 ${MONO}`, color: band.fg }}>{total}<span style={{ fontSize: 18, color: INK3 }}> / 40</span></div>
           <div style={{ flex: '1 1 300px' }}><div style={{ fontWeight: 700, color: band.fg }}>{band.label}</div><div style={{ fontSize: 14, marginTop: 2 }}>{band.text}</div>
-            {eat10Score(resp).missing > 0 && <div style={{ fontSize: 13, color: '#92400e', marginTop: 4 }}>Provisional: {eat10Score(resp).missing} item(s) unanswered.</div>}</div>
+            {eat10Score(resp).missing > 0 && <div style={{ fontSize: 13, color: '#7a4e00', marginTop: 4 }}>Provisional: {eat10Score(resp).missing} item(s) unanswered.</div>}</div>
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5 }}>
           <thead><tr><th style={{ ...th, width: 36 }}>#</th><th style={th}>Item</th><th style={{ ...th, textAlign: 'right', width: 60 }}>Score</th></tr></thead>
           <tbody>{EAT10_ITEMS.map((t, i) => <tr key={i}><td style={{ ...td, fontFamily: MONO, color: INK3 }}>{String(i + 1).padStart(2, '0')}</td><td style={td}>{t}</td><td style={{ ...td, textAlign: 'right', fontFamily: MONO, fontWeight: 600 }}>{resp[i] === null ? '—' : resp[i]}</td></tr>)}</tbody>
         </table>
         <div><div style={{ fontSize: 12, fontWeight: 700, color: INK2, marginBottom: 6 }}>Score history</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{chips.map((c, k) => <div key={k} style={{ border: '1px solid rgba(15,39,59,.12)', borderRadius: 8, padding: '6px 10px', fontSize: 12, lineHeight: 1.3 }}><div style={{ color: INK2 }}>{c.label} · {c.date}</div><div style={{ font: `600 15px ${MONO}` }}>{c.value}</div></div>)}</div></div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>{chips.map((c, k) => <div key={k} style={{ border: '1px solid rgba(21,48,42,.12)', borderRadius: 8, padding: '6px 10px', fontSize: 12, lineHeight: 1.3 }}><div style={{ color: INK2 }}>{c.label} · {c.date}</div><div style={{ font: `600 15px ${MONO}` }}>{c.value}</div></div>)}</div></div>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', paddingTop: 24, fontSize: 12.5, color: INK2 }}>
           <div style={{ borderTop: `1px solid ${INK}`, paddingTop: 6, minWidth: 220 }}>Speech-language pathologist</div><div style={{ borderTop: `1px solid ${INK}`, paddingTop: 6, minWidth: 160 }}>Date</div></div>
       </div>}
       {overlay === 'emr' && <div style={{ padding: 'clamp(20px,4vw,32px)', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ fontSize: 13.5, color: INK2 }}>Structured note for pasting into the hospital EMR. Plain text, no formatting.</div>
-        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', font: `400 13px/1.6 ${MONO}`, background: '#f8fbfd', border: `1px solid ${LINE}`, borderRadius: 10, padding: 16, color: INK }}>{emrText}</pre>
+        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', font: `400 13px/1.6 ${MONO}`, background: '#f5f8f5', border: `1px solid ${LINE}`, borderRadius: 10, padding: 16, color: INK }}>{emrText}</pre>
       </div>}
       {overlay === 'handout' && <div style={{ padding: 'clamp(20px,4vw,40px)', display: 'flex', flexDirection: 'column', gap: 18, fontSize: 17, lineHeight: 1.55 }}>
         <div><div style={{ ...eyebrow, fontSize: 11 }}>Your swallowing check</div><h2 style={{ margin: '4px 0 0', fontSize: 26, fontWeight: 700 }}>Today's result: {total} out of 40</h2></div>

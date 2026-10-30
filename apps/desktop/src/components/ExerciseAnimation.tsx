@@ -226,7 +226,7 @@ function FrontView({ pose, time, glow }: ViewProps) {
   </svg>;
 }
 
-const VIEW_LABELS: Record<string, { side: string; front: string; inside: string }> = {
+export const VIEW_LABELS: Record<string, { side: string; front: string; inside: string }> = {
   en: { side: 'Side view', front: 'Front view', inside: 'Inside view' },
   kn: { side: 'ಪಕ್ಕದ ನೋಟ', front: 'ಮುಂಭಾಗದ ನೋಟ', inside: 'ಒಳಗಿನ ನೋಟ' },
   hi: { side: 'बगल से दृश्य', front: 'सामने से दृश्य', inside: 'अंदर का दृश्य' },

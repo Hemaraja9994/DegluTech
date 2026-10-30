@@ -49,9 +49,9 @@ export const severityToneFromScore = (
 };
 
 export const toneFg: Record<'safe' | 'caution' | 'risk' | 'accent', string> = {
-  safe: '#0f766e',
-  caution: '#92400e',
-  risk: '#991b1b',
+  safe: '#2f7a5c',
+  caution: '#7a4e00',
+  risk: '#8e3420',
   accent: T.accentInk,
 };
 
@@ -72,7 +72,7 @@ export const toneDot: Record<'safe' | 'caution' | 'risk' | 'accent', string> = {
 // Standard card surface — applied via spread: { ...cardSurface }
 export const cardSurface = {
   background: T.surface1,
-  borderRadius: 10,
+  borderRadius: 18,
   boxShadow: `inset 0 0 0 0.5px ${T.line}`,
 } as const;
 

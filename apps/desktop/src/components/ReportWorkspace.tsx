@@ -79,9 +79,9 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   };
 
   const aspirationPalette: Record<typeof summary.aspirationRiskTone, { bg: string; border: string; fg: string }> = {
-    green: { bg: '#ecfdf5', border: '#10b981', fg: '#065f46' },
-    amber: { bg: '#fffbeb', border: '#f59e0b', fg: '#92400e' },
-    red: { bg: '#fef2f2', border: '#dc2626', fg: '#991b1b' },
+    green: { bg: '#ddefe5', border: '#2f7a5c', fg: '#1f5c43' },
+    amber: { bg: '#fdf6e7', border: '#c9822b', fg: '#7a4e00' },
+    red: { bg: '#fbf1ec', border: '#a8402b', fg: '#8e3420' },
   };
   const tone = aspirationPalette[summary.aspirationRiskTone];
 
@@ -92,7 +92,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
         title={draft.slpDiagnosis || 'Clinical report'}
         description="Review clinician-entered findings and decisions before exporting. Field completion does not establish clinical readiness."
         icon={<ClipboardCheck size={20} />}
-        accent="#2563eb"
+        accent="#1f5c4a"
         action={(
           <div style={styles.introActions}>
           <button type="button" style={styles.iconPillSecondary} onClick={applyAllDefaults}>
@@ -130,7 +130,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
         <div style={styles.execHeader}>
           <div>
             <p style={{ ...styles.overline, color: tone.fg }}>Executive summary</p>
-            <h3 style={{ ...styles.execTitle, color: '#0f172a' }}>{summary.diagnosis}</h3>
+            <h3 style={{ ...styles.execTitle, color: '#15302a' }}>{summary.diagnosis}</h3>
           </div>
           <FloatingBadge
             tone={summary.aspirationRiskTone === 'red' ? 'danger' : summary.aspirationRiskTone === 'amber' ? 'warning' : 'success'}
@@ -157,7 +157,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
               Mapped ICF codes, domain, qualifier severity (0–4), and head-and-neck-specific manifestation.
             </p>
           </div>
-          <Stethoscope size={18} color="#1d4ed8" />
+          <Stethoscope size={18} color="#174a3c" />
         </div>
         <div style={styles.icfTableWrap}>
           <table style={styles.icfTable}>
@@ -193,7 +193,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
                     </span>
                     <div style={styles.icfMutedSmall}>{row.severityLabel}</div>
                   </td>
-                  <td style={{ ...styles.icfTd, color: '#334155' }}>{row.manifestation}</td>
+                  <td style={{ ...styles.icfTd, color: '#3e5852' }}>{row.manifestation}</td>
                 </tr>
               ))}
             </tbody>
@@ -204,28 +204,28 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
       <section className="deglutech-recommendation-grid" style={styles.recommendationGrid}>
         <RecommendationCard
           title="Force / Range-of-Motion Exercises"
-          icon={<Dumbbell size={16} color="#0f766e" />}
+          icon={<Dumbbell size={16} color="#2f7a5c" />}
           items={recs.forceRangeOfMotion}
-          accent="#0f766e"
+          accent="#2f7a5c"
         />
         <RecommendationCard
           title="Compensatory Strategies & Diet"
-          icon={<ClipboardCheck size={16} color="#1d4ed8" />}
+          icon={<ClipboardCheck size={16} color="#174a3c" />}
           items={recs.compensatoryAndDiet}
-          accent="#1d4ed8"
+          accent="#174a3c"
         />
         <RecommendationCard
           title="Red Flags / Emergency Criteria"
-          icon={<AlertTriangle size={16} color="#dc2626" />}
+          icon={<AlertTriangle size={16} color="#a8402b" />}
           items={recs.redFlags}
-          accent="#dc2626"
+          accent="#a8402b"
           tone="danger"
         />
         <RecommendationCard
           title="Follow-up Timeline"
-          icon={<TimerReset size={16} color="#7c3aed" />}
+          icon={<TimerReset size={16} color="#5b4bb7" />}
           items={recs.followUpTimeline}
-          accent="#7c3aed"
+          accent="#5b4bb7"
           tone="info"
         />
       </section>
@@ -240,9 +240,9 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
           </p>
         </div>
         <div style={styles.signoffBox}>
-          <Heart size={20} color="#dc2626" />
+          <Heart size={20} color="#a8402b" />
           <div>
-            <strong style={{ color: '#0f172a' }}>[Clinician Name]</strong>
+            <strong style={{ color: '#15302a' }}>[Clinician Name]</strong>
             <div style={styles.signoffMeta}>M.Sc. (SLP) · RCI / ISHA No. ________</div>
             <div style={styles.signoffMeta}>Sign the exported document using your approved clinical workflow. No electronic signature or EHR submission is performed here.</div>
           </div>
@@ -297,10 +297,10 @@ function ValidationPanel({
         {sections.map((section) => {
           const tone =
             section.status === 'complete'
-              ? { bg: '#ecfdf5', border: '#10b981', fg: '#065f46' }
+              ? { bg: '#ddefe5', border: '#2f7a5c', fg: '#1f5c43' }
               : section.status === 'partial'
-              ? { bg: '#fffbeb', border: '#f59e0b', fg: '#92400e' }
-              : { bg: '#fef2f2', border: '#dc2626', fg: '#991b1b' };
+              ? { bg: '#fdf6e7', border: '#c9822b', fg: '#7a4e00' }
+              : { bg: '#fbf1ec', border: '#a8402b', fg: '#8e3420' };
 
           return (
             <button
@@ -347,7 +347,7 @@ function ValidationPanel({
 
       {!correlation.isMismatch && correlation.severity !== 'Unknown' && (
         <div style={styles.okBanner}>
-          <CheckCircle2 size={18} color="#065f46" />
+          <CheckCircle2 size={18} color="#1f5c43" />
           <span>
             Clinical severity (<strong>{correlation.severity}</strong>) correlates with mapped ICF qualifiers (mean
             qualifier {correlation.averageQualifier}, b5105 = {correlation.primaryQualifier}).
@@ -386,7 +386,7 @@ function SmartDefaultsPanel({
             Diagnosis, severity, treatment and follow-up are entered by the clinician. The app does not infer them from other scores.
           </p>
         </div>
-        <Info size={18} color="#1d4ed8" />
+        <Info size={18} color="#174a3c" />
       </div>
 
       <div className="deglutech-draft-grid" style={styles.draftGrid}>
@@ -433,7 +433,7 @@ function SmartDefaultsPanel({
 
               {source === 'auto' && currentValue !== draftValue && (
                 <div style={styles.suggestionRow}>
-                  <Sparkles size={13} color="#1d4ed8" />
+                  <Sparkles size={13} color="#174a3c" />
                   <span style={styles.suggestionText}>Smart suggestion: {draftValue}</span>
                   <button
                     type="button"
@@ -465,8 +465,8 @@ function RecommendationCard({
   accent: string;
   tone?: 'default' | 'danger' | 'info';
 }) {
-  const background = tone === 'danger' ? '#fef2f2' : tone === 'info' ? '#eff6ff' : '#ffffff';
-  const borderColor = tone === 'danger' ? '#fecaca' : tone === 'info' ? '#bfdbfe' : '#e2e8f0';
+  const background = tone === 'danger' ? '#fbf1ec' : tone === 'info' ? '#e4eee7' : '#ffffff';
+  const borderColor = tone === 'danger' ? '#f5cdbf' : tone === 'info' ? '#c9ddd0' : '#dce5df';
 
   return (
     <div style={{ ...styles.recCard, background, borderColor }}>
@@ -486,12 +486,12 @@ function RecommendationCard({
 }
 
 const qualifierColor = (value: number): string => {
-  if (value < 0) return '#64748b';
-  if (value >= 4) return '#dc2626';
+  if (value < 0) return '#4d6660';
+  if (value >= 4) return '#a8402b';
   if (value >= 3) return '#ea580c';
   if (value >= 2) return '#ca8a04';
   if (value >= 1) return '#65a30d';
-  return '#10b981';
+  return '#2f7a5c';
 };
 
 interface ReportErrorBoundaryState {
@@ -521,7 +521,7 @@ export class ReportErrorBoundary extends React.Component<
 
     return (
       <section style={styles.errorPanel}>
-        <AlertTriangle size={24} color="#dc2626" />
+        <AlertTriangle size={24} color="#a8402b" />
         <div>
           <h3 style={styles.errorTitle}>The Summary &amp; Report module hit an unexpected error.</h3>
           <p style={styles.errorText}>
@@ -543,7 +543,7 @@ const styles: Record<string, any> = {
   },
   sectionIntro: {
     background: '#ffffff',
-    border: '1px solid #dbe4ef',
+    border: '1px solid #dce5df',
     borderRadius: '10px',
     padding: '16px 18px',
     display: 'grid',
@@ -555,11 +555,11 @@ const styles: Record<string, any> = {
     margin: '4px 0 6px',
     fontSize: '20px',
     lineHeight: 1.3,
-    color: '#0f172a',
+    color: '#15302a',
   },
   introText: {
     margin: 0,
-    color: '#475569',
+    color: '#3e5852',
     fontSize: '13px',
     lineHeight: 1.5,
   },
@@ -574,13 +574,13 @@ const styles: Record<string, any> = {
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
     fontSize: '11px',
-    color: '#64748b',
+    color: '#4d6660',
     fontWeight: 800,
   },
   iconPillPrimary: {
     minHeight: '40px',
-    border: '1px solid #1d4ed8',
-    background: '#1d4ed8',
+    border: '1px solid #174a3c',
+    background: '#174a3c',
     color: '#ffffff',
     padding: '0 14px',
     borderRadius: '8px',
@@ -593,8 +593,8 @@ const styles: Record<string, any> = {
   },
   iconPillSecondary: {
     minHeight: '40px',
-    border: '1px solid #0f766e',
-    background: '#0f766e',
+    border: '1px solid #2f7a5c',
+    background: '#2f7a5c',
     color: '#ffffff',
     padding: '0 14px',
     borderRadius: '8px',
@@ -607,9 +607,9 @@ const styles: Record<string, any> = {
   },
   iconPillGhost: {
     minHeight: '40px',
-    border: '1px solid #cbd5e1',
+    border: '1px solid #c9d7ce',
     background: '#ffffff',
-    color: '#0f172a',
+    color: '#15302a',
     padding: '0 14px',
     borderRadius: '8px',
     display: 'inline-flex',
@@ -626,7 +626,7 @@ const styles: Record<string, any> = {
     padding: '16px 18px',
     display: 'grid',
     gap: '14px',
-    boxShadow: '0 18px 48px rgba(16, 32, 47, 0.07)',
+    boxShadow: '0 18px 48px rgba(21, 48, 42, 0.07)',
     backdropFilter: 'blur(16px)',
   },
   panel: {
@@ -634,7 +634,7 @@ const styles: Record<string, any> = {
     border: '1px solid rgba(215, 227, 234, 0.92)',
     borderRadius: '18px',
     padding: '16px 18px',
-    boxShadow: '0 18px 48px rgba(16, 32, 47, 0.07)',
+    boxShadow: '0 18px 48px rgba(21, 48, 42, 0.07)',
     backdropFilter: 'blur(16px)',
   },
   panelHeader: {
@@ -648,11 +648,11 @@ const styles: Record<string, any> = {
   panelTitle: {
     margin: '4px 0 0',
     fontSize: '17px',
-    color: '#0f172a',
+    color: '#15302a',
   },
   panelSubtitle: {
     margin: '6px 0 0',
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: '12.5px',
     lineHeight: 1.5,
     maxWidth: '780px',
@@ -665,9 +665,9 @@ const styles: Record<string, any> = {
     borderRadius: '999px',
     fontWeight: 800,
     fontSize: '12px',
-    background: ready ? '#ecfdf5' : '#fef2f2',
-    color: ready ? '#065f46' : '#991b1b',
-    border: `1px solid ${ready ? '#10b981' : '#dc2626'}`,
+    background: ready ? '#ddefe5' : '#fbf1ec',
+    color: ready ? '#1f5c43' : '#8e3420',
+    border: `1px solid ${ready ? '#2f7a5c' : '#a8402b'}`,
   }),
   sectionsGrid: {
     display: 'grid',
@@ -691,7 +691,7 @@ const styles: Record<string, any> = {
     width: '24px',
     height: '24px',
     borderRadius: '6px',
-    background: '#0f172a',
+    background: '#15302a',
     color: '#ffffff',
     fontWeight: 800,
     fontSize: '12px',
@@ -709,7 +709,7 @@ const styles: Record<string, any> = {
   sectionChipPercent: {
     fontSize: '11px',
     fontWeight: 600,
-    color: '#475569',
+    color: '#3e5852',
   },
   sectionChipDot: {
     width: '10px',
@@ -717,9 +717,9 @@ const styles: Record<string, any> = {
     borderRadius: '999px',
   },
   warnBanner: {
-    border: '1px solid #f59e0b',
-    background: '#fffbeb',
-    color: '#92400e',
+    border: '1px solid #c9822b',
+    background: '#fdf6e7',
+    color: '#7a4e00',
     borderRadius: '8px',
     padding: '12px 14px',
     display: 'grid',
@@ -735,12 +735,12 @@ const styles: Record<string, any> = {
   warnSub: {
     margin: '6px 0 0',
     fontSize: '12px',
-    color: '#92400e',
+    color: '#7a4e00',
   },
   okBanner: {
-    border: '1px solid #10b981',
-    background: '#ecfdf5',
-    color: '#065f46',
+    border: '1px solid #2f7a5c',
+    background: '#ddefe5',
+    color: '#1f5c43',
     borderRadius: '8px',
     padding: '10px 14px',
     display: 'flex',
@@ -754,7 +754,7 @@ const styles: Record<string, any> = {
     padding: '18px',
     display: 'grid',
     gap: '14px',
-    boxShadow: '0 18px 48px rgba(16, 32, 47, 0.06)',
+    boxShadow: '0 18px 48px rgba(21, 48, 42, 0.06)',
   },
   execHeader: {
     display: 'flex',
@@ -804,18 +804,18 @@ const styles: Record<string, any> = {
     fontSize: '10.5px',
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
-    color: '#475569',
+    color: '#3e5852',
     fontWeight: 700,
   },
   execCellValue: {
     fontSize: '13px',
-    color: '#0f172a',
+    color: '#15302a',
     lineHeight: 1.4,
   },
   icfTableWrap: {
     overflowX: 'auto',
     borderRadius: '14px',
-    border: '1px solid #d7e3ea',
+    border: '1px solid #dce5df',
   },
   icfTable: {
     width: '100%',
@@ -833,7 +833,7 @@ const styles: Record<string, any> = {
   },
   icfTd: {
     padding: '10px 12px',
-    borderTop: '1px solid #e2e8f0',
+    borderTop: '1px solid #dce5df',
     verticalAlign: 'top',
     background: '#ffffff',
   },
@@ -846,16 +846,16 @@ const styles: Record<string, any> = {
   },
   icfName: {
     display: 'block',
-    color: '#0f172a',
+    color: '#15302a',
     fontSize: '13px',
   },
   icfMuted: {
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: '11.5px',
     fontWeight: 500,
   },
   icfMutedSmall: {
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: '11px',
     marginTop: '4px',
   },
@@ -874,10 +874,10 @@ const styles: Record<string, any> = {
     gap: '12px',
   },
   draftRow: {
-    border: '1px solid #d7e3ea',
+    border: '1px solid #dce5df',
     borderRadius: '14px',
     padding: '10px 12px',
-    background: '#fbfdff',
+    background: '#f9fbf9',
     display: 'grid',
     gap: '8px',
   },
@@ -889,13 +889,13 @@ const styles: Record<string, any> = {
   draftLabel: {
     fontSize: '12px',
     fontWeight: 800,
-    color: '#0f172a',
+    color: '#15302a',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
   },
   sourceBadgeAuto: {
     background: '#dbeafe',
-    color: '#1d4ed8',
+    color: '#174a3c',
     fontSize: '10px',
     padding: '3px 7px',
     borderRadius: '999px',
@@ -903,8 +903,8 @@ const styles: Record<string, any> = {
     letterSpacing: '0.06em',
   },
   sourceBadgeClin: {
-    background: '#dcfce7',
-    color: '#166534',
+    background: '#ddefe5',
+    color: '#1f5c43',
     fontSize: '10px',
     padding: '3px 7px',
     borderRadius: '999px',
@@ -914,24 +914,24 @@ const styles: Record<string, any> = {
   draftTextarea: {
     minHeight: '80px',
     width: '100%',
-    border: '1px solid #d7e3ea',
+    border: '1px solid #dce5df',
     borderRadius: '12px',
     padding: '8px 10px',
     fontFamily: 'inherit',
     fontSize: '13px',
     lineHeight: 1.5,
-    color: '#0f172a',
+    color: '#15302a',
     resize: 'vertical',
     background: '#ffffff',
   },
   draftSelect: {
     width: '100%',
-    border: '1px solid #d7e3ea',
+    border: '1px solid #dce5df',
     borderRadius: '12px',
     padding: '8px 10px',
     fontFamily: 'inherit',
     fontSize: '13px',
-    color: '#0f172a',
+    color: '#15302a',
     background: '#ffffff',
     minHeight: '40px',
   },
@@ -939,20 +939,20 @@ const styles: Record<string, any> = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    background: '#eff6ff',
-    border: '1px solid #bfdbfe',
+    background: '#e4eee7',
+    border: '1px solid #c9ddd0',
     borderRadius: '6px',
     padding: '6px 10px',
   },
   suggestionText: {
     flex: 1,
     fontSize: '12px',
-    color: '#1d4ed8',
+    color: '#174a3c',
     lineHeight: 1.4,
   },
   applyButton: {
-    border: '1px solid #118aa3',
-    background: '#118aa3',
+    border: '1px solid #1f5c4a',
+    background: '#1f5c4a',
     color: '#ffffff',
     fontSize: '11px',
     fontWeight: 800,
@@ -977,7 +977,7 @@ const styles: Record<string, any> = {
     alignItems: 'center',
     gap: '8px',
     paddingBottom: '6px',
-    borderBottom: '1px solid #e2e8f0',
+    borderBottom: '1px solid #dce5df',
   },
   recCardTitle: {
     margin: 0,
@@ -993,7 +993,7 @@ const styles: Record<string, any> = {
     gap: '6px',
   },
   recListItem: {
-    color: '#334155',
+    color: '#3e5852',
     fontSize: '12.5px',
     lineHeight: 1.5,
   },
@@ -1006,11 +1006,11 @@ const styles: Record<string, any> = {
     gridTemplateColumns: 'minmax(0, 1fr) minmax(240px, 280px)',
     gap: '18px',
     alignItems: 'center',
-    boxShadow: '0 18px 48px rgba(16, 32, 47, 0.07)',
+    boxShadow: '0 18px 48px rgba(21, 48, 42, 0.07)',
   },
   signoffBox: {
-    border: '1px dashed #cbd5e1',
-    background: '#f8fafc',
+    border: '1px dashed #c9d7ce',
+    background: '#f5f8f5',
     borderRadius: '8px',
     padding: '14px',
     display: 'flex',
@@ -1018,14 +1018,14 @@ const styles: Record<string, any> = {
     alignItems: 'center',
   },
   signoffMeta: {
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: '11.5px',
     marginTop: '4px',
   },
   errorPanel: {
-    border: '1px solid #fecaca',
-    background: '#fef2f2',
-    color: '#991b1b',
+    border: '1px solid #f5cdbf',
+    background: '#fbf1ec',
+    color: '#8e3420',
     borderRadius: '10px',
     padding: '16px 18px',
     display: 'grid',
@@ -1041,7 +1041,7 @@ const styles: Record<string, any> = {
   errorText: {
     margin: '0 0 8px',
     fontSize: '13px',
-    color: '#991b1b',
+    color: '#8e3420',
     lineHeight: 1.5,
   },
 };

@@ -55,9 +55,9 @@ const SEVERITY_ORDER: Record<string, number> = {
 };
 
 const RISK_PALETTE: Record<RiskLevel, { bg: string; fg: string; border: string; soft: string }> = {
-  high: { bg: '#fee2e2', fg: '#991b1b', border: '#dc2626', soft: 'rgba(220, 38, 38, 0.12)' },
-  moderate: { bg: '#fef3c7', fg: '#92400e', border: '#f59e0b', soft: 'rgba(245, 158, 11, 0.14)' },
-  low: { bg: '#dcfce7', fg: '#166534', border: '#10b981', soft: 'rgba(16, 185, 129, 0.14)' },
+  high: { bg: '#fbe4dd', fg: '#8e3420', border: '#a8402b', soft: 'rgba(220, 38, 38, 0.12)' },
+  moderate: { bg: '#fbefd6', fg: '#7a4e00', border: '#c9822b', soft: 'rgba(245, 158, 11, 0.14)' },
+  low: { bg: '#ddefe5', fg: '#1f5c43', border: '#2f7a5c', soft: 'rgba(16, 185, 129, 0.14)' },
 };
 
 const PHASES: PhaseFilter[] = ['all', 'Prehab', 'Post-op', 'During RT', 'Post-CRT', 'Survivorship'];
@@ -274,11 +274,11 @@ function KpiCell({
   tone?: 'neutral' | 'high' | 'moderate' | 'low' | 'info';
 }) {
   const color =
-    tone === 'high' ? '#dc2626' :
-    tone === 'moderate' ? '#d97706' :
-    tone === 'low' ? '#0f766e' :
-    tone === 'info' ? '#2563eb' :
-    '#10202f';
+    tone === 'high' ? '#a8402b' :
+    tone === 'moderate' ? '#b7791f' :
+    tone === 'low' ? '#2f7a5c' :
+    tone === 'info' ? '#1f5c4a' :
+    '#15302a';
 
   return (
     <div style={styles.kpiCell}>
@@ -319,7 +319,7 @@ function CaseloadToolbar({
       </div>
 
       <div style={styles.filterGroup} aria-label="Risk filter">
-        <Filter size={14} color="#64748b" />
+        <Filter size={14} color="#4d6660" />
         {(['all', 'high', 'moderate', 'low'] as const).map((option) => (
           <button
             key={option}
@@ -346,7 +346,7 @@ function CaseloadToolbar({
       </select>
 
       <label style={styles.searchWrap}>
-        <Search size={14} color="#64748b" />
+        <Search size={14} color="#4d6660" />
         <input
           type="search"
           value={search}
@@ -435,7 +435,7 @@ function SortHeader({
       style={{
         ...styles.sortButton,
         ...(align === 'right' ? styles.sortButtonRight : {}),
-        color: active ? '#10202f' : '#64748b',
+        color: active ? '#15302a' : '#4d6660',
       }}
     >
       <span>{label}</span>
@@ -517,7 +517,7 @@ function RiskPill({ risk }: { risk: RiskLevel }) {
 
 function ScoreCell({ value, suffix, bad }: { value: number; suffix?: string; bad?: boolean }) {
   return (
-    <span style={{ ...styles.scoreCell, color: bad ? '#dc2626' : '#10202f' }}>
+    <span style={{ ...styles.scoreCell, color: bad ? '#a8402b' : '#15302a' }}>
       {Number.isInteger(value) ? value : value.toFixed(1)}
       {suffix && <small>{suffix}</small>}
     </span>
@@ -525,7 +525,7 @@ function ScoreCell({ value, suffix, bad }: { value: number; suffix?: string; bad
 }
 
 function AdherenceBar({ value }: { value: number }) {
-  const color = value >= 85 ? '#0f766e' : value >= 65 ? '#d97706' : '#dc2626';
+  const color = value >= 85 ? '#2f7a5c' : value >= 65 ? '#b7791f' : '#a8402b';
   return (
     <span style={styles.adherenceWrap}>
       <span style={styles.adherenceTrack}>
@@ -568,7 +568,7 @@ function CohortRiskDonut({ patients }: { patients: PatientCaseloadEntry[] }) {
 
   return (
     <svg width="124" height="124" viewBox="0 0 124 124" role="img" aria-label="Cohort risk distribution">
-      <circle cx="62" cy="62" r={radius} stroke="#e2e8f0" strokeWidth={stroke} fill="none" />
+      <circle cx="62" cy="62" r={radius} stroke="#dce5df" strokeWidth={stroke} fill="none" />
       {(['high', 'moderate', 'low'] as const).map((risk) => {
         const count = patients.filter((patient) => patient.riskLevel === risk).length;
         const length = (count / total) * circumference;
@@ -590,19 +590,19 @@ function CohortRiskDonut({ patients }: { patients: PatientCaseloadEntry[] }) {
           />
         );
       })}
-      <text x="62" y="58" textAnchor="middle" fontSize="23" fontWeight="900" fill="#10202f">{patients.length}</text>
-      <text x="62" y="76" textAnchor="middle" fontSize="10" fontWeight="700" fill="#64748b">TOTAL</text>
+      <text x="62" y="58" textAnchor="middle" fontSize="23" fontWeight="900" fill="#15302a">{patients.length}</text>
+      <text x="62" y="76" textAnchor="middle" fontSize="10" fontWeight="700" fill="#4d6660">TOTAL</text>
     </svg>
   );
 }
 
 function PhaseMixPanel({ patients }: { patients: PatientCaseloadEntry[] }) {
   const phaseColors: Record<PatientCaseloadEntry['phase'], string> = {
-    Prehab: '#2563eb',
-    'Post-op': '#7c3aed',
-    'During RT': '#dc2626',
-    'Post-CRT': '#d97706',
-    Survivorship: '#0f766e',
+    Prehab: '#1f5c4a',
+    'Post-op': '#5b4bb7',
+    'During RT': '#a8402b',
+    'Post-CRT': '#b7791f',
+    Survivorship: '#2f7a5c',
   };
   const total = Math.max(patients.length, 1);
 
@@ -657,7 +657,7 @@ function PopulationTrendPanel({ patients }: { patients: PatientCaseloadEntry[] }
 
   return (
     <RailPanel title="Population EAT-10 curve" subtitle="Mean trend across visible care episodes">
-      <Sparkline points={points} accent="#2563eb" width={290} height={82} filled />
+      <Sparkline points={points} accent="#1f5c4a" width={290} height={82} filled />
       <div style={styles.trendCaption}>
         <span>Lower is better</span>
         <strong>{points[points.length - 1] ?? 0}</strong>
@@ -855,12 +855,12 @@ function PatientOverview({ patient }: { patient: PatientCaseloadEntry }) {
       <section style={styles.drawerCardWide}>
         <div style={styles.drawerCardHeader}>
           <h3 style={styles.drawerCardTitle}>Predictive insights</h3>
-          <Sparkles size={15} color="#2563eb" />
+          <Sparkles size={15} color="#1f5c4a" />
         </div>
         <div style={styles.insightList}>
           {patient.alerts.length > 0 ? patient.alerts.map((alert) => (
             <div key={alert} style={styles.alertInsight}>
-              <AlertTriangle size={15} color="#dc2626" />
+              <AlertTriangle size={15} color="#a8402b" />
               <span>{cleanText(alert)}</span>
               <button type="button" style={styles.ackButton}><Check size={12} /> Ack</button>
             </div>
@@ -891,7 +891,7 @@ function IcfTab({ patient }: { patient: PatientCaseloadEntry }) {
       <section style={styles.drawerCard}>
         <div style={styles.drawerCardHeader}>
           <h3 style={styles.drawerCardTitle}>WHO-ICF profile</h3>
-          <HeartPulse size={15} color="#2563eb" />
+          <HeartPulse size={15} color="#1f5c4a" />
         </div>
         <IcfRadar patient={patient} />
       </section>
@@ -909,7 +909,7 @@ function IcfTab({ patient }: { patient: PatientCaseloadEntry }) {
                     key={level}
                     style={{
                       ...styles.icfBar,
-                      background: level < value ? qualifierColor(value) : '#e2e8f0',
+                      background: level < value ? qualifierColor(value) : '#dce5df',
                     }}
                   />
                 ))}
@@ -926,10 +926,10 @@ function IcfTab({ patient }: { patient: PatientCaseloadEntry }) {
 function TrendsTab({ patient }: { patient: PatientCaseloadEntry }) {
   return (
     <div style={styles.trendBlocks}>
-      <TrendBlock patient={patient} dataKey="eat10" title="EAT-10" max={40} color="#dc2626" lowerBetter />
-      <TrendBlock patient={patient} dataKey="fois" title="FOIS" max={7} min={1} color="#0f766e" />
-      <TrendBlock patient={patient} dataKey="jawOpening" title="Jaw opening" max={55} min={15} color="#7c3aed" />
-      <TrendBlock patient={patient} dataKey="pas" title="PAS" max={8} color="#d97706" lowerBetter />
+      <TrendBlock patient={patient} dataKey="eat10" title="EAT-10" max={40} color="#a8402b" lowerBetter />
+      <TrendBlock patient={patient} dataKey="fois" title="FOIS" max={7} min={1} color="#2f7a5c" />
+      <TrendBlock patient={patient} dataKey="jawOpening" title="Jaw opening" max={55} min={15} color="#5b4bb7" />
+      <TrendBlock patient={patient} dataKey="pas" title="PAS" max={8} color="#b7791f" lowerBetter />
     </div>
   );
 }
@@ -972,7 +972,7 @@ function PlanTab({
       <section style={styles.drawerCard}>
         <div style={styles.drawerCardHeader}>
           <h3 style={styles.drawerCardTitle}>Suggested adjustment</h3>
-          <Sparkles size={15} color="#2563eb" />
+          <Sparkles size={15} color="#1f5c4a" />
         </div>
         <p style={styles.cardText}>
           Jaw opening is {patient.jawOpening} mm. Consider increasing low-pain range work and review trismus precautions at the next contact.
@@ -1011,7 +1011,7 @@ function ScoreTile({
   bad?: boolean;
   note: string;
 }) {
-  const color = bad ? '#dc2626' : '#0f766e';
+  const color = bad ? '#a8402b' : '#2f7a5c';
   const percent = Math.max(0, Math.min(100, (value / max) * 100));
   return (
     <div style={styles.scoreTile}>
@@ -1044,7 +1044,7 @@ function RiskHeatmap({ patient }: { patient: PatientCaseloadEntry }) {
     <section style={styles.drawerCard}>
       <div style={styles.drawerCardHeader}>
         <h3 style={styles.drawerCardTitle}>Risk heatmap</h3>
-        <AlertTriangle size={15} color="#dc2626" />
+        <AlertTriangle size={15} color="#a8402b" />
       </div>
       <div style={styles.heatGrid}>
         {rows.map((row) => (
@@ -1056,7 +1056,7 @@ function RiskHeatmap({ patient }: { patient: PatientCaseloadEntry }) {
                   key={level}
                   style={{
                     ...styles.heatCell,
-                    background: level < row.value ? qualifierColor(row.value) : '#e2e8f0',
+                    background: level < row.value ? qualifierColor(row.value) : '#dce5df',
                   }}
                 />
               ))}
@@ -1103,7 +1103,7 @@ function IcfRadar({ patient }: { patient: PatientCaseloadEntry }) {
             })
             .join(' ')}
           fill="none"
-          stroke="#e2e8f0"
+          stroke="#dce5df"
         />
       ))}
       {axes.map((axis, index) => {
@@ -1111,14 +1111,14 @@ function IcfRadar({ patient }: { patient: PatientCaseloadEntry }) {
         const label = pointFor(index, maxValue + 0.35);
         return (
           <g key={axis}>
-            <line x1={center} y1={center} x2={edge.x} y2={edge.y} stroke="#e2e8f0" />
-            <text x={label.x} y={label.y} textAnchor="middle" dominantBaseline="middle" fontSize="10" fontWeight="700" fill="#475569">
+            <line x1={center} y1={center} x2={edge.x} y2={edge.y} stroke="#dce5df" />
+            <text x={label.x} y={label.y} textAnchor="middle" dominantBaseline="middle" fontSize="10" fontWeight="700" fill="#3e5852">
               {axis}
             </text>
           </g>
         );
       })}
-      <polygon points={polygon} fill="rgba(37, 99, 235, 0.18)" stroke="#2563eb" strokeWidth="2" />
+      <polygon points={polygon} fill="rgba(31, 92, 74, 0.18)" stroke="#1f5c4a" strokeWidth="2" />
     </svg>
   );
 }
@@ -1129,7 +1129,7 @@ function AdherenceDonut({ patient }: { patient: PatientCaseloadEntry }) {
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (patient.adherence / 100) * circumference;
-  const color = patient.adherence >= 85 ? '#0f766e' : patient.adherence >= 65 ? '#d97706' : '#dc2626';
+  const color = patient.adherence >= 85 ? '#2f7a5c' : patient.adherence >= 65 ? '#b7791f' : '#a8402b';
 
   return (
     <section style={styles.drawerCard}>
@@ -1139,7 +1139,7 @@ function AdherenceDonut({ patient }: { patient: PatientCaseloadEntry }) {
       </div>
       <div style={styles.donutLayout}>
         <svg width={size} height={size} aria-label="Adherence donut">
-          <circle cx={size / 2} cy={size / 2} r={radius} stroke="#e2e8f0" strokeWidth={stroke} fill="none" />
+          <circle cx={size / 2} cy={size / 2} r={radius} stroke="#dce5df" strokeWidth={stroke} fill="none" />
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -1152,7 +1152,7 @@ function AdherenceDonut({ patient }: { patient: PatientCaseloadEntry }) {
             strokeLinecap="round"
             transform={`rotate(-90 ${size / 2} ${size / 2})`}
           />
-          <text x={size / 2} y={size / 2} textAnchor="middle" dominantBaseline="central" fontSize="22" fontWeight="900" fill="#10202f">
+          <text x={size / 2} y={size / 2} textAnchor="middle" dominantBaseline="central" fontSize="22" fontWeight="900" fill="#15302a">
             {patient.adherence}%
           </text>
         </svg>
@@ -1170,14 +1170,14 @@ function MilestoneTimeline({ patient }: { patient: PatientCaseloadEntry }) {
     <section style={styles.drawerCardWide}>
       <div style={styles.drawerCardHeader}>
         <h3 style={styles.drawerCardTitle}>Treatment milestones</h3>
-        <CalendarClock size={15} color="#64748b" />
+        <CalendarClock size={15} color="#4d6660" />
       </div>
       <ol style={styles.timeline}>
         {patient.milestones.map((milestone, index) => {
           const color =
-            milestone.status === 'done' ? '#0f766e' :
-            milestone.status === 'current' ? '#2563eb' :
-            '#94a3b8';
+            milestone.status === 'done' ? '#2f7a5c' :
+            milestone.status === 'current' ? '#1f5c4a' :
+            '#8fa79d';
           return (
             <li key={`${milestone.label}-${index}`} style={styles.timelineItem}>
               <span style={{ ...styles.timelineDot, background: color }} />
@@ -1199,7 +1199,7 @@ function AlertsAndConcerns({ patient }: { patient: PatientCaseloadEntry }) {
     <section style={styles.drawerCard}>
       <div style={styles.drawerCardHeader}>
         <h3 style={styles.drawerCardTitle}>Concerns</h3>
-        <ClipboardList size={15} color="#64748b" />
+        <ClipboardList size={15} color="#4d6660" />
       </div>
       <div style={styles.concernsChips}>
         {patient.primaryConcerns.map((concern) => (
@@ -1243,7 +1243,7 @@ function TrendBlock({
         <div style={styles.trendStats}>
           <MiniMetric label="Baseline" value={first} />
           <MiniMetric label="Current" value={last} />
-          <span style={{ ...styles.deltaPill, color: good ? '#0f766e' : '#dc2626', background: good ? '#dcfce7' : '#fee2e2' }}>
+          <span style={{ ...styles.deltaPill, color: good ? '#2f7a5c' : '#a8402b', background: good ? '#ddefe5' : '#fbe4dd' }}>
             {good ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
             {delta > 0 ? `+${delta}` : delta}
           </span>
@@ -1281,7 +1281,7 @@ function LineChartSvg({
 
   return (
     <svg width="100%" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Score trend chart">
-      <rect x={padding.left} y={padding.top} width={innerW} height={innerH} fill="#f8fafc" stroke="#e2e8f0" />
+      <rect x={padding.left} y={padding.top} width={innerW} height={innerH} fill="#f5f8f5" stroke="#dce5df" />
       {[0.25, 0.5, 0.75].map((fraction) => (
         <line
           key={fraction}
@@ -1289,7 +1289,7 @@ function LineChartSvg({
           y1={padding.top + innerH * fraction}
           x2={padding.left + innerW}
           y2={padding.top + innerH * fraction}
-          stroke="#e2e8f0"
+          stroke="#dce5df"
           strokeDasharray="3 3"
         />
       ))}
@@ -1340,11 +1340,11 @@ function Sparkline({
 }
 
 const qualifierColor = (value: number): string => {
-  if (value >= 4) return '#dc2626';
+  if (value >= 4) return '#a8402b';
   if (value >= 3) return '#ea580c';
   if (value >= 2) return '#ca8a04';
   if (value >= 1) return '#65a30d';
-  return '#10b981';
+  return '#2f7a5c';
 };
 
 const styles: Record<string, React.CSSProperties> = {
@@ -1354,7 +1354,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   dashboardTopbar: {
     minHeight: '52px',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: 8,
     background: '#ffffff',
     display: 'flex',
@@ -1365,7 +1365,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   overline: {
     margin: 0,
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: 10,
     fontWeight: 900,
     textTransform: 'uppercase',
@@ -1373,7 +1373,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   dashboardTitle: {
     margin: '2px 0 0',
-    color: '#10202f',
+    color: '#15302a',
     fontSize: 18,
     lineHeight: 1.15,
     fontWeight: 850,
@@ -1386,9 +1386,9 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'flex-end',
   },
   topbarBadge: {
-    border: '1px solid #bfdbfe',
-    background: '#eff6ff',
-    color: '#1d4ed8',
+    border: '1px solid #c9ddd0',
+    background: '#e4eee7',
+    color: '#174a3c',
     borderRadius: 999,
     padding: '5px 9px',
     fontSize: 11,
@@ -1396,14 +1396,14 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'nowrap',
   },
   topbarMeta: {
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: 11,
     fontWeight: 700,
   },
   kpiStrip: {
     display: 'grid',
     gridTemplateColumns: 'repeat(6, minmax(120px, 1fr))',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: 8,
     overflow: 'hidden',
     background: '#ffffff',
@@ -1411,7 +1411,7 @@ const styles: Record<string, React.CSSProperties> = {
   kpiCell: {
     minHeight: 92,
     padding: '12px 14px',
-    borderRight: '1px solid #e2e8f0',
+    borderRight: '1px solid #dce5df',
     display: 'grid',
     gap: 4,
     alignContent: 'start',
@@ -1420,7 +1420,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: 7,
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: 10.5,
     fontWeight: 850,
     textTransform: 'uppercase',
@@ -1441,7 +1441,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontVariantNumeric: 'tabular-nums',
   },
   kpiSub: {
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: 11,
     lineHeight: 1.25,
   },
@@ -1453,14 +1453,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   queuePanel: {
     minWidth: 0,
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     background: '#ffffff',
     borderRadius: 8,
     overflow: 'hidden',
   },
   queueToolbar: {
     minHeight: 48,
-    borderBottom: '1px solid #e2e8f0',
+    borderBottom: '1px solid #dce5df',
     padding: '8px 12px',
     display: 'flex',
     alignItems: 'center',
@@ -1473,12 +1473,12 @@ const styles: Record<string, React.CSSProperties> = {
     minWidth: 140,
   },
   queueTitle: {
-    color: '#10202f',
+    color: '#15302a',
     fontSize: 13,
     fontWeight: 850,
   },
   queueCount: {
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: 11,
     fontWeight: 650,
   },
@@ -1486,8 +1486,8 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 4,
-    border: '1px solid #e2e8f0',
-    background: '#f8fafc',
+    border: '1px solid #dce5df',
+    background: '#f5f8f5',
     borderRadius: 8,
     padding: 3,
   },
@@ -1495,7 +1495,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: 26,
     border: 0,
     background: 'transparent',
-    color: '#475569',
+    color: '#3e5852',
     borderRadius: 6,
     padding: '0 8px',
     fontSize: 11,
@@ -1506,7 +1506,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: 26,
     border: 0,
     background: '#ffffff',
-    color: '#10202f',
+    color: '#15302a',
     borderRadius: 6,
     padding: '0 8px',
     fontSize: 11,
@@ -1516,10 +1516,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   phaseSelect: {
     minHeight: 34,
-    border: '1px solid #d7e3ea',
+    border: '1px solid #dce5df',
     borderRadius: 8,
     background: '#ffffff',
-    color: '#10202f',
+    color: '#15302a',
     padding: '0 10px',
     fontSize: 12,
     fontWeight: 700,
@@ -1531,8 +1531,8 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 7,
-    border: '1px solid #d7e3ea',
-    background: '#fbfdff',
+    border: '1px solid #dce5df',
+    background: '#f9fbf9',
     borderRadius: 8,
     padding: '0 10px',
     flex: '1 1 220px',
@@ -1544,7 +1544,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: 0,
     outline: 0,
     background: 'transparent',
-    color: '#10202f',
+    color: '#15302a',
     fontSize: 12,
   },
   tableWrap: {
@@ -1558,13 +1558,13 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     minHeight: 34,
     padding: '0 12px',
-    borderBottom: '1px solid #e2e8f0',
-    color: '#64748b',
+    borderBottom: '1px solid #dce5df',
+    color: '#4d6660',
     fontSize: 10,
     fontWeight: 900,
     textTransform: 'uppercase',
     letterSpacing: 0,
-    background: '#f8fafc',
+    background: '#f5f8f5',
   },
   tableBody: {
     minWidth: 1040,
@@ -1602,11 +1602,11 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '6px 12px',
     textAlign: 'left',
     cursor: 'pointer',
-    color: '#10202f',
+    color: '#15302a',
   },
   patientRowSelected: {
-    background: '#f7fbfd',
-    boxShadow: 'inset 3px 0 0 #118aa3',
+    background: '#f5f8f5',
+    boxShadow: 'inset 3px 0 0 #1f5c4a',
   },
   avatar: {
     width: 28,
@@ -1630,13 +1630,13 @@ const styles: Record<string, React.CSSProperties> = {
     minWidth: 0,
     gap: 1,
     fontSize: 11.5,
-    color: '#475569',
+    color: '#3e5852',
   },
   reviewCell: {
     display: 'grid',
     gap: 1,
     fontSize: 11,
-    color: '#475569',
+    color: '#3e5852',
   },
   riskPill: {
     display: 'inline-flex',
@@ -1678,7 +1678,7 @@ const styles: Record<string, React.CSSProperties> = {
     height: 6,
     minWidth: 44,
     borderRadius: 999,
-    background: '#e2e8f0',
+    background: '#dce5df',
     overflow: 'hidden',
   },
   adherenceFill: {
@@ -1700,7 +1700,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 900,
   },
   mutedText: {
-    color: '#94a3b8',
+    color: '#8fa79d',
     fontSize: 11,
     fontWeight: 700,
   },
@@ -1714,9 +1714,9 @@ const styles: Record<string, React.CSSProperties> = {
     width: 24,
     height: 24,
     borderRadius: 6,
-    border: '1px solid #e2e8f0',
-    background: '#f8fafc',
-    color: '#64748b',
+    border: '1px solid #dce5df',
+    background: '#f5f8f5',
+    color: '#4d6660',
     display: 'grid',
     placeItems: 'center',
   },
@@ -1726,7 +1726,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   emptyState: {
     padding: 28,
-    color: '#64748b',
+    color: '#4d6660',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1738,7 +1738,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 12,
   },
   railPanel: {
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: 8,
     background: '#ffffff',
     padding: '12px',
@@ -1753,14 +1753,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   railTitle: {
     margin: 0,
-    color: '#10202f',
+    color: '#15302a',
     fontSize: 13,
     lineHeight: 1.2,
     fontWeight: 850,
   },
   railSub: {
     margin: '3px 0 0',
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: 11,
     lineHeight: 1.35,
   },
@@ -1779,7 +1779,7 @@ const styles: Record<string, React.CSSProperties> = {
     gridTemplateColumns: '10px minmax(0, 1fr) auto',
     gap: 7,
     alignItems: 'center',
-    color: '#475569',
+    color: '#3e5852',
     fontSize: 11,
     textTransform: 'capitalize',
   },
@@ -1794,7 +1794,7 @@ const styles: Record<string, React.CSSProperties> = {
     height: 12,
     borderRadius: 8,
     overflow: 'hidden',
-    background: '#e2e8f0',
+    background: '#dce5df',
   },
   phaseSegment: {
     display: 'block',
@@ -1808,7 +1808,7 @@ const styles: Record<string, React.CSSProperties> = {
   trendCaption: {
     display: 'flex',
     justifyContent: 'space-between',
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: 11,
   },
   insightList: {
@@ -1819,8 +1819,8 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     border: 0,
     borderRadius: 8,
-    background: '#f8fafc',
-    color: '#10202f',
+    background: '#f5f8f5',
+    color: '#15302a',
     padding: '8px 9px',
     display: 'grid',
     gridTemplateColumns: '22px minmax(0, 1fr)',
@@ -1838,12 +1838,12 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 2,
     minWidth: 0,
     fontSize: 11.5,
-    color: '#475569',
+    color: '#3e5852',
   },
   activeCard: {
-    border: '1px solid #bfdbfe',
+    border: '1px solid #c9ddd0',
     borderRadius: 8,
-    background: '#eff6ff',
+    background: '#e4eee7',
     padding: 12,
     display: 'grid',
     gap: 12,
@@ -1856,7 +1856,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   activeName: {
     margin: '3px 0 0',
-    color: '#10202f',
+    color: '#15302a',
     fontSize: 14,
     lineHeight: 1.2,
     fontWeight: 850,
@@ -1872,21 +1872,21 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   miniMetric: {
-    border: '1px solid rgba(15, 39, 59, 0.10)',
+    border: '1px solid rgba(21, 48, 42, 0.10)',
     background: 'rgba(255, 255, 255, 0.72)',
     borderRadius: 8,
     padding: '8px 9px',
     display: 'grid',
     gap: 2,
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: 10.5,
     fontWeight: 750,
   },
   primaryAction: {
     minHeight: 34,
-    border: '1px solid #2563eb',
+    border: '1px solid #1f5c4a',
     borderRadius: 8,
-    background: '#2563eb',
+    background: '#1f5c4a',
     color: '#ffffff',
     padding: '0 11px',
     display: 'inline-flex',
@@ -1899,10 +1899,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   secondaryAction: {
     minHeight: 34,
-    border: '1px solid #cbd5e1',
+    border: '1px solid #c9d7ce',
     borderRadius: 8,
     background: '#ffffff',
-    color: '#10202f',
+    color: '#15302a',
     padding: '0 11px',
     display: 'inline-flex',
     alignItems: 'center',
@@ -1933,13 +1933,13 @@ const styles: Record<string, React.CSSProperties> = {
     minWidth: 760,
     height: '100%',
     background: '#ffffff',
-    borderLeft: '1px solid #d7e3ea',
+    borderLeft: '1px solid #dce5df',
     display: 'flex',
     flexDirection: 'column',
     boxShadow: '-24px 0 60px rgba(15, 23, 42, 0.18)',
   },
   drawerHeader: {
-    borderBottom: '1px solid #e2e8f0',
+    borderBottom: '1px solid #dce5df',
     padding: '14px 18px',
     display: 'grid',
     gridTemplateColumns: '44px minmax(0, 1fr) auto',
@@ -1971,17 +1971,17 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
     fontSize: 18,
     lineHeight: 1.2,
-    color: '#10202f',
+    color: '#15302a',
   },
   drawerId: {
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: 11,
     fontWeight: 800,
     fontVariantNumeric: 'tabular-nums',
   },
   drawerSubtitle: {
     margin: 0,
-    color: '#475569',
+    color: '#3e5852',
     fontSize: 12,
     lineHeight: 1.35,
   },
@@ -1993,10 +1993,10 @@ const styles: Record<string, React.CSSProperties> = {
   iconAction: {
     width: 34,
     height: 34,
-    border: '1px solid #cbd5e1',
+    border: '1px solid #c9d7ce',
     borderRadius: 8,
     background: '#ffffff',
-    color: '#10202f',
+    color: '#15302a',
     display: 'grid',
     placeItems: 'center',
     cursor: 'pointer',
@@ -2004,7 +2004,7 @@ const styles: Record<string, React.CSSProperties> = {
   drawerTabs: {
     display: 'flex',
     gap: 0,
-    borderBottom: '1px solid #e2e8f0',
+    borderBottom: '1px solid #dce5df',
     padding: '0 18px',
   },
   drawerTab: {
@@ -2012,7 +2012,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: 0,
     borderBottom: '2px solid transparent',
     background: 'transparent',
-    color: '#64748b',
+    color: '#4d6660',
     padding: '0 12px',
     display: 'inline-flex',
     alignItems: 'center',
@@ -2024,9 +2024,9 @@ const styles: Record<string, React.CSSProperties> = {
   drawerTabActive: {
     height: 40,
     border: 0,
-    borderBottom: '2px solid #2563eb',
+    borderBottom: '2px solid #1f5c4a',
     background: 'transparent',
-    color: '#2563eb',
+    color: '#1f5c4a',
     padding: '0 12px',
     display: 'inline-flex',
     alignItems: 'center',
@@ -2039,7 +2039,7 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     overflowY: 'auto',
     padding: 18,
-    background: '#f5f7fa',
+    background: '#f3f6f3',
   },
   drawerGrid: {
     display: 'grid',
@@ -2052,7 +2052,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 12,
   },
   drawerCard: {
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: 8,
     background: '#ffffff',
     padding: 14,
@@ -2061,7 +2061,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   drawerCardWide: {
     gridColumn: '1 / -1',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: 8,
     background: '#ffffff',
     padding: 14,
@@ -2076,7 +2076,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   drawerCardTitle: {
     margin: 0,
-    color: '#10202f',
+    color: '#15302a',
     fontSize: 13,
     fontWeight: 900,
     textTransform: 'uppercase',
@@ -2093,7 +2093,7 @@ const styles: Record<string, React.CSSProperties> = {
     gridTemplateColumns: '20px minmax(0, 1fr) auto',
     gap: 8,
     alignItems: 'center',
-    border: '1px solid #fee2e2',
+    border: '1px solid #fbe4dd',
     background: '#fff7f7',
     color: '#7f1d1d',
     borderRadius: 8,
@@ -2102,9 +2102,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   ackButton: {
     minHeight: 26,
-    border: '1px solid #fecaca',
+    border: '1px solid #f5cdbf',
     background: '#ffffff',
-    color: '#991b1b',
+    color: '#8e3420',
     borderRadius: 7,
     padding: '0 8px',
     display: 'inline-flex',
@@ -2115,16 +2115,16 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   okBanner: {
-    border: '1px solid #bbf7d0',
+    border: '1px solid #c9ddd0',
     background: '#f0fdf4',
-    color: '#166534',
+    color: '#1f5c43',
     borderRadius: 8,
     padding: '10px 12px',
     fontSize: 12,
     fontWeight: 750,
   },
   scoreTile: {
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     background: '#ffffff',
     borderRadius: 8,
     padding: 12,
@@ -2134,7 +2134,7 @@ const styles: Record<string, React.CSSProperties> = {
   scoreTileTop: {
     display: 'flex',
     justifyContent: 'space-between',
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: 10.5,
     fontWeight: 900,
     textTransform: 'uppercase',
@@ -2151,7 +2151,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   scoreTileNote: {
     margin: 0,
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: 11,
     lineHeight: 1.25,
   },
@@ -2164,7 +2164,7 @@ const styles: Record<string, React.CSSProperties> = {
     gridTemplateColumns: '86px minmax(0, 1fr) 24px',
     gap: 8,
     alignItems: 'center',
-    color: '#475569',
+    color: '#3e5852',
     fontSize: 12,
     fontWeight: 750,
   },
@@ -2205,11 +2205,11 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 999,
   },
   timelineCard: {
-    border: '1px solid #e2e8f0',
-    background: '#f8fafc',
+    border: '1px solid #dce5df',
+    background: '#f5f8f5',
     borderRadius: 8,
     padding: '8px 9px',
-    color: '#475569',
+    color: '#3e5852',
     fontSize: 11,
     display: 'grid',
     gap: 2,
@@ -2220,9 +2220,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 7,
   },
   concernChip: {
-    border: '1px solid #bfdbfe',
-    background: '#eff6ff',
-    color: '#1d4ed8',
+    border: '1px solid #c9ddd0',
+    background: '#e4eee7',
+    color: '#174a3c',
     borderRadius: 999,
     padding: '5px 9px',
     fontSize: 11,
@@ -2237,12 +2237,12 @@ const styles: Record<string, React.CSSProperties> = {
     gridTemplateColumns: '58px minmax(0, 1fr) 22px',
     gap: 8,
     alignItems: 'center',
-    color: '#475569',
+    color: '#3e5852',
     fontSize: 12,
   },
   icfCode: {
-    color: '#1d4ed8',
-    background: '#eff6ff',
+    color: '#174a3c',
+    background: '#e4eee7',
     borderRadius: 5,
     padding: '3px 6px',
     fontFamily: 'Consolas, monospace',
@@ -2281,24 +2281,24 @@ const styles: Record<string, React.CSSProperties> = {
     fontVariantNumeric: 'tabular-nums',
   },
   protocolTable: {
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: 8,
     overflow: 'hidden',
   },
   protocolRow: {
     minHeight: 42,
-    borderBottom: '1px solid #e2e8f0',
+    borderBottom: '1px solid #dce5df',
     padding: '8px 10px',
     display: 'grid',
     gridTemplateColumns: 'minmax(150px, 1.2fr) minmax(150px, 1fr) 90px 92px',
     gap: 10,
     alignItems: 'center',
-    color: '#475569',
+    color: '#3e5852',
     fontSize: 12,
   },
   cardText: {
     margin: 0,
-    color: '#475569',
+    color: '#3e5852',
     fontSize: 12,
     lineHeight: 1.5,
   },

@@ -3,14 +3,14 @@ import React from 'react';
 type BadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'high' | 'moderate' | 'low';
 
 const badgeTones: Record<BadgeTone, { bg: string; fg: string; border: string }> = {
-  neutral: { bg: '#f1f5f9', fg: '#334155', border: '#d7e3ea' },
-  info: { bg: '#e0f2fe', fg: '#075985', border: '#bae6fd' },
-  success: { bg: '#dcfce7', fg: '#166534', border: '#bbf7d0' },
-  warning: { bg: '#fef3c7', fg: '#92400e', border: '#fde68a' },
-  danger: { bg: '#fee2e2', fg: '#991b1b', border: '#fecaca' },
-  high: { bg: '#fee2e2', fg: '#991b1b', border: '#fecaca' },
-  moderate: { bg: '#fef3c7', fg: '#92400e', border: '#fde68a' },
-  low: { bg: '#dcfce7', fg: '#166534', border: '#bbf7d0' },
+  neutral: { bg: '#eef2ef', fg: '#3e5852', border: '#dce5df' },
+  info: { bg: '#e4eee7', fg: '#075985', border: '#bae6fd' },
+  success: { bg: '#ddefe5', fg: '#1f5c43', border: '#c9ddd0' },
+  warning: { bg: '#fbefd6', fg: '#7a4e00', border: '#f3dda8' },
+  danger: { bg: '#fbe4dd', fg: '#8e3420', border: '#f5cdbf' },
+  high: { bg: '#fbe4dd', fg: '#8e3420', border: '#f5cdbf' },
+  moderate: { bg: '#fbefd6', fg: '#7a4e00', border: '#f3dda8' },
+  low: { bg: '#ddefe5', fg: '#1f5c43', border: '#c9ddd0' },
 };
 
 interface FloatingBadgeProps {
@@ -69,7 +69,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,
   description,
   icon,
-  accent = '#0f8ea8',
+  accent = '#1f5c4a',
   action,
   className,
 }) => (
@@ -77,7 +77,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
     className={['clinical-section-header deglutech-section-intro', className].filter(Boolean).join(' ')}
     style={{
       background: '#ffffff',
-      border: '1px solid #e2e8f0',
+      border: '1px solid #dce5df',
       borderLeft: `4px solid ${accent}`,
       borderRadius: 8,
       padding: '18px 20px',
@@ -110,7 +110,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
           <p
             style={{
               margin: '0 0 4px',
-              color: '#64748b',
+              color: '#4d6660',
               fontSize: 11,
               fontWeight: 900,
               textTransform: 'uppercase',
@@ -120,11 +120,11 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
             {eyebrow}
           </p>
         )}
-        <h3 style={{ margin: 0, color: '#10202f', fontSize: 22, lineHeight: 1.2, fontWeight: 850 }}>
+        <h3 style={{ margin: 0, color: '#15302a', fontSize: 22, lineHeight: 1.2, fontWeight: 850 }}>
           {title}
         </h3>
         {description && (
-          <p style={{ margin: '7px 0 0', color: '#425466', fontSize: 14, lineHeight: 1.5, maxWidth: 860 }}>
+          <p style={{ margin: '7px 0 0', color: '#3e5852', fontSize: 14, lineHeight: 1.5, maxWidth: 860 }}>
             {description}
           </p>
         )}
@@ -146,17 +146,17 @@ export const HeaderSeparator: React.FC<HeaderSeparatorProps> = ({ label, icon })
       gridTemplateColumns: 'minmax(16px, 1fr) auto minmax(16px, 1fr)',
       gap: 12,
       alignItems: 'center',
-      color: '#64748b',
+      color: '#4d6660',
       margin: '2px 0',
     }}
   >
-    <span style={{ borderTop: '1px dashed #cbd5e1' }} />
+    <span style={{ borderTop: '1px dashed #c9d7ce' }} />
     <span
       style={{
         display: 'inline-flex',
         alignItems: 'center',
         gap: 7,
-        border: '1px solid #d7e3ea',
+        border: '1px solid #dce5df',
         borderRadius: 999,
         background: '#ffffff',
         padding: '5px 11px',
@@ -167,7 +167,7 @@ export const HeaderSeparator: React.FC<HeaderSeparatorProps> = ({ label, icon })
       {icon}
       {label}
     </span>
-    <span style={{ borderTop: '1px dashed #cbd5e1' }} />
+    <span style={{ borderTop: '1px dashed #c9d7ce' }} />
   </div>
 );
 
@@ -181,7 +181,7 @@ interface TicketBarProps {
 }
 
 export const TicketBar: React.FC<TicketBarProps> = ({
-  accent = '#0f8ea8',
+  accent = '#1f5c4a',
   active = false,
   children,
   onClick,
@@ -190,15 +190,15 @@ export const TicketBar: React.FC<TicketBarProps> = ({
 }) => {
   const baseStyle: React.CSSProperties = {
     width: '100%',
-      border: `1px solid ${active ? accent : '#e2e8f0'}`,
+      border: `1px solid ${active ? accent : '#dce5df'}`,
       borderLeft: `4px solid ${accent}`,
       borderRadius: 8,
-      background: active ? '#f7fbfd' : '#ffffff',
-      boxShadow: active ? '0 0 0 3px rgba(17, 138, 163, 0.10)' : 'none',
+      background: active ? '#f5f8f5' : '#ffffff',
+      boxShadow: active ? '0 0 0 3px rgba(31, 92, 74, 0.10)' : 'none',
       padding: '14px 16px',
     display: 'grid',
     gap: 12,
-    color: '#10202f',
+    color: '#15302a',
     textAlign: 'left',
     cursor: onClick ? 'pointer' : 'default',
     ...style,

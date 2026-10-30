@@ -5,18 +5,18 @@ import { bestJawOpening, numeric } from '../../../packages/core/src/clinicalCalc
 
 export type Tone = 'safe' | 'caution' | 'risk' | 'none';
 export const TONE: Record<Tone, { fg: string; bg: string }> = {
-  safe: { fg: '#0f766e', bg: 'rgba(15,118,110,.12)' },
-  caution: { fg: '#92400e', bg: 'rgba(183,121,31,.16)' },
-  risk: { fg: '#991b1b', bg: 'rgba(180,35,24,.12)' },
-  none: { fg: '#425466', bg: '#f1f5f9' },
+  safe: { fg: '#2f7a5c', bg: 'rgba(15,118,110,.12)' },
+  caution: { fg: '#7a4e00', bg: 'rgba(183,121,31,.16)' },
+  risk: { fg: '#8e3420', bg: 'rgba(180,35,24,.12)' },
+  none: { fg: '#3e5852', bg: '#eef2ef' },
 };
 
 export type CategoryId = 'screen' | 'prom' | 'instr' | 'func';
 export const TOOL_CATEGORIES: { id: CategoryId; name: string; color: string; desc: string }[] = [
-  { id: 'screen', name: 'Screening', color: '#118aa3', desc: 'Quick checks to decide who needs a full or instrumental assessment.' },
-  { id: 'prom', name: 'Patient-reported outcomes', color: '#635bff', desc: 'Quality of life and symptom burden in the patient’s own words.' },
-  { id: 'instr', name: 'Instrumental', color: '#2563eb', desc: 'Ratings from VFSS, FEES and acoustic recordings.' },
-  { id: 'func', name: 'Function & therapy', color: '#0f766e', desc: 'Oral intake, participation and home-program tracking.' },
+  { id: 'screen', name: 'Screening', color: '#1f5c4a', desc: 'Quick checks to decide who needs a full or instrumental assessment.' },
+  { id: 'prom', name: 'Patient-reported outcomes', color: '#5b4bb7', desc: 'Quality of life and symptom burden in the patient’s own words.' },
+  { id: 'instr', name: 'Instrumental', color: '#1f5c4a', desc: 'Ratings from VFSS, FEES and acoustic recordings.' },
+  { id: 'func', name: 'Function & therapy', color: '#2f7a5c', desc: 'Oral intake, participation and home-program tracking.' },
 ];
 
 /** Section that currently holds each tool's fields (opened until the tool gets its own screen). */

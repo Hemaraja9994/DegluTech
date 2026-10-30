@@ -163,20 +163,20 @@ export const OpmeMatrix: React.FC<OpmeMatrixProps> = ({ onMatrixChange }) => {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    backgroundColor: '#1e293b',
-    border: '1px solid #334155',
+    backgroundColor: '#15302a',
+    border: '1px solid #3e5852',
     borderRadius: '8px',
     padding: '20px',
     fontFamily: "'Outfit', 'Inter', sans-serif",
   },
   title: {
     fontSize: '16px',
-    color: '#38bdf8',
+    color: '#8fd3b0',
     margin: '0 0 4px 0',
   },
   subtitle: {
     fontSize: '12px',
-    color: '#94a3b8',
+    color: '#8fa79d',
     margin: '0 0 16px 0',
     lineHeight: '1.4',
   },
@@ -186,14 +186,14 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '16px',
   },
   card: {
-    backgroundColor: '#0f172a',
+    backgroundColor: '#15302a',
     borderRadius: '6px',
     padding: '16px',
-    border: '1px solid #1e293b',
+    border: '1px solid #15302a',
   },
   cardHeader: {
     fontSize: '14px',
-    color: '#0d9488',
+    color: '#2f7a5c',
     margin: '0 0 12px 0',
     fontWeight: 'bold',
   },
@@ -205,12 +205,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   label: {
     fontSize: '13px',
-    color: '#cbd5e1',
+    color: '#c9d7ce',
   },
   select: {
-    backgroundColor: '#1e293b',
-    color: '#f8fafc',
-    border: '1px solid #475569',
+    backgroundColor: '#15302a',
+    color: '#f5f8f5',
+    border: '1px solid #3e5852',
     borderRadius: '6px',
     padding: '6px 10px',
     fontSize: '13px',

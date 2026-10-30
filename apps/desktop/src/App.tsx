@@ -44,7 +44,7 @@ import { ClinicalMeasures } from './components/ClinicalMeasures';
 import { WorkspaceNotice } from './components/WorkspaceNotice';
 import { ExerciseCatalogue } from './components/ExerciseCatalogue';
 import { PrescriptionRelease, PatientSessionLog, isReleased, readDoses } from './components/PrescriptionRelease';
-import { ExerciseAnimation } from './components/ExerciseAnimation';
+import { ExerciseVisual } from './components/ExerciseVisual';
 import { ClinicalToolSuite } from './components/ClinicalToolSuite';
 import { FloatingBadge, SectionHeader } from './components/ui/ClinicalPrimitives';
 import { T } from './theme';
@@ -329,7 +329,7 @@ export const App: React.FC = () => {
                     type="button"
                     aria-current={toolSuiteOpen ? 'page' : undefined}
                     onClick={openToolSuite}
-                    style={{ ...styles.navButton, ...(toolSuiteOpen ? styles.navButtonActive : {}), borderLeftColor: toolSuiteOpen ? '#118aa3' : 'transparent' }}
+                    style={{ ...styles.navButton, ...(toolSuiteOpen ? styles.navButtonActive : {}), borderLeftColor: toolSuiteOpen ? '#1f5c4a' : 'transparent' }}
                   >
                     <ClipboardList size={16} />
                     <span style={styles.navLabel}>Clinical tool suite</span>
@@ -559,15 +559,15 @@ function SectionNavigator({
               style={{
                 ...styles.workflowStep,
                 ...(isActive ? styles.workflowStepActive : {}),
-                borderColor: isActive ? section.accent : '#dbe4ef',
+                borderColor: isActive ? section.accent : '#dce5df',
                 background: isActive ? `${section.accent}12` : '#ffffff',
               }}
             >
               <span
                 style={{
                   ...styles.workflowStepNumber,
-                  background: isActive ? section.accent : '#e2e8f0',
-                  color: isActive ? '#ffffff' : '#475569',
+                  background: isActive ? section.accent : '#dce5df',
+                  color: isActive ? '#ffffff' : '#3e5852',
                 }}
               >
                 {section.order}
@@ -833,7 +833,7 @@ function ExercisePrescription({
         eyebrow="Exercise prescription"
         title="Illustrated home program with clinical dosage and safety stop rules."
         icon={<Dumbbell size={20} />}
-        accent="#0f766e"
+        accent="#2f7a5c"
         action={<FloatingBadge tone="success">patient-ready</FloatingBadge>}
       />
 
@@ -889,7 +889,7 @@ function ExercisePrescription({
 
           <RegimenSopCard exercise={selectedExercise} />
 
-          <ExerciseAnimation key={selectedExercise.id} exerciseId={selectedExercise.id} language={patientLanguage} label={localizedExercise.title} />
+          <ExerciseVisual exerciseId={selectedExercise.id} language={patientLanguage} label={localizedExercise.title} />
 
           <ExercisePanels
             key={`${selectedExercise.id}-${patientLanguage}`}
@@ -1166,7 +1166,7 @@ function PatientPortalPreview({
         eyebrow="Patient app surface"
         title="Daily exercise queue, symptom check-in, and caregiver-safe education."
         icon={<Home size={20} />}
-        accent="#2563eb"
+        accent="#1f5c4a"
         action={<button type="button" onClick={() => setActiveSectionId('exercise')} style={styles.primaryButton}>
           <Dumbbell size={17} />
           Edit exercises
@@ -1182,7 +1182,7 @@ function PatientPortalPreview({
             const localizedExercise = localizedBundle.exercises[exercise.id] ?? exerciseTranslations.en.exercises[exercise.id];
 
             return (
-              <button key={exercise.id} type="button" onClick={() => setSelectedExerciseId(exercise.id)} aria-pressed={patientExercise?.id === exercise.id} style={{ ...styles.homeTask, width: '100%', textAlign: 'left', cursor: 'pointer', border: patientExercise?.id === exercise.id ? '2px solid #13838a' : '1px solid #dce5ea' }}>
+              <button key={exercise.id} type="button" onClick={() => setSelectedExerciseId(exercise.id)} aria-pressed={patientExercise?.id === exercise.id} style={{ ...styles.homeTask, width: '100%', textAlign: 'left', cursor: 'pointer', border: patientExercise?.id === exercise.id ? '2px solid #1f5c4a' : '1px solid #dce5df' }}>
                 <span style={styles.homeCheck} />
                 <span>
                   <strong>{localizedExercise.title}</strong>
@@ -1233,7 +1233,7 @@ function PatientPortalPreview({
               <strong>{String(fieldState.followUp || 'Ask your clinician')}</strong>
             </div>
           </div>
-          <ExerciseAnimation key={patientExercise.id} exerciseId={patientExercise.id} language={patientLanguage} label={selectedLocalizedExercise.title} />
+          <ExerciseVisual exerciseId={patientExercise.id} language={patientLanguage} label={selectedLocalizedExercise.title} />
           <ExercisePanels
             key={`${patientExercise.id}-${patientLanguage}`}
             exercise={patientExercise}
@@ -1251,13 +1251,13 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: '100vh',
     display: 'grid',
     gridTemplateColumns: '244px minmax(0, 1fr)',
-    background: '#f5f7fa',
+    background: '#f3f6f3',
     color: T.ink1,
     fontFamily: 'var(--sans)',
   },
   sidebar: {
-    background: '#171a2d',
-    borderRight: '1px solid #2c3045',
+    background: '#15302a',
+    borderRight: '1px solid #22413a',
     minHeight: '100vh',
     padding: 0,
     position: 'sticky',
@@ -1273,14 +1273,14 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: '54px',
     marginBottom: 0,
     padding: '10px 12px',
-    borderBottom: '1px solid #33374c',
+    borderBottom: '1px solid #2b4a41',
   },
   logoMark: {
     width: '42px',
     height: '42px',
     borderRadius: '8px',
-    background: '#e0f2fe',
-    color: '#0369a1',
+    background: '#e4eee7',
+    color: '#1f5c4a',
     display: 'grid',
     placeItems: 'center',
   },
@@ -1294,16 +1294,16 @@ const styles: Record<string, React.CSSProperties> = {
   },
   brandSub: {
     margin: '2px 0 0',
-    color: '#b0b7c9',
+    color: '#a9c0b6',
     fontSize: '10.5px',
     fontWeight: 700,
   },
   patientMini: {
-    border: '1px solid #3c4357',
+    border: '1px solid #2b4a41',
     borderRadius: '8px',
     padding: '12px',
     margin: '12px',
-    background: '#252a3e',
+    background: '#1c3a33',
     boxShadow: 'none',
   },
   patientName: {
@@ -1312,7 +1312,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#ffffff',
   },
   patientMeta: {
-    color: '#c1c7d5',
+    color: '#bfd1c8',
     fontSize: '12px',
     marginTop: '2px',
   },
@@ -1321,7 +1321,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginTop: '10px',
     padding: '4px 8px',
     borderRadius: '999px',
-    background: '#fee2e2',
+    background: '#fbe4dd',
     color: '#b91c1c',
     fontSize: '11px',
     fontWeight: 800,
@@ -1333,7 +1333,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   navGroup: {
     margin: '10px 6px 3px',
-    color: '#aab1c4',
+    color: '#a3bab0',
     fontSize: '10px',
     fontWeight: 900,
     textTransform: 'uppercase',
@@ -1350,16 +1350,16 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
     padding: '8px 9px',
     borderRadius: '7px',
-    color: '#c6ccda',
+    color: '#c9dad1',
     cursor: 'pointer',
     textAlign: 'left',
     minHeight: '34px',
   },
   navButtonActive: {
-    background: '#354058',
+    background: '#2b4a41',
     color: '#ffffff',
     fontWeight: 800,
-    boxShadow: 'inset 0 0 0 1px rgba(17, 138, 163, 0.12)',
+    boxShadow: 'inset 0 0 0 1px rgba(31, 92, 74, 0.12)',
   },
   navLabel: {
     overflow: 'hidden',
@@ -1368,7 +1368,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '12px',
   },
   navIndex: {
-    color: '#94a3b8',
+    color: '#8fa79d',
     fontSize: '11px',
     textAlign: 'right',
   },
@@ -1378,7 +1378,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   topbar: {
     minHeight: '54px',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     padding: '10px 14px',
     background: '#ffffff',
@@ -1409,7 +1409,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   workflowNav: {
     background: '#ffffff',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     padding: '14px',
     marginBottom: '18px',
@@ -1458,7 +1458,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   workflowButton: {
     minHeight: '44px',
-    border: '1px solid #cbd5e1',
+    border: '1px solid #c9d7ce',
     borderRadius: '8px',
     background: '#ffffff',
     color: T.ink1,
@@ -1471,9 +1471,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   workflowButtonPrimary: {
     minHeight: '44px',
-    border: '1px solid #2563eb',
+    border: '1px solid #1f5c4a',
     borderRadius: '8px',
-    background: '#2563eb',
+    background: '#1f5c4a',
     color: '#ffffff',
     padding: '8px 10px',
     display: 'flex',
@@ -1484,10 +1484,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   workflowButtonDisabled: {
     minHeight: '44px',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
-    background: '#f7fafc',
-    color: '#94a3b8',
+    background: '#f5f8f5',
+    color: '#8fa79d',
     padding: '8px 10px',
     display: 'flex',
     alignItems: 'center',
@@ -1520,20 +1520,20 @@ const styles: Record<string, React.CSSProperties> = {
   },
   workflowStep: {
     minHeight: '64px',
-    border: '1px solid #d7e3ea',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     padding: '8px',
     display: 'grid',
     justifyItems: 'start',
     alignContent: 'center',
     gap: '6px',
-    color: '#334155',
+    color: '#3e5852',
     cursor: 'pointer',
     textAlign: 'left',
   },
   workflowStepActive: {
     boxShadow: 'inset 0 0 0 1px rgba(15, 23, 42, 0.04)',
-    color: '#0f172a',
+    color: '#15302a',
     fontWeight: 900,
   },
   workflowStepNumber: {
@@ -1558,10 +1558,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   pagerButton: {
     minHeight: '58px',
-    border: '1px solid #cbd5e1',
+    border: '1px solid #c9d7ce',
     borderRadius: '8px',
     background: '#ffffff',
-    color: '#172033',
+    color: '#15302a',
     padding: '10px 12px',
     display: 'flex',
     alignItems: 'center',
@@ -1571,9 +1571,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   pagerButtonPrimary: {
     minHeight: '58px',
-    border: '1px solid #0f766e',
+    border: '1px solid #2f7a5c',
     borderRadius: '8px',
-    background: '#0f766e',
+    background: '#2f7a5c',
     color: '#ffffff',
     padding: '10px 12px',
     display: 'flex',
@@ -1585,10 +1585,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   pagerButtonDisabled: {
     minHeight: '58px',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
-    background: '#f8fafc',
-    color: '#94a3b8',
+    background: '#f5f8f5',
+    color: '#8fa79d',
     padding: '10px 12px',
     display: 'flex',
     alignItems: 'center',
@@ -1603,19 +1603,19 @@ const styles: Record<string, React.CSSProperties> = {
   },
   progressText: {
     fontSize: '12px',
-    color: '#475569',
+    color: '#3e5852',
     textAlign: 'right',
   },
   progressTrack: {
     width: '100%',
     height: '7px',
-    background: '#e2e8f0',
+    background: '#dce5df',
     borderRadius: '999px',
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    background: '#2563eb',
+    background: '#1f5c4a',
   },
   iconButton: {
     width: '38px',
@@ -1623,7 +1623,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid',
     placeItems: 'center',
     borderRadius: '10px',
-    border: '1px solid #cbd5e1',
+    border: '1px solid #c9d7ce',
     background: '#ffffff',
     color: T.ink1,
     cursor: 'pointer',
@@ -1634,7 +1634,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   heroPanel: {
     background: '#ffffff',
-    border: '1px solid #dbe4ef',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     padding: '18px',
     display: 'grid',
@@ -1652,7 +1652,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   heroText: {
     margin: '8px 0 0',
-    color: '#475569',
+    color: '#3e5852',
   },
   goalList: {
     display: 'flex',
@@ -1661,9 +1661,9 @@ const styles: Record<string, React.CSSProperties> = {
     marginTop: '14px',
   },
   goalChip: {
-    border: '1px solid #bfdbfe',
-    background: '#eff6ff',
-    color: '#1d4ed8',
+    border: '1px solid #c9ddd0',
+    background: '#e4eee7',
+    color: '#174a3c',
     borderRadius: '999px',
     padding: '6px 10px',
     fontSize: '12px',
@@ -1671,7 +1671,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   statusPanel: {
     borderRadius: '8px',
-    background: '#f1f5f9',
+    background: '#eef2ef',
     padding: '16px',
     display: 'grid',
     alignContent: 'center',
@@ -1679,15 +1679,15 @@ const styles: Record<string, React.CSSProperties> = {
   largeNumber: {
     fontSize: '42px',
     fontWeight: 900,
-    color: '#0f766e',
+    color: '#2f7a5c',
   },
   statusLabel: {
-    color: '#475569',
+    color: '#3e5852',
     fontSize: '13px',
     fontWeight: 700,
   },
   savedLine: {
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: '12px',
     marginTop: '10px',
   },
@@ -1698,7 +1698,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   metricCard: {
     background: '#ffffff',
-    border: '1px solid #dbe4ef',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     padding: '14px',
     minHeight: '88px',
@@ -1711,19 +1711,19 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '12px',
   },
   metricLabel: {
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: '12px',
     fontWeight: 700,
   },
   metricValue: {
-    color: '#0f172a',
+    color: '#15302a',
     fontSize: '24px',
     fontWeight: 900,
     marginTop: '4px',
   },
   panel: {
     background: '#ffffff',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     padding: '18px',
     boxShadow: 'none',
@@ -1749,34 +1749,34 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    color: '#334155',
+    color: '#3e5852',
     fontSize: '14px',
   },
   alertMark: {
     width: '8px',
     height: '8px',
     borderRadius: '999px',
-    background: '#dc2626',
+    background: '#a8402b',
   },
   queueList: {
     display: 'grid',
     gap: '8px',
   },
   queueItem: {
-    border: '1px solid #d7e3ea',
-    background: '#f7fafc',
+    border: '1px solid #dce5df',
+    background: '#f5f8f5',
     borderRadius: '12px',
     padding: '11px 12px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     cursor: 'pointer',
-    color: '#172033',
+    color: '#15302a',
     fontWeight: 700,
   },
   platformHub: {
     background: '#ffffff',
-    border: '1px solid #dbe4ef',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     padding: '16px',
     display: 'grid',
@@ -1788,7 +1788,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '10px',
   },
   platformCard: {
-    border: '1px solid #dbe4ef',
+    border: '1px solid #dce5df',
     background: '#ffffff',
     borderRadius: '8px',
     padding: '12px',
@@ -1798,37 +1798,37 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '10px',
     cursor: 'pointer',
     textAlign: 'left',
-    color: '#172033',
+    color: '#15302a',
   },
   platformIcon: {
     width: '34px',
     height: '34px',
     borderRadius: '8px',
-    background: '#eff6ff',
-    color: '#2563eb',
+    background: '#e4eee7',
+    color: '#1f5c4a',
     display: 'grid',
     placeItems: 'center',
   },
   platformCopy: {
     display: 'grid',
     gap: '6px',
-    color: '#475569',
+    color: '#3e5852',
     fontSize: '13px',
     lineHeight: 1.35,
   },
   platformFooter: {
-    borderTop: '1px solid #e2e8f0',
+    borderTop: '1px solid #dce5df',
     paddingTop: '9px',
     display: 'flex',
     justifyContent: 'space-between',
     gap: '10px',
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: '11px',
     fontWeight: 800,
   },
   sectionIntro: {
     background: '#ffffff',
-    border: '1px solid #d7e3ea',
+    border: '1px solid #dce5df',
     borderRadius: '12px',
     padding: '18px',
     display: 'flex',
@@ -1846,7 +1846,7 @@ const styles: Record<string, React.CSSProperties> = {
   moduleBadge: {
     borderRadius: '999px',
     color: '#ffffff',
-    background: '#2563eb',
+    background: '#1f5c4a',
     padding: '7px 11px',
     fontWeight: 800,
     fontSize: '12px',
@@ -1860,11 +1860,11 @@ const styles: Record<string, React.CSSProperties> = {
   blockHeaderLine: {
     marginBottom: '12px',
     paddingLeft: '12px',
-    borderLeft: '3px solid #118aa3',
+    borderLeft: '3px solid #1f5c4a',
   },
   blockDescription: {
     margin: '5px 0 0',
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: '13px',
     lineHeight: 1.45,
   },
@@ -1883,7 +1883,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '6px',
   },
   fieldLabel: {
-    color: '#334155',
+    color: '#3e5852',
     fontSize: '12px',
     fontWeight: 800,
   },
@@ -1891,28 +1891,28 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     minHeight: '38px',
     boxSizing: 'border-box',
-    border: '1px solid #d7e3ea',
+    border: '1px solid #dce5df',
     borderRadius: '12px',
     padding: '8px 10px',
     fontSize: '14px',
-    color: '#0f172a',
-    background: '#fbfdff',
+    color: '#15302a',
+    background: '#f9fbf9',
   },
   textarea: {
     width: '100%',
     minHeight: '86px',
     boxSizing: 'border-box',
-    border: '1px solid #d7e3ea',
+    border: '1px solid #dce5df',
     borderRadius: '12px',
     padding: '9px 10px',
     fontSize: '14px',
-    color: '#0f172a',
-    background: '#fbfdff',
+    color: '#15302a',
+    background: '#f9fbf9',
     resize: 'vertical',
     fontFamily: 'inherit',
   },
   fieldHelper: {
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: '11px',
   },
   chipGroup: {
@@ -1921,20 +1921,20 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   choiceChip: {
-    border: '1px solid #d7e3ea',
+    border: '1px solid #dce5df',
     borderRadius: '999px',
     background: '#ffffff',
-    color: '#334155',
+    color: '#3e5852',
     padding: '7px 10px',
     cursor: 'pointer',
     fontWeight: 700,
     fontSize: '12px',
   },
   choiceChipActive: {
-    border: '1px solid #118aa3',
+    border: '1px solid #1f5c4a',
     borderRadius: '999px',
-    background: '#e6f7fb',
-    color: '#07566b',
+    background: '#e8f1eb',
+    color: '#123b30',
     padding: '7px 10px',
     cursor: 'pointer',
     fontWeight: 800,
@@ -1947,7 +1947,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   scaleButton: {
     height: '34px',
-    border: '1px solid #cbd5e1',
+    border: '1px solid #c9d7ce',
     borderRadius: '7px',
     background: '#ffffff',
     cursor: 'pointer',
@@ -1955,9 +1955,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   scaleButtonActive: {
     height: '34px',
-    border: '1px solid #118aa3',
+    border: '1px solid #1f5c4a',
     borderRadius: '7px',
-    background: '#118aa3',
+    background: '#1f5c4a',
     color: '#ffffff',
     cursor: 'pointer',
     fontWeight: 800,
@@ -1968,9 +1968,9 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   outputChip: {
-    background: '#f1f5f9',
-    color: '#334155',
-    border: '1px solid #dbe4ef',
+    background: '#eef2ef',
+    color: '#3e5852',
+    border: '1px solid #dce5df',
     borderRadius: '999px',
     padding: '7px 10px',
     fontSize: '12px',
@@ -1978,7 +1978,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   clinicianPlanPanel: {
     background: '#ffffff',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     padding: '16px',
     display: 'grid',
@@ -1993,33 +1993,33 @@ const styles: Record<string, React.CSSProperties> = {
   },
   clinicianPlanTitle: {
     margin: 0,
-    color: '#0f172a',
+    color: '#15302a',
     fontSize: '19px',
     lineHeight: 1.25,
   },
   storageStatusCard: {
-    border: '1px solid #bfdbfe',
-    background: '#eff6ff',
+    border: '1px solid #c9ddd0',
+    background: '#e4eee7',
     borderRadius: '8px',
     padding: '12px',
     display: 'grid',
     gap: '5px',
   },
   storageLabel: {
-    color: '#1d4ed8',
+    color: '#174a3c',
     fontSize: '11px',
     fontWeight: 900,
     textTransform: 'uppercase',
   },
   storageText: {
     margin: 0,
-    color: '#334155',
+    color: '#3e5852',
     fontSize: '12px',
     lineHeight: 1.35,
   },
   prescribedSummary: {
-    border: '1px solid #ccfbf1',
-    background: '#f0fdfa',
+    border: '1px solid #ddefe5',
+    background: '#eef5f0',
     borderRadius: '8px',
     padding: '12px',
     display: 'grid',
@@ -2030,7 +2030,7 @@ const styles: Record<string, React.CSSProperties> = {
   prescribedCount: {
     display: 'grid',
     gap: '2px',
-    color: '#134e4a',
+    color: '#123b30',
   },
   prescribedQueue: {
     display: 'flex',
@@ -2038,9 +2038,9 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   queueChip: {
-    border: '1px solid #99f6e4',
+    border: '1px solid #c9ddd0',
     background: '#ffffff',
-    color: '#115e59',
+    color: '#123b30',
     borderRadius: '999px',
     padding: '7px 10px',
     cursor: 'pointer',
@@ -2048,8 +2048,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 800,
   },
   queueChipActive: {
-    border: '1px solid #0f766e',
-    background: '#0f766e',
+    border: '1px solid #2f7a5c',
+    background: '#2f7a5c',
     color: '#ffffff',
     borderRadius: '999px',
     padding: '7px 10px',
@@ -2064,7 +2064,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   exerciseToggle: {
     minHeight: '58px',
-    border: '1px solid #dbe4ef',
+    border: '1px solid #dce5df',
     background: '#ffffff',
     borderRadius: '8px',
     padding: '10px',
@@ -2076,8 +2076,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   exerciseToggleActive: {
     minHeight: '58px',
-    border: '1px solid #0d9488',
-    background: '#ecfeff',
+    border: '1px solid #2f7a5c',
+    background: '#eef5f0',
     borderRadius: '8px',
     padding: '10px',
     display: 'grid',
@@ -2094,12 +2094,12 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid',
     gap: '3px',
     fontSize: '12px',
-    color: '#475569',
+    color: '#3e5852',
   },
   patientVisiblePill: {
-    border: '1px solid #99f6e4',
-    background: '#ccfbf1',
-    color: '#115e59',
+    border: '1px solid #c9ddd0',
+    background: '#ddefe5',
+    color: '#123b30',
     borderRadius: '999px',
     padding: '4px 8px',
     fontSize: '11px',
@@ -2107,9 +2107,9 @@ const styles: Record<string, React.CSSProperties> = {
     width: 'fit-content',
   },
   clinicianOnlyPill: {
-    border: '1px solid #e2e8f0',
-    background: '#f8fafc',
-    color: '#64748b',
+    border: '1px solid #dce5df',
+    background: '#f5f8f5',
+    color: '#4d6660',
     borderRadius: '999px',
     padding: '4px 8px',
     fontSize: '11px',
@@ -2123,7 +2123,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   exerciseMenu: {
     background: '#ffffff',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     padding: '10px',
     display: 'grid',
@@ -2131,7 +2131,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignSelf: 'start',
   },
   exerciseMenuItem: {
-    border: '1px solid #d7e3ea',
+    border: '1px solid #dce5df',
     borderRadius: '13px',
     background: '#ffffff',
     padding: '11px',
@@ -2141,9 +2141,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '4px',
   },
   exerciseMenuItemActive: {
-    border: '1px solid #118aa3',
+    border: '1px solid #1f5c4a',
     borderRadius: '13px',
-    background: '#e6f7fb',
+    background: '#e8f1eb',
     padding: '11px',
     textAlign: 'left',
     cursor: 'pointer',
@@ -2152,11 +2152,11 @@ const styles: Record<string, React.CSSProperties> = {
   },
   exerciseName: {
     fontWeight: 800,
-    color: '#172033',
+    color: '#15302a',
     fontSize: '13px',
   },
   exerciseMeta: {
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: '11px',
     textTransform: 'capitalize',
   },
@@ -2169,18 +2169,18 @@ const styles: Record<string, React.CSSProperties> = {
   },
   exerciseText: {
     margin: '7px 0 0',
-    color: '#475569',
+    color: '#3e5852',
     lineHeight: 1.5,
   },
   languageNote: {
     margin: '8px 0 0',
-    color: '#1d4ed8',
+    color: '#174a3c',
     fontSize: '12px',
     fontWeight: 800,
   },
   regimenPanel: {
-    border: '1px solid #bfdbfe',
-    background: '#f8fbff',
+    border: '1px solid #c9ddd0',
+    background: '#f7faf7',
     borderRadius: '8px',
     padding: '14px',
     marginBottom: '16px',
@@ -2195,14 +2195,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   regimenTitle: {
     margin: 0,
-    color: '#0f172a',
+    color: '#15302a',
     fontSize: '16px',
     lineHeight: 1.25,
   },
   adherenceBadge: {
-    border: '1px solid #99f6e4',
-    background: '#ecfeff',
-    color: '#115e59',
+    border: '1px solid #c9ddd0',
+    background: '#eef5f0',
+    color: '#123b30',
     borderRadius: '999px',
     padding: '7px 10px',
     fontSize: '12px',
@@ -2215,7 +2215,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
   },
   regimenItem: {
-    border: '1px solid #dbe4ef',
+    border: '1px solid #dce5df',
     background: '#ffffff',
     borderRadius: '8px',
     padding: '10px',
@@ -2252,14 +2252,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   protocolBasis: {
     margin: 0,
-    color: '#475569',
+    color: '#3e5852',
     fontSize: '12px',
     lineHeight: 1.45,
   },
   dosageBox: {
-    background: '#f0fdfa',
-    color: '#07566b',
-    border: '1px solid #b9e8ef',
+    background: '#eef5f0',
+    color: '#123b30',
+    border: '1px solid #c9ddd0',
     borderRadius: '8px',
     padding: '12px',
     display: 'grid',
@@ -2271,7 +2271,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 900,
   },
   generatedImageFrame: {
-    border: '1px solid #dbe4ef',
+    border: '1px solid #dce5df',
     background: '#ffffff',
     borderRadius: '8px',
     padding: '10px',
@@ -2291,7 +2291,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   infographicPanel: {
     minHeight: '238px',
-    border: '1px solid #dbe4ef',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     background: '#ffffff',
     padding: '12px',
@@ -2300,15 +2300,15 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
   },
   stepLabel: {
-    color: '#2563eb',
+    color: '#1f5c4a',
     fontSize: '12px',
     fontWeight: 900,
   },
   patientFigure: {
     position: 'relative',
     borderRadius: '8px',
-    background: '#f8fafc',
-    border: '1px solid #e2e8f0',
+    background: '#f5f8f5',
+    border: '1px solid #dce5df',
   },
   headCircle: {
     position: 'absolute',
@@ -2318,7 +2318,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '42px',
     height: '42px',
     borderRadius: '50%',
-    border: '3px solid #64748b',
+    border: '3px solid #4d6660',
     background: '#ffffff',
   },
   tongueMark: {
@@ -2328,7 +2328,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '18px',
     height: '7px',
     borderRadius: '999px',
-    background: '#2dd4bf',
+    background: '#8fd3b0',
   },
   neckLine: {
     position: 'absolute',
@@ -2336,7 +2336,7 @@ const styles: Record<string, React.CSSProperties> = {
     left: '50%',
     width: '3px',
     height: '22px',
-    background: '#94a3b8',
+    background: '#8fa79d',
     transform: 'translateX(-50%)',
   },
   bodyLine: {
@@ -2345,7 +2345,7 @@ const styles: Record<string, React.CSSProperties> = {
     left: '50%',
     width: '62px',
     height: '34px',
-    border: '3px solid #94a3b8',
+    border: '3px solid #8fa79d',
     borderBottom: '0',
     borderRadius: '34px 34px 0 0',
     transform: 'translateX(-50%)',
@@ -2356,20 +2356,20 @@ const styles: Record<string, React.CSSProperties> = {
     top: '18px',
     width: '2px',
     height: '86px',
-    background: '#38bdf8',
+    background: '#8fd3b0',
   },
   motionArrow: {
     position: 'absolute',
     right: '24%',
     top: '40px',
-    color: '#2563eb',
+    color: '#1f5c4a',
     fontSize: '30px',
     fontWeight: 900,
   },
   stepCue: {
-    color: '#0f766e',
-    background: '#ccfbf1',
-    border: '1px solid #99f6e4',
+    color: '#2f7a5c',
+    background: '#ddefe5',
+    border: '1px solid #c9ddd0',
     borderRadius: '999px',
     padding: '5px 9px',
     display: 'inline-flex',
@@ -2379,7 +2379,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   stepInstruction: {
     margin: 0,
-    color: '#475569',
+    color: '#3e5852',
     fontSize: '13px',
     lineHeight: 1.35,
   },
@@ -2390,25 +2390,25 @@ const styles: Record<string, React.CSSProperties> = {
     marginTop: '16px',
   },
   prescriptionBand: {
-    background: '#fbfdff',
-    border: '1px solid #d7e3ea',
+    background: '#f9fbf9',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     padding: '12px',
   },
   smallTitle: {
     margin: '0 0 7px',
     fontSize: '13px',
-    color: '#0f172a',
+    color: '#15302a',
   },
   smallText: {
     margin: 0,
-    color: '#475569',
+    color: '#3e5852',
     fontSize: '13px',
     lineHeight: 1.45,
   },
   primaryButton: {
     border: '0',
-    background: '#2563eb',
+    background: '#1f5c4a',
     color: '#ffffff',
     borderRadius: '8px',
     padding: '10px 13px',
@@ -2424,7 +2424,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '16px',
   },
   patientPhone: {
-    border: '1px solid #cbd5e1',
+    border: '1px solid #c9d7ce',
     borderRadius: '26px',
     background: '#ffffff',
     padding: '20px',
@@ -2435,7 +2435,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '88px',
     height: '7px',
     borderRadius: '999px',
-    background: '#cbd5e1',
+    background: '#c9d7ce',
     margin: '0 auto 20px',
   },
   phoneTitle: {
@@ -2443,11 +2443,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '24px',
   },
   phoneSub: {
-    color: '#64748b',
+    color: '#4d6660',
     margin: '4px 0 16px',
   },
   homeTask: {
-    border: '1px solid #dbe4ef',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     display: 'flex',
     alignItems: 'flex-start',
@@ -2460,14 +2460,14 @@ const styles: Record<string, React.CSSProperties> = {
     width: '16px',
     height: '16px',
     borderRadius: '4px',
-    border: '2px solid #0d9488',
-    background: '#ccfbf1',
+    border: '2px solid #2f7a5c',
+    background: '#ddefe5',
     flex: '0 0 auto',
     marginTop: '2px',
   },
   phoneTaskDose: {
     display: 'block',
-    color: '#64748b',
+    color: '#4d6660',
     fontSize: '11px',
     fontWeight: 700,
     lineHeight: 1.35,
@@ -2480,8 +2480,8 @@ const styles: Record<string, React.CSSProperties> = {
     margin: '12px 0 16px',
   },
   phoneRegimenGridItem: {
-    border: '1px solid #dbe4ef',
-    background: '#f8fafc',
+    border: '1px solid #dce5df',
+    background: '#f5f8f5',
     borderRadius: '8px',
     padding: '10px',
     display: 'grid',
@@ -2499,12 +2499,12 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '16px',
   },
   reportLine: {
-    borderTop: '1px solid #e2e8f0',
+    borderTop: '1px solid #dce5df',
     padding: '12px 0',
     display: 'grid',
     gridTemplateColumns: '160px minmax(0, 1fr)',
     gap: '14px',
-    color: '#475569',
+    color: '#3e5852',
     lineHeight: 1.45,
   },
   icfBars: {
@@ -2519,8 +2519,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   icfCode: {
     fontFamily: 'Consolas, monospace',
-    color: '#1d4ed8',
-    background: '#eff6ff',
+    color: '#174a3c',
+    background: '#e4eee7',
     borderRadius: '6px',
     padding: '3px 6px',
     fontSize: '12px',
@@ -2528,18 +2528,18 @@ const styles: Record<string, React.CSSProperties> = {
   },
   icfTrack: {
     height: '11px',
-    background: '#e2e8f0',
+    background: '#dce5df',
     borderRadius: '999px',
     overflow: 'hidden',
   },
   icfFill: {
     height: '100%',
-    background: '#0f766e',
+    background: '#2f7a5c',
   },
   icfValue: {
     fontSize: '12px',
     fontWeight: 900,
-    color: '#334155',
+    color: '#3e5852',
   },
   icfGrid: {
     display: 'grid',
@@ -2547,7 +2547,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '10px',
   },
   icfItem: {
-    border: '1px solid #e2e8f0',
+    border: '1px solid #dce5df',
     borderRadius: '8px',
     padding: '10px',
     display: 'grid',
@@ -2560,6 +2560,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '13px',
     fontWeight: 700,
     textAlign: 'center',
-    borderTop: '1px solid #d7e3ea',
+    borderTop: '1px solid #dce5df',
   },
 };

@@ -101,7 +101,7 @@ export const ReportIngestionZone: React.FC<IngestionZoneProps> = ({ patientHash,
         onClick={() => fileInputRef.current?.click()}
         style={{
           ...styles.dropZone,
-          borderColor: isDragActive ? '#0d9488' : '#334155',
+          borderColor: isDragActive ? '#2f7a5c' : '#3e5852',
           backgroundColor: isDragActive ? '#022c22' : '#020617',
         }}
       >
@@ -115,7 +115,7 @@ export const ReportIngestionZone: React.FC<IngestionZoneProps> = ({ patientHash,
         />
         <div style={styles.iconContainer}>📁</div>
         <div style={styles.dropText}>
-          Drag and drop files here, or <strong style={{ color: '#0d9488' }}>browse</strong>
+          Drag and drop files here, or <strong style={{ color: '#2f7a5c' }}>browse</strong>
         </div>
         <div style={styles.supportText}>Supports PDF, PNG, JPG, and DICOM up to 50MB</div>
       </div>
@@ -142,7 +142,7 @@ export const ReportIngestionZone: React.FC<IngestionZoneProps> = ({ patientHash,
                         file.status === 'stored'
                           ? '#34d399'
                           : file.status === 'encrypting'
-                          ? '#fbbf24'
+                          ? '#c9822b'
                           : '#60a5fa',
                     }}
                   >
@@ -165,21 +165,21 @@ export const ReportIngestionZone: React.FC<IngestionZoneProps> = ({ patientHash,
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    backgroundColor: '#0f172a',
-    color: '#e2e8f0',
+    backgroundColor: '#15302a',
+    color: '#dce5df',
     padding: '20px',
     borderRadius: '10px',
-    border: '1px solid #1e293b',
+    border: '1px solid #15302a',
     fontFamily: "'Outfit', 'Inter', sans-serif",
   },
   title: {
     fontSize: '18px',
     margin: '0 0 4px 0',
-    color: '#0d9488',
+    color: '#2f7a5c',
   },
   subtitle: {
     fontSize: '13px',
-    color: '#94a3b8',
+    color: '#8fa79d',
     margin: '0 0 16px 0',
     lineHeight: '1.4',
   },
@@ -198,21 +198,21 @@ const styles: Record<string, React.CSSProperties> = {
   },
   dropText: {
     fontSize: '15px',
-    color: '#e2e8f0',
+    color: '#dce5df',
     marginBottom: '6px',
   },
   supportText: {
     fontSize: '12px',
-    color: '#64748b',
+    color: '#4d6660',
   },
   logContainer: {
     marginTop: '20px',
-    borderTop: '1px solid #1e293b',
+    borderTop: '1px solid #15302a',
     paddingTop: '16px',
   },
   logTitle: {
     fontSize: '14px',
-    color: '#38bdf8',
+    color: '#8fd3b0',
     margin: '0 0 12px 0',
   },
   logList: {
@@ -221,10 +221,10 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '10px',
   },
   logCard: {
-    backgroundColor: '#1e293b',
+    backgroundColor: '#15302a',
     borderRadius: '6px',
     padding: '12px',
-    border: '1px solid #334155',
+    border: '1px solid #3e5852',
   },
   cardHeader: {
     display: 'flex',
@@ -235,7 +235,7 @@ const styles: Record<string, React.CSSProperties> = {
   fileName: {
     fontSize: '14px',
     fontWeight: 'bold',
-    color: '#f8fafc',
+    color: '#f5f8f5',
   },
   statusBadge: {
     fontSize: '10px',
@@ -245,7 +245,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   cardDetails: {
     fontSize: '12px',
-    color: '#94a3b8',
+    color: '#8fa79d',
     display: 'flex',
     flexDirection: 'column',
     gap: '3px',
@@ -256,7 +256,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   isolationText: {
     fontSize: '11px',
-    color: '#0d9488',
+    color: '#2f7a5c',
     marginTop: '4px',
   },
 };
